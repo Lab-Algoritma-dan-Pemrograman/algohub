@@ -1,0 +1,4 @@
+{
+  "extends": "@algohub/config/tsconfig.json",
+  "include": ["*.js", "*.ts", "packages/config/*.js", "scripts/**/*.ts"]
+}

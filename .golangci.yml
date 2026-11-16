@@ -1,0 +1,30 @@
+version: '2'
+
+linters:
+  default: standard
+  enable:
+    - dupl
+    - gocritic
+    - misspell
+    - unconvert
+    - unparam
+  settings:
+    dupl:
+      threshold: 100
+    gocritic:
+      enabled-tags:
+        - diagnostic
+        - performance
+        - style
+  exclusions:
+    presets:
+      - std-error-handling
+    rules:
+      - path: _test\.go
+        linters:
+          - dupl
+
+formatters:
+  enable:
+    - gofmt
+    - goimports

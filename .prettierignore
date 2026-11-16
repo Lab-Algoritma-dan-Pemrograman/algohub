@@ -1,0 +1,4 @@
+backend/
+bun.lock
+CHANGELOG.md
+docs/
