@@ -21,6 +21,8 @@ Semua perubahan penting dicatat di file ini. Format mengikuti [Keep a Changelog]
 - `.gitattributes` (semua file teks LF, supaya gofmt dan Prettier konsisten di Windows).
 - `.env.example` (bagian `algohub-api`), `.gitignore`, `.prettierignore`, `README.md`, `docs/README.md`, `docs/api.md`, `docs/deploy.md`.
 
+- Project Vercel baru `algohub-api` (Root Directory `backend`, preset Go, tanpa Git integration dan tanpa domain) dengan env preview `APP_ENV`, `CORS_ORIGINS`, `CORS_ORIGIN_PATTERNS`. Deployment preview lulus uji health dan CORS (`docs/deploy.md`).
+
 #### Diubah
 - Versi Go: `go 1.26.0` + `toolchain go1.26.11`, bukan Go 1.24 seperti di rencana dan praktikum lama. Alasannya: Go 1.24 sudah tidak mendapat patch keamanan (Go 1.27 sudah rilis, dan Go hanya mendukung dua versi mayor terakhir). Vercel memakai versi dari `go`/`toolchain` di `go.mod`, jadi versinya dipin. `govulncheck` dengan go1.26.2 + `golang.org/x/net` v0.50.0 menemukan 17 kerentanan yang terjangkau. Dengan go1.26.11 + `golang.org/x/net` v0.62.0, hasilnya "No vulnerabilities found".
 

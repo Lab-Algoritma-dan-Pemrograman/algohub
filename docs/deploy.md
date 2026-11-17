@@ -49,3 +49,36 @@ Tidak bisa dibaca lewat CLI. `vercel usage` di team Hobby mengembalikan "Billing
 | Fast Origin Transfer | ? |
 | Fast Data Transfer | ? |
 | CDN Requests | ? |
+
+## Project baru
+
+### `algohub-api` (Fase 1, 2026-11-17)
+| Setting | Nilai |
+|---|---|
+| Project ID | `prj_nI7yzo8IPyQFqKQ4ITu1uyOlXUwj` |
+| Team | `lab-algoritma-pemrograman` (`team_xEm9gJWxtM1sb09eyCeIN4js`) |
+| Root Directory | `backend` |
+| Framework | Go (Go 1.26.11 dari `toolchain` di `go.mod`) |
+| Git integration | **belum disambungkan** (deploy lewat `vercel deploy` dari laptop) |
+| Domain | belum ada. `api.algohub.web.id` masih di `labap-backend`. |
+| Env (preview) | `APP_ENV=production`, `CORS_ORIGINS` (5 domain prod), `CORS_ORIGIN_PATTERNS=https://algohub-[a-z0-9-]+-lab-algoritma-pemrograman\.vercel\.app` |
+| Env (production) | belum diisi |
+
+Deployment:
+- `algohub-r1g6oxqvq-…vercel.app` (preview): lulus uji `/api/health` dan CORS (lihat di bawah).
+- `algohub-et9mmhajw-…vercel.app` (production, alias `algohub-api.vercel.app`): deploy pertama sebuah project selalu dijadikan production oleh Vercel. Deployment ini jalan tanpa env production, sehingga `APP_ENV` = `development` dan CORS hanya mengizinkan localhost. Isinya hanya `/api/health`. Tidak terhubung ke domain prod mana pun.
+
+Catatan:
+- Deployment Protection standar aktif. URL deployment preview mengembalikan 302 ke login Vercel. Alias production `algohub-api.vercel.app` publik.
+- `vercel curl` membuat **Protection Bypass for Automation** secret di project ini (otomatis, untuk uji). Secret bisa dicabut di Settings → Deployment Protection.
+
+Uji di preview (`vercel curl /api/health --deployment <url>`):
+
+| Kasus | Hasil |
+|---|---|
+| GET, origin `https://siakad.algohub.web.id` | 200, `Allow-Origin` = origin, `Allow-Credentials: true`, `Expose-Headers`, `Vary: Origin` |
+| Preflight POST dari origin prod | 204, `Allow-Methods`, `Allow-Headers`, `Max-Age: 86400` |
+| GET, origin preview `algohub-portal-…-lab-algoritma-pemrograman.vercel.app` | 200 dengan header CORS |
+| GET, origin asing | 200 tanpa header CORS |
+| GET, origin tiruan `…vercel.app.evil.com` | 200 tanpa header CORS |
+| Preflight dari origin asing | 204 tanpa header CORS |
