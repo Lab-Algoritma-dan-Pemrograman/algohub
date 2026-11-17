@@ -19,6 +19,7 @@ Semua perubahan penting dicatat di file ini. Format mengikuti [Keep a Changelog]
 - Worker compiler hanya dibuat di halaman yang punya editor, dan dashboard mem-prefetch file compiler.
 - Cache Query: `staleTime` default 30 detik. `/info` dan `/info/jadwal` 5 menit (pengganti `setHeaders` 300 detik). Dashboard, sesi, dan ruang `0`.
 - Root `tsconfig.json` memakai `types: ['bun']`. Root `package.json` mendapat `@types/bun` dan `@playwright/test`.
+- ESLint dan Prettier mengabaikan `.worktrees/` dan `.agents/` supaya lint lokal tidak ikut memeriksa worktree fase lain.
 
 #### Diketahui
 - E2E belum masuk CI.
