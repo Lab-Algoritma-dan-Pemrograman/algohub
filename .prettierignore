@@ -2,3 +2,4 @@ backend/
 bun.lock
 CHANGELOG.md
 docs/
+packages/runner/static/vendor/
