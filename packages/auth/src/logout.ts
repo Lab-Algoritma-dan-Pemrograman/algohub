@@ -1,6 +1,6 @@
 export interface LogoutOptions {
   queryClient: { clear(): void };
-  persister?: { close(): void; removeClient(): Promise<void> };
+  persister?: { close(): void; removeClient(): void | PromiseLike<void> };
   session: { clear(): void };
 }
 // Urutan wajib: persister ditutup dulu agar tulis tertunda tidak mengisi ulang IndexedDB

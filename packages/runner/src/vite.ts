@@ -3,8 +3,8 @@ import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { Connect, Plugin } from 'vite';
-import { withTrailingSlash } from './config';
-import { resolveWorkerFile, WORKER_FILES } from './worker-files';
+import { withTrailingSlash } from './config.ts';
+import { resolveWorkerFile, WORKER_FILES } from './worker-files.ts';
 const STATIC_DIR = fileURLToPath(new URL('../static/', import.meta.url));
 const COMPILER_FILES = ['clang', 'lld', 'memfs', 'sysroot.tar'];
 export interface RunnerWorkersOptions {

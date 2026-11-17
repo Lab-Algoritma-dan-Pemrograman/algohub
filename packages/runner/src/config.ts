@@ -1,4 +1,4 @@
-import { WORKER_VERSION } from './constants';
+import { WORKER_VERSION } from './constants.ts';
 export interface RunnerConfig {
   compilerBaseUrl: string;
   workerBaseUrl?: string;
