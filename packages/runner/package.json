@@ -8,14 +8,21 @@
     "./vite": "./src/vite.ts"
   },
   "scripts": {
+    "dev": "vite --config harness/vite.config.ts",
+    "build": "vite build --config harness/vite.config.ts",
     "check": "svelte-check --tsconfig ./tsconfig.json",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:e2e": "playwright test"
   },
   "peerDependencies": {
     "svelte": "^5"
   },
   "devDependencies": {
     "@algohub/config": "workspace:*",
+    "@algohub/ui": "workspace:*",
+    "@playwright/test": "^1.65.1",
+    "@sveltejs/vite-plugin-svelte": "^7.3.1",
+    "@tailwindcss/vite": "^4.3.5",
     "@types/node": "^26.6.6",
     "svelte": "^5.57.3",
     "svelte-check": "^4.7.8",
