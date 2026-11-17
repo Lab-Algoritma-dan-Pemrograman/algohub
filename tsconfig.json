@@ -1,4 +1,7 @@
 {
   "extends": "@algohub/config/tsconfig.json",
+  "compilerOptions": {
+    "types": ["bun"]
+  },
   "include": ["*.js", "*.ts", "packages/config/*.js", "scripts/**/*.ts"]
 }

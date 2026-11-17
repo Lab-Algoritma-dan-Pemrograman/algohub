@@ -10,14 +10,19 @@
   "prettier": "@algohub/config/prettier",
   "scripts": {
     "dev:api": "cd backend && go run ./cmd/server",
+    "dev:praktikum": "bun run --filter @algohub/praktikum dev",
+    "fetch-compiler": "bun scripts/fetch-compiler.ts",
     "lint": "eslint . && prettier --check .",
     "format": "prettier --write .",
     "check": "tsc -p tsconfig.json && bun run --filter \"./apps/*\" --filter \"./packages/*\" --if-present check",
     "test": "bun run --filter \"./apps/*\" --filter \"./packages/*\" --if-present test",
+    "test:e2e": "playwright test -c tests/e2e/playwright.config.ts",
     "build": "bun run --filter \"./apps/*\" --filter \"./packages/*\" --if-present build"
   },
   "devDependencies": {
     "@algohub/config": "workspace:*",
+    "@playwright/test": "^1.65.1",
+    "@types/bun": "^1.4.4",
     "eslint": "^10.15.0",
     "prettier": "^3.10.1",
     "prettier-plugin-svelte": "^4.1.1",
