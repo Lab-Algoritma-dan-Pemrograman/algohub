@@ -418,15 +418,15 @@ Pola sama untuk keenam tabel (`<t>` = nama tabel). Pesan 403 memakai nama tabel 
 | R-game_settings-SELECT-1 | semua peran | tanpa token → 401 | `GET /game/settings`, `GET /game/plays/me` | `TestRLS_R_game_settings_SELECT_1_Diizinkan`, `TestRLS_R_game_settings_SELECT_1_Ditolak` |
 | R-game_settings-INSERT-1 | A/K (upsert) | S/P → 403 `... for table "game_settings"` | `PUT /game/settings` | `TestRLS_R_game_settings_INSERT_1_Diizinkan`, `TestRLS_R_game_settings_INSERT_1_Ditolak` |
 | R-game_settings-UPDATE-1 | A/K | S/P → 0 baris, 200 | — (upsert ikut R-game_settings-INSERT-1) | `TestRLS_R_game_settings_UPDATE_1_Diizinkan`, `TestRLS_R_game_settings_UPDATE_1_Ditolak` |
-| R-game_settings-DELETE-1 | A/K | S/P → 0 baris, 200 | — | `TestRLS_R_game_settings_DELETE_1_Diizinkan`, `TestRLS_R_game_settings_DELETE_1_Ditolak` |
+| R-game_settings-DELETE-1 | A/K | S/P → 0 baris, 200 | — | tanpa endpoint, tidak diuji |
 | R-playground_examples-SELECT-1 | semua peran | tanpa token → 401 | `GET /playground/examples` | `TestRLS_R_playground_examples_SELECT_1_Diizinkan`, `TestRLS_R_playground_examples_SELECT_1_Ditolak` |
 | R-playground_examples-INSERT-1 | A/K | S/P → 403 `... for table "playground_examples"` | `POST /playground/examples` | `TestRLS_R_playground_examples_INSERT_1_Diizinkan`, `TestRLS_R_playground_examples_INSERT_1_Ditolak` |
 | R-playground_examples-UPDATE-1 | A/K | S/P → 0 baris, 200 | `PATCH /playground/examples/:id` | `TestRLS_R_playground_examples_UPDATE_1_Diizinkan`, `TestRLS_R_playground_examples_UPDATE_1_Ditolak` |
 | R-playground_examples-DELETE-1 | A/K | S/P → 0 baris, 200 | `DELETE /playground/examples/:id` | `TestRLS_R_playground_examples_DELETE_1_Diizinkan`, `TestRLS_R_playground_examples_DELETE_1_Ditolak` |
 | R-achievements-SELECT-1 | semua peran | tanpa token → 401 | `GET /achievements`, `POST /achievements/check`, `POST /achievements/check-xp` | `TestRLS_R_achievements_SELECT_1_Diizinkan`, `TestRLS_R_achievements_SELECT_1_Ditolak` |
-| R-achievements-INSERT-1 | A/K | S/P → 403 `... for table "achievements"` | — | `TestRLS_R_achievements_INSERT_1_Diizinkan`, `TestRLS_R_achievements_INSERT_1_Ditolak` |
-| R-achievements-UPDATE-1 | A/K | S/P → 0 baris, 200 | — | `TestRLS_R_achievements_UPDATE_1_Diizinkan`, `TestRLS_R_achievements_UPDATE_1_Ditolak` |
-| R-achievements-DELETE-1 | A/K | S/P → 0 baris, 200 | — | `TestRLS_R_achievements_DELETE_1_Diizinkan`, `TestRLS_R_achievements_DELETE_1_Ditolak` |
+| R-achievements-INSERT-1 | A/K | S/P → 403 `... for table "achievements"` | — | tanpa endpoint, tidak diuji |
+| R-achievements-UPDATE-1 | A/K | S/P → 0 baris, 200 | — | tanpa endpoint, tidak diuji |
+| R-achievements-DELETE-1 | A/K | S/P → 0 baris, 200 | — | tanpa endpoint, tidak diuji |
 
 ### lessons dan student_lessons
 
@@ -446,7 +446,7 @@ Pola sama untuk keenam tabel (`<t>` = nama tabel). Pesan 403 memakai nama tabel 
 |---|---|---|---|---|
 | R-student_progress-SELECT-1 | baris milik sendiri (semua peran); A/K/S semua baris | P baris orang lain → disaring | `GET /progress/me/lessons`, `GET /progress/me/recent`, `GET /admin/users/:nim/progress`, `GET /monitoring/progress`, `GET /prestige/eligibility`, `GET /leaderboard/weekly`, `POST /progress/lessons/:lessonId/complete` (cek duplikat) | `TestRLS_R_student_progress_SELECT_1_Diizinkan`, `TestRLS_R_student_progress_SELECT_1_Ditolak` |
 | R-student_progress-INSERT-1 | baris milik sendiri (semua peran); A/K/S NIM mana pun | P untuk NIM lain → 403 `... for table "student_progress"` | `POST /progress/lessons/:lessonId/complete` | `TestRLS_R_student_progress_INSERT_1_Diizinkan`, `TestRLS_R_student_progress_INSERT_1_Ditolak` |
-| R-student_progress-UPDATE-1 | A/K/S | P (termasuk baris sendiri) → 0 baris, 200 | — | `TestRLS_R_student_progress_UPDATE_1_Diizinkan`, `TestRLS_R_student_progress_UPDATE_1_Ditolak` |
+| R-student_progress-UPDATE-1 | A/K/S | P (termasuk baris sendiri) → 0 baris, 200 | — | tanpa endpoint, tidak diuji |
 | R-student_progress-DELETE-1 | A/K/S | P (termasuk baris sendiri) → 0 baris, 200 | `POST /admin/users/:nim/reset`, `POST /admin/users/:nim/reset-level`, `POST /admin/users/:nim/reset-lesson` | `TestRLS_R_student_progress_DELETE_1_Diizinkan`, `TestRLS_R_student_progress_DELETE_1_Ditolak` |
 
 ### game_history
@@ -487,18 +487,18 @@ Pola sama untuk keenam tabel (`<t>` = nama tabel). Pesan 403 memakai nama tabel 
 |---|---|---|---|---|
 | R-prestige_history-SELECT-1 | baris milik sendiri; A/K/S semua | P baris orang lain → disaring | `GET /prestige/eligibility` | `TestRLS_R_prestige_history_SELECT_1_Diizinkan`, `TestRLS_R_prestige_history_SELECT_1_Ditolak` |
 | R-prestige_history-INSERT-1 | A/K (UPDATE/DELETE sama, policy ALL) | S/P → 403 `... for table "prestige_history"` (UPDATE/DELETE: 0 baris) | — (hanya ditulis `do_prestige_reset`) | `TestRLS_R_prestige_history_INSERT_1_Diizinkan`, `TestRLS_R_prestige_history_INSERT_1_Ditolak` |
-| R-progress_archive-SELECT-1 | baris milik sendiri; A/K/S semua | P baris orang lain → disaring | — | `TestRLS_R_progress_archive_SELECT_1_Diizinkan`, `TestRLS_R_progress_archive_SELECT_1_Ditolak` |
-| R-progress_archive-INSERT-1 | A/K (UPDATE/DELETE sama, policy ALL) | S/P → 403 `... for table "progress_archive"` (UPDATE/DELETE: 0 baris) | — (hanya ditulis `do_prestige_reset`) | `TestRLS_R_progress_archive_INSERT_1_Diizinkan`, `TestRLS_R_progress_archive_INSERT_1_Ditolak` |
+| R-progress_archive-SELECT-1 | baris milik sendiri; A/K/S semua | P baris orang lain → disaring | — | tanpa endpoint, tidak diuji |
+| R-progress_archive-INSERT-1 | A/K (UPDATE/DELETE sama, policy ALL) | S/P → 403 `... for table "progress_archive"` (UPDATE/DELETE: 0 baris) | — (hanya ditulis `do_prestige_reset`) | tanpa endpoint, tidak diuji |
 
 ### weekly_standings, assessment_grading_rules, storage.objects
 
 | ID | Diizinkan | Ditolak → hasil | Endpoint | Test |
 |---|---|---|---|---|
-| R-weekly_standings-SELECT-1 | semua peran | tanpa token → 401 | — (kode mati) | `TestRLS_R_weekly_standings_SELECT_1_Diizinkan`, `TestRLS_R_weekly_standings_SELECT_1_Ditolak` |
-| R-weekly_standings-INSERT-1 | A/K/S | P → 403 `... for table "weekly_standings"` | — (kode mati) | `TestRLS_R_weekly_standings_INSERT_1_Diizinkan`, `TestRLS_R_weekly_standings_INSERT_1_Ditolak` |
-| R-weekly_standings-UPDATE-1 | A/K/S | P → 0 baris, 200 | — (kode mati) | `TestRLS_R_weekly_standings_UPDATE_1_Diizinkan`, `TestRLS_R_weekly_standings_UPDATE_1_Ditolak` |
+| R-weekly_standings-SELECT-1 | semua peran | tanpa token → 401 | — (kode mati) | tanpa endpoint, tidak diuji |
+| R-weekly_standings-INSERT-1 | A/K/S | P → 403 `... for table "weekly_standings"` | — (kode mati) | tanpa endpoint, tidak diuji |
+| R-weekly_standings-UPDATE-1 | A/K/S | P → 0 baris, 200 | — (kode mati) | tanpa endpoint, tidak diuji |
 | R-assessment_grading_rules-SELECT-1 | semua peran | tanpa token → 401 | `POST /grade` | `TestRLS_R_assessment_grading_rules_SELECT_1_Diizinkan`, `TestRLS_R_assessment_grading_rules_SELECT_1_Ditolak` |
-| R-assessment_grading_rules-UPDATE-1 | semua peran (policy ALL `true`, berlaku juga untuk INSERT/DELETE) | tanpa token → 401 | — | `TestRLS_R_assessment_grading_rules_UPDATE_1_Diizinkan`, `TestRLS_R_assessment_grading_rules_UPDATE_1_Ditolak` |
+| R-assessment_grading_rules-UPDATE-1 | semua peran (policy ALL `true`, berlaku juga untuk INSERT/DELETE) | tanpa token → 401 | — | tanpa endpoint, tidak diuji |
 | R-storage_objects-SELECT-1 | publik (URL publik bucket) | — | — (dilayani Supabase Storage langsung) | `TestRLS_R_storage_objects_SELECT_1_Diizinkan`, `TestRLS_R_storage_objects_SELECT_1_Ditolak` (tanpa token → 401 di endpoint Go) |
 | R-storage_objects-INSERT-1 | A/K/S | P → 403 `new row violates row-level security policy` (teks Storage API tanpa nama tabel, tidak pasti). Dicek sesudah validasi tipe file | `POST /storage/lesson-images` | `TestRLS_R_storage_objects_INSERT_1_Diizinkan`, `TestRLS_R_storage_objects_INSERT_1_Ditolak` |
 | R-storage_objects-UPDATE-1 | A/K/S (DELETE sama) | P → 403 dari Storage API | — (`upsert: false`, tidak ada hapus) | `TestRLS_R_storage_objects_UPDATE_1_Diizinkan`, `TestRLS_R_storage_objects_UPDATE_1_Ditolak` |

@@ -1038,6 +1038,17 @@ func pngFile() *dto.ImageFile {
 	return &dto.ImageFile{Name: "diagram.png", ContentType: "image/png", Content: []byte("png")}
 }
 
+func TestRLS_R_assessment_grading_rules_SELECT_1_Diizinkan(t *testing.T) {
+	q := easyQuestion()
+	p := gradePrompt(t, "post_test", `{"difficulties":{"easy":{"criteria":{"benar":20}}}}`, &q)
+	assert.Contains(t, p, "KRITERIA SCORING KHUSUS UNTUK SOAL INI:\n- EASY: benar: 20 poin\n")
+}
+
+func TestRLS_R_assessment_grading_rules_SELECT_1_Ditolak(t *testing.T) {
+	_, err := newGrade(t, usecase.AIClients{}).uc.Grade(bg, "", gradeReq(`["a1"]`))
+	assertMissingToken(t, err)
+}
+
 func TestRLS_R_storage_objects_SELECT_1_Diizinkan(t *testing.T) {
 	f := newLearn(t)
 	res, err := f.storageUC.UploadLessonImage(who(usecase.RoleAdmin), pngFile())
