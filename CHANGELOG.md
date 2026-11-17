@@ -4,6 +4,25 @@ Semua perubahan penting dicatat di file ini. Format mengikuti [Keep a Changelog]
 
 ## [Belum dirilis]
 
+### Fase 7 — Backend elearning (2026-11-18)
+
+#### Ditambahkan
+- Domain elearning di backend Go: 64 route di `/api/elearning/*`, menggantikan 10 Vercel Function `elearning/api/*.ts` dan 59 query Supabase yang dulu dijalankan langsung dari browser (53 menjadi endpoint, 5 kode mati tidak dibawa, 1 keep-alive milik Fase 5). Peta lengkapnya ada di `docs/updates/elearning-rls.md` § Peta query, dan tabel endpoint di `docs/api.md` § E-Learning.
+- Auth: `verify` menerima 3 format token (siakad, elearning, Go praktikum). Juga `receive-token`, `login` (lewat usecase praktikum dengan audit dan rate limit 10/menit per IP), `auth/supabase-token` (re-sign JWT Supabase, deteksi encoding secret dari `auth.ts`), dan `POST /sso` (form dari siakad → 303 ke `/sso?code=…`, code AES-256-GCM sekali pakai dengan umur ≤ 60 detik).
+- `ai` (rotasi key Gemini), `grade` (konkurensi 3, Gemini atau Ollama), `report`, dan `validate-quiz`.
+- Kurikulum, progres, streak, profil, pencapaian, admin users, game Bug Hunt, leaderboard (termasuk mingguan), prestige (RPC `do_prestige_reset`), playground, sesi, monitoring, activity log, dan upload `lesson-images`.
+- RLS ditiru di `usecase/elearning`: 137 `CREATE POLICY` dipetakan (56 aktif). Aturannya beserta column grant `users` dan trigger `auth_role()` didokumentasikan di `docs/updates/elearning-rls.md`, dengan 124 test diizinkan/ditolak untuk 62 aturan.
+- `pkg/gemini.GenerateParts` (API key lewat header `x-goog-api-key`, bukan URL) dan `pkg/ollama/native.go` (API native Ollama untuk elearning).
+
+#### Diubah
+- Respons memakai envelope `pkg/response`. Pesan dan status code lama tetap sama.
+- Error baca DB yang dulu ditelan menjadi `[]`/`0`/`null` sekarang 500 (game, leaderboard, playground, sebagian progres). Error non-Postgres dibalas `Internal server error`.
+- Daftar dipaginasi maksimal 100 (`/monitoring/*`, `/activity-logs`, `/admin/users`). `PUT /curriculum` dan `PUT /game/questions` berjalan dalam satu transaksi.
+- `golang.org/x/text` menjadi dependency langsung (`collate` untuk urutan leaderboard mingguan).
+
+#### Diketahui
+- SQL repository hanya diuji dengan mock. Sebelum cutover, wajib diuji di salinan non-prod DB elearning, lalu `select * from pg_policies where schemaname='public'` dicocokkan dengan `docs/updates/elearning-rls.md`.
+- Perilaku lama yang salah tetap ditiru dan dicatat sebagai T-23..T-40 (misalnya koordinator ditolak di `ai`/`grade`, dan `xp_earned` game tanpa batas).
 ### Fase 5 — Backend siakad (2026-11-18)
 
 #### Ditambahkan
@@ -22,7 +41,7 @@ Semua perubahan penting dicatat di file ini. Format mengikuti [Keep a Changelog]
 
 #### Diketahui
 - SQL baru hanya diuji dengan sqlmock. Beberapa kolom belum dicocokkan dengan skema prod (`schedule_assignments.*`, `users.phone`, `users.nama/class_code/major`, `sso_handshakes.user_id`, `group_assistants.schedule_id`). Wajib diuji di preview sebelum cutover.
-- Satu `CRON_SECRET` dipakai bersama oleh cron praktikum (cron-job.org), cron siakad, dan bypass `send-push`/`send-wa` (`T-10`).
+- Satu `CRON_SECRET` dipakai bersama oleh cron praktikum (cron-job.org), cron siakad, dan bypass `send-push`/`send-wa` (`T-41`).
 ### Fase 2 — Backend praktikum (2026-11-17)
 
 #### Dipindahkan
