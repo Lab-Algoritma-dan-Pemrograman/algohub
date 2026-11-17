@@ -48,6 +48,12 @@ export default defineConfig(
     rules: { 'svelte/no-inner-declarations': 'off' },
   },
   {
+    // App praktikum dilayani di root domain tanpa paths.base, jadi resolve() tidak mengubah URL;
+    // href dan goto dibiarkan sama dengan app lama.
+    files: ['apps/praktikum/**'],
+    rules: { 'svelte/no-navigation-without-resolve': 'off' },
+  },
+  {
     // Kode edra di-vendor dari CLI edra; dibiarkan apa adanya agar mudah dibandingkan dengan upstream.
     files: ['packages/ui/src/lib/components/rich-text/edra/**'],
     rules: { eqeqeq: 'off', 'no-useless-assignment': 'off' },

@@ -42,7 +42,7 @@ export default defineConfig({
   test: {
     include: ['src/**/*.test.ts', 'tests/**/*.test.ts'],
     environment: 'jsdom',
-    setupFiles: ['@testing-library/jest-dom/vitest'],
+    setupFiles: ['./vitest-setup.ts'],
     server: {
       deps: {
         inline: [/katex/],
