@@ -101,7 +101,6 @@ func supabaseAuth(c *gin.Context, cfg *config.Config, userRepo repository.UserRe
 	return true
 }
 
-// UserID helper
 func UserID(c *gin.Context) int {
 	if v, ok := c.Get(CtxUserID); ok {
 		if id, ok := v.(int); ok {

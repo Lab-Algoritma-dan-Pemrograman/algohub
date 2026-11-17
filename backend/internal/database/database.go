@@ -70,7 +70,7 @@ func connect(dsn string, debug bool) (*gorm.DB, error) {
 		DSN: withConnectTimeout(dsn),
 		// PreferSimpleProtocol mematikan prepared statement — WAJIB untuk
 		// Supabase Transaction Pooler (pgbouncer mode transaction) yang dipakai
-		// di serverless. Tanpa ini, query akan error "prepared statement exists".
+		// Vercel Function. Tanpa ini, query akan error "prepared statement exists".
 		PreferSimpleProtocol: true,
 	}), &gorm.Config{
 		Logger: logger.Default.LogMode(logLevel),
@@ -83,7 +83,7 @@ func connect(dsn string, debug bool) (*gorm.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	// Pool kecil: di serverless koneksi mudah menumpuk lewat pooler.
+	// Pool kecil: tiap instance Vercel Function membuka pool sendiri, jadi koneksi mudah menumpuk di pooler.
 	sqlDB.SetMaxOpenConns(5)
 	sqlDB.SetMaxIdleConns(2)
 	sqlDB.SetConnMaxIdleTime(time.Minute)
@@ -91,7 +91,7 @@ func connect(dsn string, debug bool) (*gorm.DB, error) {
 	return db, nil
 }
 
-// connect_timeout supaya cold-start serverless gagal cepat (bukan menggantung).
+// connect_timeout supaya cold start Vercel Function gagal cepat (bukan menggantung).
 func withConnectTimeout(dsn string) string {
 	if strings.Contains(dsn, "connect_timeout") {
 		return dsn

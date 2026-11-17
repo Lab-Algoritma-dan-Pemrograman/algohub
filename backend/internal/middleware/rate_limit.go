@@ -11,9 +11,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// rateLimiter adalah pembatas laju berbasis fixed window in-memory.
-// Dipakai untuk melindungi endpoint sensitif (login/register/cek-nim) dari
-// brute-force, dan endpoint mahal (run/compile-c) dari penyalahgunaan.
+// Fixed window in-memory: melindungi endpoint sensitif (login/register/cek-nim) dari
+// brute-force dan endpoint mahal (run) dari penyalahgunaan.
 type rateLimiter struct {
 	mu     sync.Mutex
 	hits   map[string]*window
@@ -26,8 +25,6 @@ type window struct {
 	reset time.Time
 }
 
-// RateLimit membuat middleware yang membatasi maksimum `limit` request per `window`
-// untuk tiap IP. Entri kedaluwarsa dibersihkan periodik oleh janitor.
 func RateLimit(limit int, win time.Duration) gin.HandlerFunc {
 	return newRateLimiter(limit, win, func(c *gin.Context) string {
 		return "ip:" + ClientIP(c)
@@ -35,9 +32,8 @@ func RateLimit(limit int, win time.Duration) gin.HandlerFunc {
 }
 
 // RateLimitUser membatasi per USER (JWT), fallback ke IP bila belum terautentikasi.
-// Dipakai untuk /praktikum/run dan /praktikum/compile-c: dua endpoint ini
-// mengeksekusi compiler di server, jadi satu akun tidak boleh membanjiri antrian
-// (DoS CPU/RAM). Satu IP dengan banyak akun tetap terbatas karena kuncinya user.
+// Dipakai untuk /praktikum/run: endpoint ini meneruskan eksekusi kode ke Glot.io
+// dengan token server, jadi satu akun tidak boleh menghabiskan kuota bersama.
 func RateLimitUser(limit int, win time.Duration) gin.HandlerFunc {
 	return newRateLimiter(limit, win, func(c *gin.Context) string {
 		if uid := UserID(c); uid > 0 {

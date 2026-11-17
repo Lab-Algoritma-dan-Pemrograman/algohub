@@ -58,8 +58,6 @@ func registeredUser(role entity.RoleType) *entity.User {
 	}
 }
 
-// ============================= CekNIM =============================
-
 func TestCekNIM_TidakDiRoster(t *testing.T) {
 	uc, mockUserRepo, mockKelasRepo := setupAuthUsecase(t)
 	mockUserRepo.On("FindByNIM", "999999").Return(nil, gorm.ErrRecordNotFound)
@@ -99,8 +97,6 @@ func TestCekNIM_RosterBelumKlaim(t *testing.T) {
 	assert.Equal(t, "Akun belum terdaftar. Silakan buat password.", resp.Pesan)
 	mockUserRepo.AssertExpectations(t)
 }
-
-// ============================= Login =============================
 
 func TestLogin_Sukses_NIM(t *testing.T) {
 	uc, mockUserRepo, _ := setupAuthUsecase(t)
@@ -181,9 +177,7 @@ func TestLogin_AdminBelumRegisterFlag_TetapMasuk(t *testing.T) {
 	mockUserRepo.AssertExpectations(t)
 }
 
-// ============================= Register =============================
-
-// ---- Regresi: baris drift (is_registered=true TANPA kredensial) ----
+// Regresi baris drift: is_registered=true TANPA kredensial.
 // Kasus nyata: admin mengedit mahasiswa, flag is_registered ikut ter-set true padahal
 // password_hash NULL. Akibatnya cek-nim bilang "belum terdaftar" tapi register ditolak
 // "konflik data" — mahasiswa mentok total. Gate harus ikut kredensial, bukan flag.
@@ -321,7 +315,7 @@ func TestRegister_EmailSudahDipakai(t *testing.T) {
 	mockUserRepo.AssertExpectations(t)
 }
 
-// ---- Validasi email (indirect lewat Register; allowlist + anti-alias) ----
+// Validasi email diuji lewat Register (allowlist + anti-alias).
 
 func TestRegister_EmailDomainTidakDiizinkan(t *testing.T) {
 	uc, _, _ := setupAuthUsecase(t)
@@ -369,8 +363,6 @@ func TestRegister_ItplnTanpaFlag_Ditolak(t *testing.T) {
 	assert.ErrorIs(t, err, usecase.ErrBadRequest)
 	assert.Contains(t, err.Error(), "tidak diizinkan")
 }
-
-// ============================= Forgot/Reset =============================
 
 // Anti-enumeration: email tak terdaftar tetap 200 (err nil), tidak panic tanpa Supabase.
 func TestForgotPassword_EmailTidakTerdaftar_TetapSukses(t *testing.T) {

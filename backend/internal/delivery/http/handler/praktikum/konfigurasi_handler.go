@@ -23,15 +23,13 @@ func NewKonfigurasiHandler(uc *usecase.KonfigurasiUsecase, defaultAIModel string
 	return &KonfigurasiHandler{uc: uc, defaultAIModel: defaultAIModel, auditLog: al}
 }
 
-// All GET /api/admin/konfigurasi
-//
-//	@Summary		Seluruh Konfigurasi
-//	@Description	Mengambil semua data konfigurasi global
-//	@Tags			Admin - Konfigurasi
-//	@Security		bearerAuth
-//	@Produce		json
-//	@Success		200	{object}	response.Envelope{data=[]entity.Konfigurasi}
-//	@Router			/praktikum/admin/konfigurasi [get]
+// @Summary		Seluruh Konfigurasi
+// @Description	Mengambil semua data konfigurasi global
+// @Tags			Admin - Konfigurasi
+// @Security		bearerAuth
+// @Produce		json
+// @Success		200	{object}	response.Envelope{data=[]entity.Konfigurasi}
+// @Router			/praktikum/admin/konfigurasi [get]
 func (h *KonfigurasiHandler) All(c *gin.Context) {
 	res, err := h.uc.All()
 	if err != nil {
@@ -41,17 +39,15 @@ func (h *KonfigurasiHandler) All(c *gin.Context) {
 	response.OK(c, http.StatusOK, "Konfigurasi", res)
 }
 
-// Set POST /api/admin/konfigurasi
-//
-//	@Summary		Set Konfigurasi
-//	@Description	Mengubah atau menambah konfigurasi global (Upsert)
-//	@Tags			Admin - Konfigurasi
-//	@Security		bearerAuth
-//	@Accept			json
-//	@Produce		json
-//	@Param			request	body		dto.KonfigurasiRequest	true	"Payload Konfigurasi"
-//	@Success		200		{object}	response.Envelope
-//	@Router			/praktikum/admin/konfigurasi [post]
+// @Summary		Set Konfigurasi
+// @Description	Mengubah atau menambah konfigurasi global (Upsert)
+// @Tags			Admin - Konfigurasi
+// @Security		bearerAuth
+// @Accept			json
+// @Produce		json
+// @Param			request	body		dto.KonfigurasiRequest	true	"Payload Konfigurasi"
+// @Success		200		{object}	response.Envelope
+// @Router			/praktikum/admin/konfigurasi [post]
 func (h *KonfigurasiHandler) Set(c *gin.Context) {
 	var req dto.KonfigurasiRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -66,15 +62,13 @@ func (h *KonfigurasiHandler) Set(c *gin.Context) {
 	response.OK(c, http.StatusOK, "Konfigurasi disimpan", nil)
 }
 
-// AIModel GET /api/admin/konfigurasi/ai-model
-//
-//	@Summary		Model AI aktif
-//	@Description	Model AI grading yang sedang dipakai: override (key ai_model) jika ada, jika kosong pakai default server (env).
-//	@Tags			Admin - Konfigurasi
-//	@Security		bearerAuth
-//	@Produce		json
-//	@Success		200	{object}	response.Envelope
-//	@Router			/praktikum/admin/konfigurasi/ai-model [get]
+// @Summary		Model AI aktif
+// @Description	Model AI grading yang sedang dipakai: override (key ai_model) jika ada, jika kosong pakai default server (env).
+// @Tags			Admin - Konfigurasi
+// @Security		bearerAuth
+// @Produce		json
+// @Success		200	{object}	response.Envelope
+// @Router			/praktikum/admin/konfigurasi/ai-model [get]
 func (h *KonfigurasiHandler) AIModel(c *gin.Context) {
 	override, _ := h.uc.Get(entity.KeyAIModel)
 	effective := override
@@ -88,29 +82,23 @@ func (h *KonfigurasiHandler) AIModel(c *gin.Context) {
 	})
 }
 
-// ---- Publik (info) ----
-
-// PublicModul GET /api/info/modul
-//
-//	@Summary		File Modul Publik
-//	@Description	Mengambil URL publik dari Modul Praktikum
-//	@Tags			Info
-//	@Produce		json
-//	@Success		200	{object}	response.Envelope
-//	@Router			/praktikum/info/modul [get]
+// @Summary		File Modul Publik
+// @Description	Mengambil URL publik dari Modul Praktikum
+// @Tags			Info
+// @Produce		json
+// @Success		200	{object}	response.Envelope
+// @Router			/praktikum/info/modul [get]
 func (h *KonfigurasiHandler) PublicModul(c *gin.Context) {
 	url, _ := h.uc.Get(entity.KeyModulFileURL)
 	response.OK(c, http.StatusOK, "Modul praktikum", gin.H{"file_url": url})
 }
 
-// PublicJadwalConfig GET /api/info/jadwal/config
-//
-//	@Summary		Konfigurasi Jadwal Publik
-//	@Description	Mengecek apakah jadwal menggunakan sistem internal atau GDrive URL
-//	@Tags			Info
-//	@Produce		json
-//	@Success		200	{object}	response.Envelope
-//	@Router			/praktikum/info/jadwal/config [get]
+// @Summary		Konfigurasi Jadwal Publik
+// @Description	Mengecek apakah jadwal menggunakan sistem internal atau GDrive URL
+// @Tags			Info
+// @Produce		json
+// @Success		200	{object}	response.Envelope
+// @Router			/praktikum/info/jadwal/config [get]
 func (h *KonfigurasiHandler) PublicJadwalConfig(c *gin.Context) {
 	gdrive, _ := h.uc.Get(entity.KeyGDriveJadwalURL)
 	mode, _ := h.uc.Get(entity.KeyJadwalMode)
@@ -120,7 +108,6 @@ func (h *KonfigurasiHandler) PublicJadwalConfig(c *gin.Context) {
 	response.OK(c, http.StatusOK, "Konfigurasi jadwal", gin.H{"mode": mode, "gdrive_url": gdrive})
 }
 
-// PublicAnnouncements GET /api/info/announcements
 func (h *KonfigurasiHandler) PublicAnnouncements(c *gin.Context) {
 	reschedules, _ := h.uc.Get("ann_reschedules")
 	recruit, _ := h.uc.Get("ann_recruit")
@@ -134,7 +121,6 @@ func (h *KonfigurasiHandler) PublicAnnouncements(c *gin.Context) {
 	})
 }
 
-// GetRolePermissions GET /api/superadmin/permissions
 func (h *KonfigurasiHandler) GetRolePermissions(c *gin.Context) {
 	raw, _ := h.uc.Get("role_permissions")
 	if raw == "" {
@@ -147,7 +133,6 @@ func (h *KonfigurasiHandler) GetRolePermissions(c *gin.Context) {
 	response.OK(c, http.StatusOK, "Role permissions", m)
 }
 
-// SetRolePermissions PUT /api/superadmin/permissions
 func (h *KonfigurasiHandler) SetRolePermissions(c *gin.Context) {
 	var perms map[string]map[string]bool
 	if err := c.ShouldBindJSON(&perms); err != nil {

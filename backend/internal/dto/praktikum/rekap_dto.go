@@ -24,7 +24,6 @@ type RekapMahasiswa struct {
 	TotalScore float64             `json:"total_score"`
 }
 
-// RekapKelasResponse adalah response lengkap untuk endpoint rekapitulasi.
 type RekapKelasResponse struct {
 	Columns []RekapKolom     `json:"columns"`
 	Data    []RekapMahasiswa `json:"data"`

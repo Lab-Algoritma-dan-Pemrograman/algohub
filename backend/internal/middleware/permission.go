@@ -40,8 +40,8 @@ func RequirePermission(konfRepo repository.KonfigurasiRepository, resource, acti
 			return
 		}
 		// Explicit-deny menang; tanpa entri eksplisit per role+key, tolak juga.
-		// Default ini aman karena seed wajib mengisi semua role non-koordinator
-		// untuk semua key yang dipasang di router (lihat seed_role_permissions.sql).
+		// Default ini aman karena data role_permissions wajib mengisi semua role
+		// non-koordinator untuk semua key yang dipasang di router.
 		role := Role(c)
 		if m, ok := perms[role]; ok {
 			if allowed, ok := m[key]; ok && allowed {

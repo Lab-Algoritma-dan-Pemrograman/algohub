@@ -24,7 +24,6 @@ type RekapJawabanItem struct {
 	Feedback        *string    `json:"feedback"`
 }
 
-// RekapJawabanResponse adalah response untuk tabel Rekap Jawaban
 type RekapJawabanResponse struct {
 	Items   []RekapJawabanItem `json:"items"`
 	Total   int64              `json:"total"`

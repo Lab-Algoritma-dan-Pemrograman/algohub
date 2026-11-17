@@ -17,7 +17,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-// SupabaseClaims hanya identitas (sub/email). Role TIDAK dari token — resolve DB.
+// SupabaseClaims hanya memuat identitas (sub/email) karena role selalu di-resolve dari DB, bukan dari token.
 type SupabaseClaims struct {
 	Subject string
 	Email   string

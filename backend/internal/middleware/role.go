@@ -8,8 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// RequireRole memastikan user memiliki salah satu role yang diizinkan.
-// Harus dipasang SETELAH Auth (response.Fail sudah AbortWithStatusJSON, jadi
+// RequireRole harus dipasang SETELAH PraktikumAuth (response.Fail sudah AbortWithStatusJSON, jadi
 // request yang ditolak tidak pernah sampai ke handler di belakangnya).
 func RequireRole(roles ...string) gin.HandlerFunc {
 	allowed := make(map[string]bool, len(roles))

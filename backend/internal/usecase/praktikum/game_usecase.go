@@ -185,8 +185,6 @@ func (uc *GameUsecase) SelesaiMain(userID int, req dto.SelesaiMainRequest) (*dto
 	}, nil
 }
 
-// ---- Admin: soal lengkap dengan kunci jawaban ----
-
 func (uc *GameUsecase) AdminListSoal(bahasa string) ([]entity.GameSoal, error) {
 	return uc.repo.ListSoal(bahasa)
 }
@@ -241,8 +239,6 @@ func (uc *GameUsecase) AdminDeleteSoal(id int) error {
 	return mapDeleteErr(uc.repo.DeleteSoal(id))
 }
 
-// ---- Peringkat ----
-
 func (uc *GameUsecase) Peringkat(limit int, kelasID *int, namaKelas string) ([]repository.BarisPeringkat, error) {
 	if limit <= 0 || limit > 100 {
 		limit = 10
@@ -253,8 +249,6 @@ func (uc *GameUsecase) Peringkat(limit int, kelasID *int, namaKelas string) ([]r
 func (uc *GameUsecase) PeringkatSaya(userID int, kelasID *int, namaKelas string) (int, error) {
 	return uc.repo.PeringkatUser(userID, kelasID, namaKelas)
 }
-
-// ---- Monitoring ----
 
 // Detak mencatat "saya sedang online". Identitas diambil dari token,
 // bukan dari body, supaya tidak bisa mengaku jadi orang lain.

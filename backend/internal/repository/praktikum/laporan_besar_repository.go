@@ -89,8 +89,7 @@ func (r *laporanBesarRepository) ListTarget(laporanID int) ([]entity.LaporanBesa
 	return ts, r.db.Preload("Kelas").Where("laporan_besar_id = ?", laporanID).Order("kelas_id asc").Find(&ts).Error
 }
 
-// FindTarget mencari window untuk (laporan, kelas, shift). Prioritas:
-// 1) baris spesifik shift kalau ada, 2) fallback ke shift NULL (berlaku semua).
+// FindTarget mendahulukan baris spesifik shift, lalu fallback ke shift NULL (berlaku semua).
 func (r *laporanBesarRepository) FindTarget(laporanID, kelasID int, shift *int) (*entity.LaporanBesarTarget, error) {
 	var t entity.LaporanBesarTarget
 	if shift != nil {

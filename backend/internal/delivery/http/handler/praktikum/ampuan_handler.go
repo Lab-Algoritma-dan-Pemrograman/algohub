@@ -20,15 +20,13 @@ func NewAmpuanHandler(uc *usecase.AmpuanUsecase, user *usecase.UserUsecase) *Amp
 	return &AmpuanHandler{uc: uc, user: user}
 }
 
-// List GET /api/admin/ampuan
-//
-//	@Summary		Daftar Ampuan
-//	@Description	Mengambil data dosen/asisten pengampu
-//	@Tags			Admin - Ampuan
-//	@Security		bearerAuth
-//	@Produce		json
-//	@Success		200	{object}	response.Envelope{data=[]entity.AmpuanKelompok}
-//	@Router			/praktikum/admin/ampuan [get]
+// @Summary		Daftar Ampuan
+// @Description	Mengambil data dosen/asisten pengampu
+// @Tags			Admin - Ampuan
+// @Security		bearerAuth
+// @Produce		json
+// @Success		200	{object}	response.Envelope{data=[]entity.AmpuanKelompok}
+// @Router			/praktikum/admin/ampuan [get]
 func (h *AmpuanHandler) List(c *gin.Context) {
 	res, err := h.uc.List()
 	if err != nil {
@@ -38,17 +36,15 @@ func (h *AmpuanHandler) List(c *gin.Context) {
 	response.OK(c, http.StatusOK, "Daftar ampuan", res)
 }
 
-// Create POST /api/admin/ampuan
-//
-//	@Summary		Tambah Ampuan
-//	@Description	Menambahkan data pengampu untuk kelompok/kelas
-//	@Tags			Admin - Ampuan
-//	@Security		bearerAuth
-//	@Accept			json
-//	@Produce		json
-//	@Param			request	body		dto.AmpuanRequest	true	"Payload"
-//	@Success		201		{object}	response.Envelope{data=entity.AmpuanKelompok}
-//	@Router			/praktikum/admin/ampuan [post]
+// @Summary		Tambah Ampuan
+// @Description	Menambahkan data pengampu untuk kelompok/kelas
+// @Tags			Admin - Ampuan
+// @Security		bearerAuth
+// @Accept			json
+// @Produce		json
+// @Param			request	body		dto.AmpuanRequest	true	"Payload"
+// @Success		201		{object}	response.Envelope{data=entity.AmpuanKelompok}
+// @Router			/praktikum/admin/ampuan [post]
 func (h *AmpuanHandler) Create(c *gin.Context) {
 	var req dto.AmpuanRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -63,16 +59,14 @@ func (h *AmpuanHandler) Create(c *gin.Context) {
 	response.Created(c, "Ampuan ditambahkan", res)
 }
 
-// Delete DELETE /api/admin/ampuan/:id
-//
-//	@Summary		Hapus Ampuan
-//	@Description	Menghapus data pengampu
-//	@Tags			Admin - Ampuan
-//	@Security		bearerAuth
-//	@Produce		json
-//	@Param			id	path		int	true	"ID Ampuan"
-//	@Success		200	{object}	response.Envelope
-//	@Router			/praktikum/admin/ampuan/{id} [delete]
+// @Summary		Hapus Ampuan
+// @Description	Menghapus data pengampu
+// @Tags			Admin - Ampuan
+// @Security		bearerAuth
+// @Produce		json
+// @Param			id	path		int	true	"ID Ampuan"
+// @Success		200	{object}	response.Envelope
+// @Router			/praktikum/admin/ampuan/{id} [delete]
 func (h *AmpuanHandler) Delete(c *gin.Context) {
 	id, ok := idParam(c, "id")
 	if !ok {
@@ -85,15 +79,13 @@ func (h *AmpuanHandler) Delete(c *gin.Context) {
 	response.OK(c, http.StatusOK, "Ampuan dihapus", nil)
 }
 
-// PublicKelasMahasiswa GET /api/info/kelas/:id/mahasiswa
-//
-//	@Summary		Data Kelas Mahasiswa
-//	@Description	Mengambil data seluruh mahasiswa dalam satu kelas beserta data pengampu (Publik)
-//	@Tags			Info
-//	@Produce		json
-//	@Param			id	path		int	true	"ID Kelas"
-//	@Success		200	{object}	response.Envelope
-//	@Router			/praktikum/info/kelas/{id}/mahasiswa [get]
+// @Summary		Data Kelas Mahasiswa
+// @Description	Mengambil data seluruh mahasiswa dalam satu kelas beserta data pengampu (Publik)
+// @Tags			Info
+// @Produce		json
+// @Param			id	path		int	true	"ID Kelas"
+// @Success		200	{object}	response.Envelope
+// @Router			/praktikum/info/kelas/{id}/mahasiswa [get]
 func (h *AmpuanHandler) PublicKelasMahasiswa(c *gin.Context) {
 	kelasID, ok := idParam(c, "id")
 	if !ok {

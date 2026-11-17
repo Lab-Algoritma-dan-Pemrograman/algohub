@@ -141,7 +141,6 @@ func (uc *PraktikumUsecase) buildCourses(userID int, user *entity.User, aktivasi
 	return courses
 }
 
-// Dashboard menyusun data dashboard mahasiswa.
 func (uc *PraktikumUsecase) Dashboard(userID int) (*dto.DashboardUserResponse, error) {
 	user, err := uc.users.FindByID(userID)
 	if err != nil {

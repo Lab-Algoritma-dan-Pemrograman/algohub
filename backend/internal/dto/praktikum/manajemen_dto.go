@@ -1,7 +1,5 @@
 package dto
 
-// === User ===
-
 // UserRequest: tambah/ubah data mahasiswa oleh admin.
 type UserRequest struct {
 	NIM       string  `json:"nim" binding:"required"`
@@ -51,13 +49,9 @@ type AsistenRequest struct {
 	Password   *string `json:"password" binding:"omitempty,min=6"`
 }
 
-// === Kelas ===
-
 type KelasRequest struct {
 	NamaKelas string `json:"nama_kelas" binding:"required"`
 }
-
-// === Jadwal ===
 
 type JadwalRequest struct {
 	KelasID    int    `json:"kelas_id" binding:"required"`
@@ -67,8 +61,6 @@ type JadwalRequest struct {
 	JamSelesai string `json:"jam_selesai" binding:"required"`
 	Keterangan string `json:"keterangan"`
 }
-
-// === Pedoman ===
 
 type PedomanRequest struct {
 	NamaDokumen string `json:"nama_dokumen" binding:"required"`

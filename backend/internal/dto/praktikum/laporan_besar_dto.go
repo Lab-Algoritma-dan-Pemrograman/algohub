@@ -2,8 +2,6 @@ package dto
 
 import "time"
 
-// === Laporan Besar (admin) ===
-
 // LaporanBesarRequest: buat/ubah tugas laporan besar.
 type LaporanBesarRequest struct {
 	Judul        string `json:"judul" binding:"omitempty,max=200"`
@@ -27,8 +25,6 @@ type SetTargetRequest struct {
 	Targets []LaporanBesarTargetRequest `json:"targets" binding:"required,dive"`
 }
 
-// === Pengumpulan berkas (mahasiswa) ===
-
 // UploadURLRequest: minta signed URL unggah berkas laporan besar.
 type UploadURLRequest struct {
 	Jenis string `json:"jenis" binding:"required,oneof=laporan analisa"`
@@ -47,8 +43,6 @@ type KumpulRequest struct {
 	AnalisaPath *string `json:"analisa_path"`
 }
 
-// === Centang manual / override (admin) ===
-
 // MarkRequest: asisten mencentang manual pengumpulan (via MS Teams).
 type MarkRequest struct {
 	Status  string `json:"status" binding:"required,oneof=belum terkumpul"`
@@ -59,8 +53,6 @@ type MarkRequest struct {
 type OverrideRequest struct {
 	Alasan string `json:"alasan" binding:"required,max=500"`
 }
-
-// === Download batch (admin) ===
 
 // DownloadBatchRequest: minta signed URL banyak berkas sekaligus (tanpa zip di server).
 type DownloadBatchRequest struct {
@@ -79,8 +71,6 @@ type DownloadBatchResult struct {
 	Filename string `json:"filename"`
 	URL      string `json:"url"`
 }
-
-// === Response ===
 
 // LaporanBesarStatusResponse: status laporan besar milik mahasiswa.
 type LaporanBesarStatusResponse struct {

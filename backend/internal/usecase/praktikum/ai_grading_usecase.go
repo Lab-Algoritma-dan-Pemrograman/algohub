@@ -9,8 +9,8 @@ import (
 	"github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/pkg/ollama"
 )
 
-// AIGradingUsecase: penilaian AI SINKRON satu-per-satu (serverless-friendly).
-// Frontend memanggil GradeOne berulang per jawaban; tidak ada worker/job background.
+// AIGradingUsecase: penilaian AI SINKRON satu-per-satu supaya tiap request muat dalam
+// batas durasi Vercel Function. Frontend memanggil GradeOne berulang per jawaban.
 type AIGradingUsecase interface {
 	ListTargets(aktivasiSesiID, courseID int) (*dto.AIGradeTargetsResponse, error)
 	GradeOne(jawabanID int) (*dto.AIGradeOneResponse, error)

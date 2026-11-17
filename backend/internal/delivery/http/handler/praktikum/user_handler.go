@@ -21,19 +21,15 @@ func NewUserHandler(uc *usecase.UserUsecase, al *usecase.AuditLogUsecase) *UserH
 	return &UserHandler{uc: uc, auditLog: al}
 }
 
-// ---- Mahasiswa ----
-
-// ListMahasiswa GET /api/admin/users
-//
-//	@Summary		Daftar Mahasiswa
-//	@Description	Mengambil data mahasiswa dengan filter opsional (kelas_id, shift)
-//	@Tags			Admin - User
-//	@Security		bearerAuth
-//	@Produce		json
-//	@Param			kelas_id	query		int	false	"ID Kelas"
-//	@Param			shift		query		int	false	"Shift"
-//	@Success		200			{object}	response.Envelope{data=[]entity.User}
-//	@Router			/praktikum/admin/users [get]
+// @Summary		Daftar Mahasiswa
+// @Description	Mengambil data mahasiswa dengan filter opsional (kelas_id, shift)
+// @Tags			Admin - User
+// @Security		bearerAuth
+// @Produce		json
+// @Param			kelas_id	query		int	false	"ID Kelas"
+// @Param			shift		query		int	false	"Shift"
+// @Success		200			{object}	response.Envelope{data=[]entity.User}
+// @Router			/praktikum/admin/users [get]
 func (h *UserHandler) ListMahasiswa(c *gin.Context) {
 	res, err := h.uc.ListMahasiswa(queryIntPtr(c, "kelas_id"), queryIntPtr(c, "shift"))
 	if err != nil {
@@ -43,17 +39,15 @@ func (h *UserHandler) ListMahasiswa(c *gin.Context) {
 	response.OK(c, http.StatusOK, "Daftar mahasiswa", res)
 }
 
-// CreateMahasiswa POST /api/admin/users
-//
-//	@Summary		Tambah Mahasiswa
-//	@Description	Menambahkan data mahasiswa baru
-//	@Tags			Admin - User
-//	@Security		bearerAuth
-//	@Accept			json
-//	@Produce		json
-//	@Param			request	body		dto.UserRequest	true	"Payload Mahasiswa"
-//	@Success		201		{object}	response.Envelope{data=entity.User}
-//	@Router			/praktikum/admin/users [post]
+// @Summary		Tambah Mahasiswa
+// @Description	Menambahkan data mahasiswa baru
+// @Tags			Admin - User
+// @Security		bearerAuth
+// @Accept			json
+// @Produce		json
+// @Param			request	body		dto.UserRequest	true	"Payload Mahasiswa"
+// @Success		201		{object}	response.Envelope{data=entity.User}
+// @Router			/praktikum/admin/users [post]
 func (h *UserHandler) CreateMahasiswa(c *gin.Context) {
 	_, res, ok := bindCreate(c, h.uc.CreateMahasiswa)
 	if !ok {
@@ -63,17 +57,15 @@ func (h *UserHandler) CreateMahasiswa(c *gin.Context) {
 	response.Created(c, "Mahasiswa dibuat", res)
 }
 
-// BulkUpsertMahasiswa POST /api/admin/users/bulk
-//
-//	@Summary		Import Mahasiswa (Bulk)
-//	@Description	Menambahkan atau memperbarui banyak data mahasiswa sekaligus dari JSON (biasanya hasil parsing CSV di Frontend). Jika NIM sudah ada, data akan di-update.
-//	@Tags			Admin - User
-//	@Security		bearerAuth
-//	@Accept			json
-//	@Produce		json
-//	@Param			request	body		dto.UserBulkRequest	true	"Payload Bulk Mahasiswa"
-//	@Success		200		{object}	response.Envelope{data=dto.BulkResponse}
-//	@Router			/praktikum/admin/users/bulk [post]
+// @Summary		Import Mahasiswa (Bulk)
+// @Description	Menambahkan atau memperbarui banyak data mahasiswa sekaligus dari JSON (biasanya hasil parsing CSV di Frontend). Jika NIM sudah ada, data akan di-update.
+// @Tags			Admin - User
+// @Security		bearerAuth
+// @Accept			json
+// @Produce		json
+// @Param			request	body		dto.UserBulkRequest	true	"Payload Bulk Mahasiswa"
+// @Success		200		{object}	response.Envelope{data=dto.BulkResponse}
+// @Router			/praktikum/admin/users/bulk [post]
 func (h *UserHandler) BulkUpsertMahasiswa(c *gin.Context) {
 	req, res, ok := bindCreate(c, h.uc.BulkUpsertMahasiswa)
 	if !ok {
@@ -83,17 +75,15 @@ func (h *UserHandler) BulkUpsertMahasiswa(c *gin.Context) {
 	response.OK(c, http.StatusOK, "Import mahasiswa berhasil diproses", res)
 }
 
-// BulkAttrsMahasiswa PUT /api/admin/users/bulk-attrs
-//
-//	@Summary		Ubah Atribut Massal Mahasiswa
-//	@Description	Mengubah gelombang/shift/kelas/kelompok untuk daftar NIM sekaligus. Field yang tidak dikirim (nil) tidak diubah.
-//	@Tags			Admin - User
-//	@Security		bearerAuth
-//	@Accept			json
-//	@Produce		json
-//	@Param			request	body		dto.UserBulkAttrsRequest	true	"Daftar NIM + atribut"
-//	@Success		200		{object}	response.Envelope{data=dto.BulkResponse}
-//	@Router			/praktikum/admin/users/bulk-attrs [put]
+// @Summary		Ubah Atribut Massal Mahasiswa
+// @Description	Mengubah gelombang/shift/kelas/kelompok untuk daftar NIM sekaligus. Field yang tidak dikirim (nil) tidak diubah.
+// @Tags			Admin - User
+// @Security		bearerAuth
+// @Accept			json
+// @Produce		json
+// @Param			request	body		dto.UserBulkAttrsRequest	true	"Daftar NIM + atribut"
+// @Success		200		{object}	response.Envelope{data=dto.BulkResponse}
+// @Router			/praktikum/admin/users/bulk-attrs [put]
 func (h *UserHandler) BulkAttrsMahasiswa(c *gin.Context) {
 	req, res, ok := bindCreate(c, h.uc.BulkAttrsMahasiswa)
 	if !ok {
@@ -103,18 +93,16 @@ func (h *UserHandler) BulkAttrsMahasiswa(c *gin.Context) {
 	response.OK(c, http.StatusOK, "Atribut mahasiswa berhasil diperbarui", res)
 }
 
-// UpdateMahasiswa PUT /api/admin/users/:id
-//
-//	@Summary		Perbarui Mahasiswa
-//	@Description	Memperbarui data mahasiswa (termasuk reset perangkat jika diatur)
-//	@Tags			Admin - User
-//	@Security		bearerAuth
-//	@Accept			json
-//	@Produce		json
-//	@Param			id		path		int				true	"ID Mahasiswa"
-//	@Param			request	body		dto.UserRequest	true	"Payload Mahasiswa"
-//	@Success		200		{object}	response.Envelope{data=entity.User}
-//	@Router			/praktikum/admin/users/{id} [put]
+// @Summary		Perbarui Mahasiswa
+// @Description	Memperbarui data mahasiswa (termasuk reset perangkat jika diatur)
+// @Tags			Admin - User
+// @Security		bearerAuth
+// @Accept			json
+// @Produce		json
+// @Param			id		path		int				true	"ID Mahasiswa"
+// @Param			request	body		dto.UserRequest	true	"Payload Mahasiswa"
+// @Success		200		{object}	response.Envelope{data=entity.User}
+// @Router			/praktikum/admin/users/{id} [put]
 func (h *UserHandler) UpdateMahasiswa(c *gin.Context) {
 	res, ok := bindUpdate(c, "id", h.uc.UpdateMahasiswa)
 	if !ok {
@@ -124,16 +112,14 @@ func (h *UserHandler) UpdateMahasiswa(c *gin.Context) {
 	response.OK(c, http.StatusOK, "Mahasiswa diperbarui", res)
 }
 
-// Delete DELETE /api/admin/users/:id
-//
-//	@Summary		Hapus User
-//	@Description	Menghapus pengguna (mahasiswa) dari sistem
-//	@Tags			Admin - User
-//	@Security		bearerAuth
-//	@Produce		json
-//	@Param			id	path		int	true	"ID User"
-//	@Success		200	{object}	response.Envelope
-//	@Router			/praktikum/admin/users/{id} [delete]
+// @Summary		Hapus User
+// @Description	Menghapus pengguna (mahasiswa) dari sistem
+// @Tags			Admin - User
+// @Security		bearerAuth
+// @Produce		json
+// @Param			id	path		int	true	"ID User"
+// @Success		200	{object}	response.Envelope
+// @Router			/praktikum/admin/users/{id} [delete]
 func (h *UserHandler) Delete(c *gin.Context) {
 	id, ok := idParam(c, "id")
 	if !ok {
@@ -147,16 +133,14 @@ func (h *UserHandler) Delete(c *gin.Context) {
 	response.OK(c, http.StatusOK, "User dihapus", nil)
 }
 
-// ResetPassword POST /api/admin/users/:id/reset-password
-//
-//	@Summary		Reset Password
-//	@Description	Me-reset password mahasiswa (kosong). Mahasiswa harus register ulang.
-//	@Tags			Admin - User
-//	@Security		bearerAuth
-//	@Produce		json
-//	@Param			id	path		int	true	"ID Mahasiswa"
-//	@Success		200	{object}	response.Envelope
-//	@Router			/praktikum/admin/users/{id}/reset-password [post]
+// @Summary		Reset Password
+// @Description	Me-reset password mahasiswa (kosong). Mahasiswa harus register ulang.
+// @Tags			Admin - User
+// @Security		bearerAuth
+// @Produce		json
+// @Param			id	path		int	true	"ID Mahasiswa"
+// @Success		200	{object}	response.Envelope
+// @Router			/praktikum/admin/users/{id}/reset-password [post]
 func (h *UserHandler) ResetPassword(c *gin.Context) {
 	id, ok := idParam(c, "id")
 	if !ok {
@@ -170,18 +154,14 @@ func (h *UserHandler) ResetPassword(c *gin.Context) {
 	response.OK(c, http.StatusOK, "Password direset (mahasiswa harus register ulang)", nil)
 }
 
-// ---- Asisten ----
-
-// ListAsisten GET /api/admin/asisten & /api/info/asisten
-//
-//	@Summary		Daftar Asisten
-//	@Description	Mengambil daftar seluruh asisten
-//	@Tags			Info, Admin - Asisten
-//	@Security		bearerAuth
-//	@Produce		json
-//	@Success		200	{object}	response.Envelope{data=[]entity.User}
-//	@Router			/praktikum/info/asisten [get]
-//	@Router			/praktikum/admin/asisten [get]
+// @Summary		Daftar Asisten
+// @Description	Mengambil daftar seluruh asisten
+// @Tags			Info, Admin - Asisten
+// @Security		bearerAuth
+// @Produce		json
+// @Success		200	{object}	response.Envelope{data=[]entity.User}
+// @Router			/praktikum/info/asisten [get]
+// @Router			/praktikum/admin/asisten [get]
 func (h *UserHandler) ListAsisten(c *gin.Context) {
 	res, err := h.uc.ListAsisten()
 	if err != nil {
@@ -191,17 +171,15 @@ func (h *UserHandler) ListAsisten(c *gin.Context) {
 	response.OK(c, http.StatusOK, "Daftar asisten", res)
 }
 
-// CreateAsisten POST /api/admin/asisten
-//
-//	@Summary		Tambah Asisten
-//	@Description	Menambahkan akun asisten baru
-//	@Tags			Admin - Asisten
-//	@Security		bearerAuth
-//	@Accept			json
-//	@Produce		json
-//	@Param			request	body		dto.AsistenRequest	true	"Payload"
-//	@Success		201		{object}	response.Envelope{data=entity.User}
-//	@Router			/praktikum/admin/asisten [post]
+// @Summary		Tambah Asisten
+// @Description	Menambahkan akun asisten baru
+// @Tags			Admin - Asisten
+// @Security		bearerAuth
+// @Accept			json
+// @Produce		json
+// @Param			request	body		dto.AsistenRequest	true	"Payload"
+// @Success		201		{object}	response.Envelope{data=entity.User}
+// @Router			/praktikum/admin/asisten [post]
 func (h *UserHandler) CreateAsisten(c *gin.Context) {
 	_, res, ok := bindCreate(c, h.uc.CreateAsisten)
 	if !ok {
@@ -211,18 +189,16 @@ func (h *UserHandler) CreateAsisten(c *gin.Context) {
 	response.Created(c, "Asisten dibuat", res)
 }
 
-// UpdateAsisten PUT /api/admin/asisten/:id
-//
-//	@Summary		Perbarui Asisten
-//	@Description	Mengubah data akun asisten
-//	@Tags			Admin - Asisten
-//	@Security		bearerAuth
-//	@Accept			json
-//	@Produce		json
-//	@Param			id		path		int					true	"ID Asisten"
-//	@Param			request	body		dto.AsistenRequest	true	"Payload"
-//	@Success		200		{object}	response.Envelope{data=entity.User}
-//	@Router			/praktikum/admin/asisten/{id} [put]
+// @Summary		Perbarui Asisten
+// @Description	Mengubah data akun asisten
+// @Tags			Admin - Asisten
+// @Security		bearerAuth
+// @Accept			json
+// @Produce		json
+// @Param			id		path		int					true	"ID Asisten"
+// @Param			request	body		dto.AsistenRequest	true	"Payload"
+// @Success		200		{object}	response.Envelope{data=entity.User}
+// @Router			/praktikum/admin/asisten/{id} [put]
 func (h *UserHandler) UpdateAsisten(c *gin.Context) {
 	res, ok := bindUpdate(c, "id", h.uc.UpdateAsisten)
 	if !ok {

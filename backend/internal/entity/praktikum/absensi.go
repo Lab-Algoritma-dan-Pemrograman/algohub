@@ -2,7 +2,7 @@ package entity
 
 import "time"
 
-// Absensi kehadiran pada sesi praktikum. Cocok dgn 004_domain.sql.
+// Absensi kehadiran pada sesi praktikum.
 type Absensi struct {
 	ID          int       `gorm:"primaryKey;autoIncrement" json:"id"`
 	UserID      int       `gorm:"not null" json:"user_id"`

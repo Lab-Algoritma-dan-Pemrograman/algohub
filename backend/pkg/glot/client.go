@@ -1,5 +1,4 @@
-// Package glot membungkus Glot.io Run API untuk menjalankan kode (C/Python)
-// di sandbox eksternal. Backend hanya proxy; token disimpan di server.
+// Package glot membungkus Glot.io Run API untuk menjalankan kode (C/Python) di sandbox eksternal dengan token yang hanya disimpan di server.
 package glot
 
 import (
@@ -18,7 +17,7 @@ type Client struct {
 	http    *http.Client
 }
 
-// New membuat client. baseURL default "https://glot.io/api/run".
+// New membuat client untuk endpoint Run API baseURL (default config: https://glot.io/api/run).
 func New(baseURL, token string) *Client {
 	return &Client{
 		baseURL: strings.TrimRight(baseURL, "/"),

@@ -16,7 +16,6 @@ func NewDashboardUsecase(u repository.UserRepository, a repository.AktivasiRepos
 	return &DashboardUsecase{users: u, aktivasi: a, pengerjaan: p}
 }
 
-// Statistik menyusun ringkasan dashboard admin.
 func (uc *DashboardUsecase) Statistik() (*dto.StatistikResponse, error) {
 	totalMhs, err := uc.users.CountByRole(entity.RoleMahasiswa)
 	if err != nil {

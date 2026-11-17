@@ -15,8 +15,6 @@ func NewSesiUsecase(s repository.SesiRepository, c repository.CourseRepository) 
 	return &SesiUsecase{sesi: s, course: c}
 }
 
-// ---- Sesi ----
-
 func (uc *SesiUsecase) List() ([]entity.SesiPraktikum, error) { return uc.sesi.List() }
 
 func (uc *SesiUsecase) Get(id int) (*entity.SesiPraktikum, error) {
@@ -56,8 +54,6 @@ func (uc *SesiUsecase) Update(id int, req *dto.SesiRequest) (*entity.SesiPraktik
 }
 
 func (uc *SesiUsecase) Delete(id int) error { return mapDeleteErr(uc.sesi.Delete(id)) }
-
-// ---- Course ----
 
 func (uc *SesiUsecase) ListCourse(sesiID int) ([]entity.Course, error) {
 	return uc.course.ListBySesi(sesiID)

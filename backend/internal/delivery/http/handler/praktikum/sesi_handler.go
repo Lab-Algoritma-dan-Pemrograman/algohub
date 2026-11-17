@@ -21,15 +21,13 @@ func NewSesiHandler(uc *usecase.SesiUsecase, al *usecase.AuditLogUsecase) *SesiH
 	return &SesiHandler{uc: uc, auditLog: al}
 }
 
-// List GET /api/admin/sesi
-//
-//	@Summary		Daftar Master Sesi
-//	@Description	Mengambil seluruh master data sesi praktikum
-//	@Tags			Admin - Sesi
-//	@Security		bearerAuth
-//	@Produce		json
-//	@Success		200	{object}	response.Envelope{data=[]entity.SesiPraktikum}
-//	@Router			/praktikum/admin/sesi [get]
+// @Summary		Daftar Master Sesi
+// @Description	Mengambil seluruh master data sesi praktikum
+// @Tags			Admin - Sesi
+// @Security		bearerAuth
+// @Produce		json
+// @Success		200	{object}	response.Envelope{data=[]entity.SesiPraktikum}
+// @Router			/praktikum/admin/sesi [get]
 func (h *SesiHandler) List(c *gin.Context) {
 	res, err := h.uc.List()
 	if err != nil {
@@ -39,16 +37,14 @@ func (h *SesiHandler) List(c *gin.Context) {
 	response.OK(c, http.StatusOK, "Daftar sesi", res)
 }
 
-// Get GET /api/admin/sesi/:id
-//
-//	@Summary		Detail Master Sesi
-//	@Description	Mengambil detail master sesi praktikum
-//	@Tags			Admin - Sesi
-//	@Security		bearerAuth
-//	@Produce		json
-//	@Param			id	path		int	true	"ID Sesi"
-//	@Success		200	{object}	response.Envelope{data=entity.SesiPraktikum}
-//	@Router			/praktikum/admin/sesi/{id} [get]
+// @Summary		Detail Master Sesi
+// @Description	Mengambil detail master sesi praktikum
+// @Tags			Admin - Sesi
+// @Security		bearerAuth
+// @Produce		json
+// @Param			id	path		int	true	"ID Sesi"
+// @Success		200	{object}	response.Envelope{data=entity.SesiPraktikum}
+// @Router			/praktikum/admin/sesi/{id} [get]
 func (h *SesiHandler) Get(c *gin.Context) {
 	id, ok := idParam(c, "id")
 	if !ok {
@@ -62,17 +58,15 @@ func (h *SesiHandler) Get(c *gin.Context) {
 	response.OK(c, http.StatusOK, "Detail sesi", res)
 }
 
-// Create POST /api/admin/sesi
-//
-//	@Summary		Tambah Master Sesi
-//	@Description	Menambahkan master sesi praktikum baru
-//	@Tags			Admin - Sesi
-//	@Security		bearerAuth
-//	@Accept			json
-//	@Produce		json
-//	@Param			request	body		dto.SesiRequest	true	"Payload"
-//	@Success		201		{object}	response.Envelope{data=entity.SesiPraktikum}
-//	@Router			/praktikum/admin/sesi [post]
+// @Summary		Tambah Master Sesi
+// @Description	Menambahkan master sesi praktikum baru
+// @Tags			Admin - Sesi
+// @Security		bearerAuth
+// @Accept			json
+// @Produce		json
+// @Param			request	body		dto.SesiRequest	true	"Payload"
+// @Success		201		{object}	response.Envelope{data=entity.SesiPraktikum}
+// @Router			/praktikum/admin/sesi [post]
 func (h *SesiHandler) Create(c *gin.Context) {
 	var req dto.SesiRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -88,18 +82,16 @@ func (h *SesiHandler) Create(c *gin.Context) {
 	response.Created(c, "Sesi dibuat", res)
 }
 
-// Update PUT /api/admin/sesi/:id
-//
-//	@Summary		Perbarui Master Sesi
-//	@Description	Mengubah data master sesi praktikum
-//	@Tags			Admin - Sesi
-//	@Security		bearerAuth
-//	@Accept			json
-//	@Produce		json
-//	@Param			id		path		int				true	"ID Sesi"
-//	@Param			request	body		dto.SesiRequest	true	"Payload"
-//	@Success		200		{object}	response.Envelope{data=entity.SesiPraktikum}
-//	@Router			/praktikum/admin/sesi/{id} [put]
+// @Summary		Perbarui Master Sesi
+// @Description	Mengubah data master sesi praktikum
+// @Tags			Admin - Sesi
+// @Security		bearerAuth
+// @Accept			json
+// @Produce		json
+// @Param			id		path		int				true	"ID Sesi"
+// @Param			request	body		dto.SesiRequest	true	"Payload"
+// @Success		200		{object}	response.Envelope{data=entity.SesiPraktikum}
+// @Router			/praktikum/admin/sesi/{id} [put]
 func (h *SesiHandler) Update(c *gin.Context) {
 	res, ok := bindUpdate(c, "id", h.uc.Update)
 	if !ok {
@@ -109,16 +101,14 @@ func (h *SesiHandler) Update(c *gin.Context) {
 	response.OK(c, http.StatusOK, "Sesi diperbarui", res)
 }
 
-// Delete DELETE /api/admin/sesi/:id
-//
-//	@Summary		Hapus Master Sesi
-//	@Description	Menghapus master sesi praktikum
-//	@Tags			Admin - Sesi
-//	@Security		bearerAuth
-//	@Produce		json
-//	@Param			id	path		int	true	"ID Sesi"
-//	@Success		200	{object}	response.Envelope
-//	@Router			/praktikum/admin/sesi/{id} [delete]
+// @Summary		Hapus Master Sesi
+// @Description	Menghapus master sesi praktikum
+// @Tags			Admin - Sesi
+// @Security		bearerAuth
+// @Produce		json
+// @Param			id	path		int	true	"ID Sesi"
+// @Success		200	{object}	response.Envelope
+// @Router			/praktikum/admin/sesi/{id} [delete]
 func (h *SesiHandler) Delete(c *gin.Context) {
 	id, ok := idParam(c, "id")
 	if !ok {
@@ -132,18 +122,14 @@ func (h *SesiHandler) Delete(c *gin.Context) {
 	response.OK(c, http.StatusOK, "Sesi dihapus", nil)
 }
 
-// ---- Course ----
-
-// ListCourse GET /api/admin/sesi/:id/course
-//
-//	@Summary		Daftar Course
-//	@Description	Mengambil course (pretest/posttest/dll) di dalam satu sesi
-//	@Tags			Admin - Course
-//	@Security		bearerAuth
-//	@Produce		json
-//	@Param			id	path		int	true	"ID Sesi"
-//	@Success		200	{object}	response.Envelope{data=[]entity.Course}
-//	@Router			/praktikum/admin/sesi/{id}/course [get]
+// @Summary		Daftar Course
+// @Description	Mengambil course (pretest/posttest/dll) di dalam satu sesi
+// @Tags			Admin - Course
+// @Security		bearerAuth
+// @Produce		json
+// @Param			id	path		int	true	"ID Sesi"
+// @Success		200	{object}	response.Envelope{data=[]entity.Course}
+// @Router			/praktikum/admin/sesi/{id}/course [get]
 func (h *SesiHandler) ListCourse(c *gin.Context) {
 	id, ok := idParam(c, "id")
 	if !ok {
@@ -157,18 +143,16 @@ func (h *SesiHandler) ListCourse(c *gin.Context) {
 	response.OK(c, http.StatusOK, "Daftar course", res)
 }
 
-// CreateCourse POST /api/admin/sesi/:id/course
-//
-//	@Summary		Tambah Course
-//	@Description	Menambahkan course ke dalam master sesi
-//	@Tags			Admin - Course
-//	@Security		bearerAuth
-//	@Accept			json
-//	@Produce		json
-//	@Param			id		path		int					true	"ID Sesi"
-//	@Param			request	body		dto.CourseRequest	true	"Payload"
-//	@Success		201		{object}	response.Envelope{data=entity.Course}
-//	@Router			/praktikum/admin/sesi/{id}/course [post]
+// @Summary		Tambah Course
+// @Description	Menambahkan course ke dalam master sesi
+// @Tags			Admin - Course
+// @Security		bearerAuth
+// @Accept			json
+// @Produce		json
+// @Param			id		path		int					true	"ID Sesi"
+// @Param			request	body		dto.CourseRequest	true	"Payload"
+// @Success		201		{object}	response.Envelope{data=entity.Course}
+// @Router			/praktikum/admin/sesi/{id}/course [post]
 func (h *SesiHandler) CreateCourse(c *gin.Context) {
 	id, ok := idParam(c, "id")
 	if !ok {
@@ -188,18 +172,16 @@ func (h *SesiHandler) CreateCourse(c *gin.Context) {
 	response.Created(c, "Course dibuat", res)
 }
 
-// UpdateCourse PUT /api/admin/course/:courseId
-//
-//	@Summary		Perbarui Course
-//	@Description	Mengubah course (termasuk pool soal dan durasi)
-//	@Tags			Admin - Course
-//	@Security		bearerAuth
-//	@Accept			json
-//	@Produce		json
-//	@Param			courseId	path		int					true	"ID Course"
-//	@Param			request		body		dto.CourseRequest	true	"Payload"
-//	@Success		200			{object}	response.Envelope{data=entity.Course}
-//	@Router			/praktikum/admin/course/{courseId} [put]
+// @Summary		Perbarui Course
+// @Description	Mengubah course (termasuk pool soal dan durasi)
+// @Tags			Admin - Course
+// @Security		bearerAuth
+// @Accept			json
+// @Produce		json
+// @Param			courseId	path		int					true	"ID Course"
+// @Param			request		body		dto.CourseRequest	true	"Payload"
+// @Success		200			{object}	response.Envelope{data=entity.Course}
+// @Router			/praktikum/admin/course/{courseId} [put]
 func (h *SesiHandler) UpdateCourse(c *gin.Context) {
 	res, ok := bindUpdate(c, "courseId", h.uc.UpdateCourse)
 	if !ok {
@@ -209,16 +191,14 @@ func (h *SesiHandler) UpdateCourse(c *gin.Context) {
 	response.OK(c, http.StatusOK, "Course diperbarui", res)
 }
 
-// DeleteCourse DELETE /api/admin/course/:courseId
-//
-//	@Summary		Hapus Course
-//	@Description	Menghapus course dari sesi
-//	@Tags			Admin - Course
-//	@Security		bearerAuth
-//	@Produce		json
-//	@Param			courseId	path		int	true	"ID Course"
-//	@Success		200			{object}	response.Envelope
-//	@Router			/praktikum/admin/course/{courseId} [delete]
+// @Summary		Hapus Course
+// @Description	Menghapus course dari sesi
+// @Tags			Admin - Course
+// @Security		bearerAuth
+// @Produce		json
+// @Param			courseId	path		int	true	"ID Course"
+// @Success		200			{object}	response.Envelope
+// @Router			/praktikum/admin/course/{courseId} [delete]
 func (h *SesiHandler) DeleteCourse(c *gin.Context) {
 	cid, ok := idParam(c, "courseId")
 	if !ok {

@@ -28,9 +28,8 @@ func (uc *RekapUsecase) GetRekapKelas(kelasID int) (*dto.RekapKelasResponse, err
 		return nil, err
 	}
 
-	// 1. Ekstrak metadata kolom unik dan urutannya
-	// Kita gunakan map untuk memastikan unique, dan slice untuk menjaga urutan penemuan.
-	// Karena query sudah ORDER BY s.urutan, c.id, urutan penemuan pertama adalah urutan yang benar.
+	// Query sudah ORDER BY s.urutan, c.id, jadi urutan kolom = urutan kemunculan pertama;
+	// map menjaga keunikan, slice menjaga urutan.
 	type colMeta struct {
 		key   string
 		label string
@@ -38,18 +37,16 @@ func (uc *RekapUsecase) GetRekapKelas(kelasID int) (*dto.RekapKelasResponse, err
 	var columns []colMeta
 	colSeen := make(map[string]bool)
 
-	// 2. Kelompokkan data per mahasiswa
 	type mhsData struct {
 		NIM        string
 		Nama       string
 		Scores     map[string]dto.RekapSel
 		TotalScore float64
 	}
-	mhsMap := make(map[string]*mhsData) // Key by NIM
-	var nimOrder []string               // Untuk menjaga urutan NIM
+	mhsMap := make(map[string]*mhsData)
+	var nimOrder []string
 
 	for _, row := range rows {
-		// Init mahasiswa jika belum ada
 		if _, ok := mhsMap[row.NIM]; !ok {
 			mhsMap[row.NIM] = &mhsData{
 				NIM:        row.NIM,
@@ -101,7 +98,6 @@ func (uc *RekapUsecase) GetRekapKelas(kelasID int) (*dto.RekapKelasResponse, err
 		}
 	}
 
-	// 3. Susun respons akhir
 	resp := &dto.RekapKelasResponse{
 		Columns: make([]dto.RekapKolom, 0, len(columns)),
 		Data:    make([]dto.RekapMahasiswa, 0, len(nimOrder)),

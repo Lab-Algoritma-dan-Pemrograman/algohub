@@ -174,7 +174,6 @@ func (uc *AuthUsecase) Register(req dto.RegisterRequest) (*dto.AuthResponse, err
 		supaUID = uid
 	}
 
-	// Klaim roster
 	if supaUID != "" {
 		if err := uc.users.ClaimRoster(u.ID, supaUID, &emailNorm, hashed); err != nil {
 			if errors.Is(err, repository.ErrRosterClaimed) {
@@ -190,7 +189,6 @@ func (uc *AuthUsecase) Register(req dto.RegisterRequest) (*dto.AuthResponse, err
 			}
 			return nil, err
 		}
-		// Reload user setelah claim
 		if fresh, err := uc.users.FindByID(u.ID); err == nil {
 			u = fresh
 		}

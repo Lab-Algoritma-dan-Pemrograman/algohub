@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-// Admin memanggil Supabase Admin API pakai service_role. Hanya backend.
+// Admin memanggil Supabase Admin API dengan kunci service_role yang hanya boleh dipegang backend.
 type Admin struct {
 	URL        string
 	ServiceKey string
@@ -30,7 +30,7 @@ type adminUser struct {
 	Email string `json:"email"`
 }
 
-// CreateAuthUser bikin akun auth via Admin API. emailConfirm=true → langsung aktif (kita pakai true).
+// CreateAuthUser membuat akun auth via Admin API; emailConfirm=true membuat akun langsung aktif.
 func (s *Admin) CreateAuthUser(email, password string, emailConfirm bool) (string, error) {
 	if s.URL == "" || s.ServiceKey == "" {
 		return "", fmt.Errorf("SUPABASE_URL / SUPABASE_SERVICE_KEY belum diset")

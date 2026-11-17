@@ -2,8 +2,6 @@ package dto
 
 import entity "github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/entity/praktikum"
 
-// ---- Game ----
-
 type GameKonfigurasiRequest struct {
 	BugHuntAktif   *bool `json:"bug_hunt_aktif"`
 	BugHuntCAktif  *bool `json:"bug_hunt_c_aktif"`
@@ -59,21 +57,15 @@ type SelesaiMainResponse struct {
 	Koreksi   []KoreksiJawaban `json:"koreksi"`
 }
 
-// ---- Monitoring ----
-
 type DetakRequest struct {
 	Aktivitas string `json:"aktivitas"`
 }
-
-// ---- Pencapaian ----
 
 type PencapaianSayaResponse struct {
 	Semua     []entity.Pencapaian `json:"semua"`
 	TerbukaID []string            `json:"terbuka_id"`
 	BaruSaja  []entity.Pencapaian `json:"baru_saja"`
 }
-
-// ---- Admin belajar ----
 
 type ResetProgresRequest struct {
 	LevelID string `json:"level_id"`
@@ -82,8 +74,6 @@ type ResetProgresRequest struct {
 type SetXPRequest struct {
 	XP int `json:"xp"`
 }
-
-// ---- Sesi belajar ----
 
 // SesiBelajarResponse: satu panggilan untuk menyiapkan sesi elearning.
 // Menggabungkan identitas (dari token) dengan profil belajar, supaya
@@ -106,8 +96,6 @@ type SesiBelajarResponse struct {
 type SetAksesLevelRequest struct {
 	AksesLevel map[string]string `json:"akses_level"`
 }
-
-// ---- Simpan kurikulum penuh ----
 
 type MateriKurikulumRequest struct {
 	ID             string      `json:"id" binding:"required"`

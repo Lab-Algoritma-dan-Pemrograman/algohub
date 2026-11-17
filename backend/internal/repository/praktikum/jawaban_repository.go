@@ -64,7 +64,6 @@ func (r *jawabanRepository) FindByID(id int) (*entity.JawabanMahasiswa, error) {
 	return &j, nil
 }
 
-// soalTerpilihIDsForCourse helper: ambil id soal_terpilih untuk aktivasi+course.
 func (r *jawabanRepository) soalTerpilihIDsForCourse(aktivasiSesiID, courseID int) ([]int, error) {
 	var ids []int
 	err := r.db.Model(&entity.SoalTerpilih{}).
@@ -194,7 +193,6 @@ func (r *jawabanRepository) GetAllJawabanFlat(kelasID, sesiID int, search, jenis
 		Preload("SoalTerpilih.AktivasiSesi").
 		Preload("SoalTerpilih.AktivasiSesi.Sesi")
 
-	// Joins untuk memfilter
 	query = query.Joins("JOIN users ON users.id = jawaban_mahasiswa.mahasiswa_id").
 		Joins("JOIN soal_terpilih ON soal_terpilih.id = jawaban_mahasiswa.soal_terpilih_id").
 		Joins("JOIN course ON course.id = soal_terpilih.course_id").

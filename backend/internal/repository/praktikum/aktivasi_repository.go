@@ -42,8 +42,6 @@ type aktivasiRepository struct{ db *gorm.DB }
 
 func NewAktivasiRepository(db *gorm.DB) AktivasiRepository { return &aktivasiRepository{db: db} }
 
-// ---- aktivasi_sesi ----
-
 func (r *aktivasiRepository) CreateSesi(a *entity.AktivasiSesi) error { return r.db.Create(a).Error }
 
 func (r *aktivasiRepository) UpdateSesi(a *entity.AktivasiSesi) error { return r.db.Save(a).Error }
@@ -115,8 +113,6 @@ func (r *aktivasiRepository) DeleteSesi(id int) error {
 	})
 }
 
-// ---- aktivasi_course ----
-
 func (r *aktivasiRepository) CreateCourse(ac *entity.AktivasiCourse) error {
 	return r.db.Create(ac).Error
 }
@@ -156,8 +152,6 @@ func (r *aktivasiRepository) ListCoursesByAktivasi(aktivasiSesiID int) ([]entity
 		Where("aktivasi_sesi_id = ?", aktivasiSesiID).Order("urutan asc").Find(&acs).Error
 	return acs, err
 }
-
-// ---- peserta_susulan ----
 
 func (r *aktivasiRepository) AddSusulan(p *entity.PesertaSusulan) error {
 	return r.db.Create(p).Error

@@ -20,17 +20,15 @@ func NewPenilaianHandler(uc *usecase.PenilaianUsecase, al *usecase.AuditLogUseca
 	return &PenilaianHandler{uc: uc, auditLog: al}
 }
 
-// Rekap GET /api/admin/penilaian/rekap
-//
-//	@Summary		Rekap Nilai
-//	@Description	Mengambil rekapitulasi nilai jawaban untuk satu course pada suatu sesi
-//	@Tags			Admin - Penilaian
-//	@Security		bearerAuth
-//	@Produce		json
-//	@Param			aktivasi_sesi_id	query		int	true	"ID Aktivasi Sesi"
-//	@Param			course_id			query		int	true	"ID Course"
-//	@Success		200					{object}	response.Envelope{data=dto.RekapResponse}
-//	@Router			/praktikum/admin/penilaian/rekap [get]
+// @Summary		Rekap Nilai
+// @Description	Mengambil rekapitulasi nilai jawaban untuk satu course pada suatu sesi
+// @Tags			Admin - Penilaian
+// @Security		bearerAuth
+// @Produce		json
+// @Param			aktivasi_sesi_id	query		int	true	"ID Aktivasi Sesi"
+// @Param			course_id			query		int	true	"ID Course"
+// @Success		200					{object}	response.Envelope{data=dto.RekapResponse}
+// @Router			/praktikum/admin/penilaian/rekap [get]
 func (h *PenilaianHandler) Rekap(c *gin.Context) {
 	aks := queryIntPtr(c, "aktivasi_sesi_id")
 	cid := queryIntPtr(c, "course_id")
@@ -46,17 +44,15 @@ func (h *PenilaianHandler) Rekap(c *gin.Context) {
 	response.OK(c, http.StatusOK, "Rekap jawaban", res)
 }
 
-// SetNilai POST /api/admin/penilaian
-//
-//	@Summary		Set Nilai Jawaban
-//	@Description	Memberikan atau mengubah nilai (skor) pada jawaban mahasiswa secara manual
-//	@Tags			Admin - Penilaian
-//	@Security		bearerAuth
-//	@Accept			json
-//	@Produce		json
-//	@Param			request	body		dto.NilaiRequest	true	"Payload Nilai"
-//	@Success		200		{object}	response.Envelope
-//	@Router			/praktikum/admin/penilaian [post]
+// @Summary		Set Nilai Jawaban
+// @Description	Memberikan atau mengubah nilai (skor) pada jawaban mahasiswa secara manual
+// @Tags			Admin - Penilaian
+// @Security		bearerAuth
+// @Accept			json
+// @Produce		json
+// @Param			request	body		dto.NilaiRequest	true	"Payload Nilai"
+// @Success		200		{object}	response.Envelope
+// @Router			/praktikum/admin/penilaian [post]
 func (h *PenilaianHandler) SetNilai(c *gin.Context) {
 	var req dto.NilaiRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -72,17 +68,15 @@ func (h *PenilaianHandler) SetNilai(c *gin.Context) {
 	response.OK(c, http.StatusOK, "Nilai disimpan", res)
 }
 
-// SetKeaktifan POST /api/admin/keaktifan
-//
-//	@Summary		Set Keaktifan
-//	@Description	Set nilai keaktifan (partisipasi) per pengerjaan pretest/posttest, massal.
-//	@Tags			Admin - Penilaian
-//	@Security		bearerAuth
-//	@Accept			json
-//	@Produce		json
-//	@Param			request	body		dto.KeaktifanRequest	true	"Payload Keaktifan"
-//	@Success		200		{object}	response.Envelope
-//	@Router			/praktikum/admin/keaktifan [post]
+// @Summary		Set Keaktifan
+// @Description	Set nilai keaktifan (partisipasi) per pengerjaan pretest/posttest, massal.
+// @Tags			Admin - Penilaian
+// @Security		bearerAuth
+// @Accept			json
+// @Produce		json
+// @Param			request	body		dto.KeaktifanRequest	true	"Payload Keaktifan"
+// @Success		200		{object}	response.Envelope
+// @Router			/praktikum/admin/keaktifan [post]
 func (h *PenilaianHandler) SetKeaktifan(c *gin.Context) {
 	var req dto.KeaktifanRequest
 	if err := c.ShouldBindJSON(&req); err != nil {

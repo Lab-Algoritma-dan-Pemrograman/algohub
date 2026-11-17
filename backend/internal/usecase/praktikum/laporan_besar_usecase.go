@@ -42,8 +42,6 @@ func NewLaporanBesarUsecase(
 	return &LaporanBesarUsecase{repo: r, users: u, sb: sb, ttlRead: ttlBacaLaporan, ttlUp: ttlUploadLaporan}
 }
 
-// ---- Helper waktu ----
-
 // faseWindow menghitung fase window untuk satu target pada waktu now.
 // now < buka_at => belum_dibuka; buka_at<=now<deadline_at => dibuka;
 // deadline_at<=now<=late_until => telat; selain itu => ditutup.
@@ -81,8 +79,6 @@ func sisaDetik(batas *time.Time, now time.Time) int64 {
 	}
 	return int64(batas.Sub(now).Seconds())
 }
-
-// ---- Laporan induk (admin) ----
 
 func (uc *LaporanBesarUsecase) List() ([]entity.LaporanBesar, error) { return uc.repo.List() }
 
@@ -180,8 +176,6 @@ func (uc *LaporanBesarUsecase) SetTargets(laporanID int, req dto.SetTargetReques
 	}
 	return uc.repo.ListTarget(laporanID)
 }
-
-// ---- Mahasiswa: status & pengumpulan ----
 
 // StatusSaya mengembalikan status laporan besar mahasiswa + window kelasnya.
 func (uc *LaporanBesarUsecase) StatusSaya(userID int) (*dto.LaporanBesarStatusResponse, error) {
@@ -409,8 +403,6 @@ func (uc *LaporanBesarUsecase) BatalkanKumpul(userID int) error {
 	return uc.repo.UpsertPengumpulan(p)
 }
 
-// ---- Admin: rekap pengumpulan ----
-
 // ListPengumpulan: daftar seluruh mahasiswa dari kelas yang ditarget + status + jejak.
 func (uc *LaporanBesarUsecase) ListPengumpulan(laporanID int) ([]dto.PengumpulanRow, error) {
 	if _, err := uc.repo.FindByID(laporanID); err != nil {
@@ -567,8 +559,6 @@ func (uc *LaporanBesarUsecase) RevokeOverride(laporanID, mhsID int) (*entity.Pen
 	return p, nil
 }
 
-// ---- Akses berkas (privat) ----
-
 // SignedBerkas: validasi izin + kembalikan signed URL. mahasiswaID==0 (staf) = akses penuh.
 // Bila mahasiswaID != 0, mahasiswa hanya boleh mengakses berkasnya sendiri.
 func (uc *LaporanBesarUsecase) SignedBerkas(laporanID, mhsID, pemintaID int, jenis string, forDownload bool) (signedURL, filename string, err error) {
@@ -646,8 +636,6 @@ func (uc *LaporanBesarUsecase) DownloadBatch(laporanID int, req dto.DownloadBatc
 	return out, nil
 }
 
-// ---- Gerbang ujian ----
-
 // CekGerbangLaporanBesar dipanggil Mulai (ujian praktik). Bila ada laporan besar
 // aktif untuk kelas mahasiswa, wajib status='terkumpul' ATAU ada override_pada.
 // Mengembalikan error bila gerbang tertutup.
@@ -674,8 +662,6 @@ func (uc *LaporanBesarUsecase) CekGerbangLaporanBesar(userID int, kelasID, shift
 	}
 	return nil
 }
-
-// ---- util ----
 
 func boolOr(p *bool, def bool) bool {
 	if p == nil {

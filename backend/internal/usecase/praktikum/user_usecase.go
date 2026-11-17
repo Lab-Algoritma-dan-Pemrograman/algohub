@@ -39,7 +39,6 @@ func (uc *UserUsecase) CreateMahasiswa(req *dto.UserRequest) (*entity.User, erro
 	return u, nil
 }
 
-// BulkUpsertMahasiswa memproses array UserRequest dan melakukan upsert.
 func (uc *UserUsecase) BulkUpsertMahasiswa(req *dto.UserBulkRequest) (*dto.BulkResponse, error) {
 	if len(req.Users) == 0 {
 		return &dto.BulkResponse{}, nil
@@ -64,11 +63,11 @@ func (uc *UserUsecase) BulkUpsertMahasiswa(req *dto.UserBulkRequest) (*dto.BulkR
 		return nil, err
 	}
 
-	// GORM's CreateInBatches with OnConflict doesn't easily return exact insert/update counts in MySQL/Postgres
-	// without complex RETURNING clauses. For now, we return TotalProcessed.
+	// OnConflict GORM tidak melaporkan jumlah insert vs update tanpa RETURNING,
+	// jadi hanya TotalProcessed yang diisi.
 	return &dto.BulkResponse{
 		TotalProcessed: len(entities),
-		TotalInserted:  0, // Can be refined if needed
+		TotalInserted:  0,
 		TotalUpdated:   0,
 	}, nil
 }
@@ -152,8 +151,6 @@ func (uc *UserUsecase) ResetPassword(id int) error {
 	u.IsRegistered = false
 	return uc.users.Update(u)
 }
-
-// ---- Asisten (role admin) ----
 
 func (uc *UserUsecase) ListAsisten() ([]entity.User, error) { return uc.users.ListAsisten() }
 

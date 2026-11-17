@@ -103,8 +103,7 @@ func clamp(v, lo, hi float64) float64 {
 	return v
 }
 
-// GradeAnswer menilai satu jawaban memakai rubrik (default: ketentuan project lama).
-// Hasil di-skala ke poin soal agar adaptif terhadap bobot soal yang ditetapkan admin.
+// GradeAnswer menilai satu jawaban memakai rubrik lalu menskalakan hasilnya ke poin soal yang ditetapkan admin.
 func (c *Client) GradeAnswer(ctx context.Context, p *GradeParams) (*AIResult, error) {
 	// Soal & kunci berasal dari editor HTML (edra) -> bersihkan agar AI baca teks/kode bersih.
 	soal := stripHTML(p.Soal)
@@ -164,9 +163,7 @@ func (c *Client) GradeAnswer(ctx context.Context, p *GradeParams) (*AIResult, er
 	return res, nil
 }
 
-// RawChat memanggil endpoint chat dengan prompt bebas (tanpa format JSON)
-// dan mengembalikan isi balasan mentah. Dipakai untuk tugas generatif
-// non-grading (mis. pembuatan kode rumpang).
+// RawChat mengirim prompt bebas (tanpa format JSON) dan mengembalikan balasan mentah, untuk tugas non-grading seperti pembuatan kode rumpang.
 func (c *Client) RawChat(ctx context.Context, prompt string) (string, error) {
 	reqPayload := ChatRequest{
 		Model:    c.cfg.Model,
@@ -217,7 +214,6 @@ func (c *Client) chat(ctx context.Context, prompt, model string) (string, error)
 	if err != nil {
 		return "", fmt.Errorf("failed to marshal request: %w", err)
 	}
-	// OllamaURL kini berisi endpoint chat-completions lengkap (OpenAI-compatible).
 	url := c.cfg.URL
 	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(payloadBytes))
 	if err != nil {

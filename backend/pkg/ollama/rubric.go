@@ -22,7 +22,7 @@ func stripHTML(s string) string {
 	return strings.TrimSpace(html.UnescapeString(s))
 }
 
-// Rubrik bobot AI grading — DEFAULT diambil dari project lama (lab-ap-v2 DEFAULT_RUBRIK).
+// Rubrik bobot AI grading — DEFAULT diambil dari DEFAULT_RUBRIK project v2 lama.
 // Esai (pretest/posttest easy-medium, pretest hard): klasifikasi kategori -> poin.
 // Coding (keterampilan, posttest hard, ujian praktik): 3 sub-kriteria
 //   Sesuai Petunjuk (SP) + Berjalan Tanpa Error (BTE) + Tepat Waktu/Selesai (TW).

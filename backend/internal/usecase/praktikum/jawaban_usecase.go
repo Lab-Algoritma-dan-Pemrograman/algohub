@@ -234,7 +234,6 @@ func (uc *JawabanUsecase) AutoSave(userID int, req dto.AutoSaveRequest) error {
 	return uc.jawaban.Update(j)
 }
 
-// Submit melakukan submit manual seluruh course untuk mahasiswa.
 func (uc *JawabanUsecase) Submit(userID int, req dto.SubmitRequest) error {
 	_, _, _, _, err := uc.loadKonteks(userID, req.AktivasiSesiID, req.CourseID)
 	if err != nil {
@@ -258,7 +257,7 @@ func (uc *JawabanUsecase) finalize(userID, aktivasiSesiID, courseID int) error {
 	return uc.pengerjaan.Update(p)
 }
 
-// AutoSubmitExpired disapu oleh background job: auto-submit pengerjaan yang lewat deadline.
+// AutoSubmitExpired dipanggil cron auto-submit untuk pengerjaan yang lewat deadline.
 func (uc *JawabanUsecase) AutoSubmitExpired() (int, error) {
 	expired, err := uc.pengerjaan.FindExpired()
 	if err != nil {
@@ -274,7 +273,6 @@ func (uc *JawabanUsecase) AutoSubmitExpired() (int, error) {
 	return n, nil
 }
 
-// buildRuang menyusun response ruang course.
 func (uc *JawabanUsecase) buildRuang(userID int, aktivasi *entity.AktivasiSesi, ac *entity.AktivasiCourse, course *entity.Course) (*dto.RuangCourseResponse, error) {
 	soalTerpilih, err := uc.terpilih.ListByAktivasiCourse(aktivasi.ID, course.ID)
 	if err != nil {
@@ -340,18 +338,15 @@ func (uc *JawabanUsecase) buildRuang(userID int, aktivasi *entity.AktivasiSesi, 
 // existing untuk mahasiswa tertentu. Tidak ada validasi kelas+shift, deadline, atau is_open
 // karena ini aksi admin eksplisit.
 func (uc *JawabanUsecase) AdminInjectJawaban(req dto.AdminInjectJawabanRequest) error {
-	// 1. Validasi soal_terpilih exists.
 	st, err := uc.terpilih.FindByID(req.SoalTerpilihID)
 	if err != nil {
 		return fmt.Errorf("%w: soal_terpilih tidak ditemukan", ErrNotFound)
 	}
 
-	// 2. Validasi mahasiswa exists.
 	if _, err := uc.users.FindByID(req.MahasiswaID); err != nil {
 		return fmt.Errorf("%w: mahasiswa tidak ditemukan", ErrNotFound)
 	}
 
-	// 3. Pastikan pengerjaan_course ada.
 	p, err := uc.pengerjaan.FindOrCreate(req.MahasiswaID, st.AktivasiSesiID, st.CourseID)
 	if err != nil {
 		return err
@@ -363,14 +358,13 @@ func (uc *JawabanUsecase) AdminInjectJawaban(req dto.AdminInjectJawabanRequest) 
 		_ = uc.pengerjaan.Update(p)
 	}
 
-	// 4. Upsert jawaban (create or update, bahkan jika sudah submitted).
+	// Jawaban yang sudah submitted tetap boleh ditimpa (hak istimewa admin).
 	now := time.Now()
 	j, err := uc.jawaban.FindByMahasiswaSoal(req.MahasiswaID, st.ID)
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return err
 		}
-		// Create baru.
 		j = &entity.JawabanMahasiswa{
 			MahasiswaID:    req.MahasiswaID,
 			SoalTerpilihID: st.ID,
@@ -384,7 +378,6 @@ func (uc *JawabanUsecase) AdminInjectJawaban(req dto.AdminInjectJawabanRequest) 
 		return uc.jawaban.Create(j)
 	}
 
-	// Update existing (termasuk yang sudah submitted — admin privilege).
 	j.JawabanTeks = req.JawabanTeks
 	j.UpdatedAt = now
 	if req.AutoSubmit {

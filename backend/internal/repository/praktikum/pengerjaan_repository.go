@@ -30,7 +30,7 @@ type PengerjaanRepository interface {
 	// ResetForMahasiswa: lepas kunci SATU mahasiswa (buka kunci per peserta).
 	ResetForMahasiswa(mahasiswaID, aktivasiSesiID, courseID int) (int64, error)
 	ProgressSummary(aktivasiSesiID, courseID int) (ProgressSummary, error)
-	// FindExpired mengambil pengerjaan yang sedang berjalan & sudah lewat deadline (untuk sweeper).
+	// FindExpired mengambil pengerjaan yang sedang berjalan & sudah lewat deadline (untuk cron auto-submit).
 	FindExpired() ([]ExpiredPengerjaan, error)
 	// SetKeaktifanIfTest set keaktifan HANYA bila course pengerjaan = pretest/posttest.
 	// Mengembalikan RowsAffected (0 = id tak ada / bukan pretest/posttest).

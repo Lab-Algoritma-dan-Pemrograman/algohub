@@ -17,7 +17,7 @@ type Peminjaman struct {
 
 func (Peminjaman) TableName() string { return "peminjaman" }
 
-// Status sah, cocok CHECK peminjaman_status_check di 004.
+// Status sah, cocok CHECK peminjaman_status_check.
 const (
 	PinjamDiajukan = "diajukan"
 	PinjamDipinjam = "dipinjam"

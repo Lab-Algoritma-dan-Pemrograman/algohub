@@ -11,8 +11,7 @@ import (
 	"time"
 )
 
-// Client membungkus operasi Supabase Storage (REST API).
-// Dipakai untuk upload foto asisten, PDF modul/pedoman, dan gambar flowchart.
+// Client membungkus Supabase Storage REST API untuk foto asisten, PDF modul/pedoman, gambar flowchart, dan berkas laporan.
 type Client struct {
 	baseURL    string
 	serviceKey string
@@ -34,8 +33,7 @@ func (c *Client) Enabled() bool {
 	return c.baseURL != "" && c.serviceKey != ""
 }
 
-// Upload mengunggah file ke path tertentu dalam bucket dan mengembalikan URL publik.
-// upsert=true akan menimpa file yang sudah ada.
+// Upload mengunggah file ke path dalam bucket (upsert=true menimpa file lama) dan mengembalikan URL publik.
 func (c *Client) Upload(path string, content []byte, contentType string, upsert bool) (string, error) {
 	if !c.Enabled() {
 		return "", fmt.Errorf("supabase belum dikonfigurasi")
@@ -71,9 +69,7 @@ func (c *Client) PublicURL(path string) string {
 	return fmt.Sprintf("%s/storage/v1/object/public/%s/%s", c.baseURL, c.bucket, path)
 }
 
-// SignedUploadURL membuat URL unggah bertanda tangan (berlaku terbatas waktu).
-// Dipakai agar berkas besar (laporan PDF/DOCX) mengalir browser -> Supabase
-// langsung, tanpa melewati backend (yang dibatasi ukuran body di serverless).
+// SignedUploadURL membuat URL unggah bertanda tangan agar berkas besar mengalir langsung dari browser ke Supabase, karena Vercel membatasi ukuran body request.
 func (c *Client) SignedUploadURL(path string, ttl time.Duration) (string, error) {
 	if !c.Enabled() {
 		return "", fmt.Errorf("supabase belum dikonfigurasi")
@@ -110,9 +106,7 @@ func (c *Client) SignedUploadURL(path string, ttl time.Duration) (string, error)
 	return c.baseURL + "/storage/v1" + strings.TrimPrefix(out.URL, "/storage/v1"), nil
 }
 
-// SignedDownloadURL membuat URL baca bertanda tangan (berlaku terbatas waktu).
-// downloadName != "" menambahkan ?download=<nama> agar respons jadi attachment.
-// Bucket laporan bersifat privat, jadi semua baca lewat url ini.
+// SignedDownloadURL membuat URL baca bertanda tangan untuk bucket privat; downloadName != "" menambahkan ?download=<nama> agar respons jadi attachment.
 func (c *Client) SignedDownloadURL(path string, ttl time.Duration, downloadName string) (string, error) {
 	if !c.Enabled() {
 		return "", fmt.Errorf("supabase belum dikonfigurasi")

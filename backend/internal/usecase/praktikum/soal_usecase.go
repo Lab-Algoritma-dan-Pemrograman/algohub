@@ -22,8 +22,6 @@ func NewSoalUsecase(s repository.SoalRepository, c repository.CourseRepository, 
 	return &SoalUsecase{soal: s, course: c, terpilih: t}
 }
 
-// ---- CRUD pool ----
-
 func (uc *SoalUsecase) Create(req *dto.SoalRequest) (*entity.Soal, error) {
 	if _, err := uc.course.FindByID(req.CourseID); err != nil {
 		return nil, ErrNotFound
@@ -102,8 +100,6 @@ func (uc *SoalUsecase) ListByCourse(courseID int) ([]entity.Soal, error) {
 	return uc.soal.ListByCourse(courseID)
 }
 
-// ---- Pengacakan ke soal_terpilih ----
-
 // distribusiDifficulty mengembalikan jumlah soal per difficulty. Pakai kuota
 // per course bila admin mengisinya; selain itu fallback ke default per jenis.
 func distribusiDifficulty(course *entity.Course) map[entity.Difficulty]int {
@@ -116,10 +112,8 @@ func distribusiDifficulty(course *entity.Course) map[entity.Difficulty]int {
 	}
 	switch course.Jenis {
 	case entity.CoursePretest:
-		// default: 1 easy, 2 medium, 2 hard (total 5)
 		return map[entity.Difficulty]int{entity.DiffEasy: 1, entity.DiffMedium: 2, entity.DiffHard: 2}
 	case entity.CoursePosttest:
-		// default: 1 easy, 1 medium, 1 hard (total 3)
 		return map[entity.Difficulty]int{entity.DiffEasy: 1, entity.DiffMedium: 1, entity.DiffHard: 1}
 	default:
 		return nil

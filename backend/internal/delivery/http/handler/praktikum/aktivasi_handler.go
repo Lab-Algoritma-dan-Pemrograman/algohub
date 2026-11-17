@@ -22,15 +22,13 @@ func NewAktivasiHandler(uc *usecase.AktivasiUsecase, al *usecase.AuditLogUsecase
 	return &AktivasiHandler{uc: uc, auditLog: al}
 }
 
-// List GET /api/admin/aktivasi
-//
-//	@Summary		Daftar aktivasi
-//	@Description	Mengambil daftar seluruh sesi yang sedang/pernah diaktifkan
-//	@Tags			Admin - Aktivasi
-//	@Security		bearerAuth
-//	@Produce		json
-//	@Success		200	{object}	response.Envelope{data=[]entity.AktivasiSesi}
-//	@Router			/praktikum/admin/aktivasi [get]
+// @Summary		Daftar aktivasi
+// @Description	Mengambil daftar seluruh sesi yang sedang/pernah diaktifkan
+// @Tags			Admin - Aktivasi
+// @Security		bearerAuth
+// @Produce		json
+// @Success		200	{object}	response.Envelope{data=[]entity.AktivasiSesi}
+// @Router			/praktikum/admin/aktivasi [get]
 func (h *AktivasiHandler) List(c *gin.Context) {
 	res, err := h.uc.List()
 	if err != nil {
@@ -40,16 +38,14 @@ func (h *AktivasiHandler) List(c *gin.Context) {
 	response.OK(c, http.StatusOK, "Daftar aktivasi", res)
 }
 
-// Get GET /api/admin/aktivasi/:id
-//
-//	@Summary		Detail aktivasi
-//	@Description	Mengambil detail satu aktivasi
-//	@Tags			Admin - Aktivasi
-//	@Security		bearerAuth
-//	@Produce		json
-//	@Param			id	path		int	true	"ID Aktivasi"
-//	@Success		200	{object}	response.Envelope{data=entity.AktivasiSesi}
-//	@Router			/praktikum/admin/aktivasi/{id} [get]
+// @Summary		Detail aktivasi
+// @Description	Mengambil detail satu aktivasi
+// @Tags			Admin - Aktivasi
+// @Security		bearerAuth
+// @Produce		json
+// @Param			id	path		int	true	"ID Aktivasi"
+// @Success		200	{object}	response.Envelope{data=entity.AktivasiSesi}
+// @Router			/praktikum/admin/aktivasi/{id} [get]
 func (h *AktivasiHandler) Get(c *gin.Context) {
 	id, ok := idParam(c, "id")
 	if !ok {
@@ -63,17 +59,15 @@ func (h *AktivasiHandler) Get(c *gin.Context) {
 	response.OK(c, http.StatusOK, "Detail aktivasi", res)
 }
 
-// Aktivasi POST /api/admin/aktivasi (aktifkan sesi + gacha)
-//
-//	@Summary		Mengaktifkan sesi praktikum (Gacha Soal)
-//	@Description	Mengaktifkan sesi untuk kelas tertentu dan melakukan gacha soal pretest/posttest/ujian
-//	@Tags			Admin - Aktivasi
-//	@Security		bearerAuth
-//	@Accept			json
-//	@Produce		json
-//	@Param			request	body		dto.AktivasiRequest	true	"Payload Aktivasi"
-//	@Success		201		{object}	response.Envelope{data=entity.AktivasiSesi}
-//	@Router			/praktikum/admin/aktivasi [post]
+// @Summary		Mengaktifkan sesi praktikum (Gacha Soal)
+// @Description	Mengaktifkan sesi untuk kelas tertentu dan melakukan gacha soal pretest/posttest/ujian
+// @Tags			Admin - Aktivasi
+// @Security		bearerAuth
+// @Accept			json
+// @Produce		json
+// @Param			request	body		dto.AktivasiRequest	true	"Payload Aktivasi"
+// @Success		201		{object}	response.Envelope{data=entity.AktivasiSesi}
+// @Router			/praktikum/admin/aktivasi [post]
 func (h *AktivasiHandler) Aktivasi(c *gin.Context) {
 	var req dto.AktivasiRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -88,17 +82,15 @@ func (h *AktivasiHandler) Aktivasi(c *gin.Context) {
 	response.Created(c, "Sesi diaktifkan", res)
 }
 
-// BukaTutupCourse POST /api/admin/aktivasi-course/buka-tutup
-//
-//	@Summary		Buka/Tutup Course
-//	@Description	Membuka atau menutup course. Jika ditutup, akan melakukan auto-submit massal.
-//	@Tags			Admin - Aktivasi
-//	@Security		bearerAuth
-//	@Accept			json
-//	@Produce		json
-//	@Param			request	body		dto.BukaTutupCourseRequest	true	"Payload Buka Tutup"
-//	@Success		200		{object}	response.Envelope{data=string}
-//	@Router			/praktikum/admin/aktivasi-course/buka-tutup [post]
+// @Summary		Buka/Tutup Course
+// @Description	Membuka atau menutup course. Jika ditutup, akan melakukan auto-submit massal.
+// @Tags			Admin - Aktivasi
+// @Security		bearerAuth
+// @Accept			json
+// @Produce		json
+// @Param			request	body		dto.BukaTutupCourseRequest	true	"Payload Buka Tutup"
+// @Success		200		{object}	response.Envelope{data=string}
+// @Router			/praktikum/admin/aktivasi-course/buka-tutup [post]
 func (h *AktivasiHandler) BukaTutupCourse(c *gin.Context) {
 	var req dto.BukaTutupCourseRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -129,8 +121,6 @@ func (h *AktivasiHandler) BukaTutupCourse(c *gin.Context) {
 	response.OK(c, http.StatusOK, msg, res)
 }
 
-// BukaTutupPeserta POST /api/admin/aktivasi-course/buka-tutup-peserta
-//
 //	@Summary		Buka/Tutup Course per Peserta
 //	@Description	Mengubah status pengerjaan + submit HANYA untuk peserta terpilih
 //
@@ -169,18 +159,16 @@ func (h *AktivasiHandler) BukaTutupPeserta(c *gin.Context) {
 	response.OK(c, http.StatusOK, msg, map[string]any{"diproses": jumlah})
 }
 
-// AddSusulan POST /api/admin/aktivasi/:id/susulan
-//
-//	@Summary		Tambah Peserta Susulan
-//	@Description	Menambahkan mahasiswa sebagai peserta susulan ke suatu aktivasi sesi
-//	@Tags			Admin - Aktivasi
-//	@Security		bearerAuth
-//	@Accept			json
-//	@Produce		json
-//	@Param			id		path		int					true	"ID Aktivasi"
-//	@Param			request	body		dto.SusulanRequest	true	"Payload Susulan"
-//	@Success		201		{object}	response.Envelope
-//	@Router			/praktikum/admin/aktivasi/{id}/susulan [post]
+// @Summary		Tambah Peserta Susulan
+// @Description	Menambahkan mahasiswa sebagai peserta susulan ke suatu aktivasi sesi
+// @Tags			Admin - Aktivasi
+// @Security		bearerAuth
+// @Accept			json
+// @Produce		json
+// @Param			id		path		int					true	"ID Aktivasi"
+// @Param			request	body		dto.SusulanRequest	true	"Payload Susulan"
+// @Success		201		{object}	response.Envelope
+// @Router			/praktikum/admin/aktivasi/{id}/susulan [post]
 func (h *AktivasiHandler) AddSusulan(c *gin.Context) {
 	id, ok := idParam(c, "id")
 	if !ok {
@@ -199,16 +187,14 @@ func (h *AktivasiHandler) AddSusulan(c *gin.Context) {
 	response.Created(c, "Mahasiswa susulan didaftarkan", nil)
 }
 
-// ListSusulan GET /api/admin/aktivasi/:id/susulan
-//
-//	@Summary		Daftar Peserta Susulan
-//	@Description	Melihat daftar mahasiswa yang ditambahkan sebagai peserta susulan
-//	@Tags			Admin - Aktivasi
-//	@Security		bearerAuth
-//	@Produce		json
-//	@Param			id	path		int	true	"ID Aktivasi"
-//	@Success		200	{object}	response.Envelope{data=[]entity.PesertaSusulan}
-//	@Router			/praktikum/admin/aktivasi/{id}/susulan [get]
+// @Summary		Daftar Peserta Susulan
+// @Description	Melihat daftar mahasiswa yang ditambahkan sebagai peserta susulan
+// @Tags			Admin - Aktivasi
+// @Security		bearerAuth
+// @Produce		json
+// @Param			id	path		int	true	"ID Aktivasi"
+// @Success		200	{object}	response.Envelope{data=[]entity.PesertaSusulan}
+// @Router			/praktikum/admin/aktivasi/{id}/susulan [get]
 func (h *AktivasiHandler) ListSusulan(c *gin.Context) {
 	id, ok := idParam(c, "id")
 	if !ok {
@@ -222,17 +208,15 @@ func (h *AktivasiHandler) ListSusulan(c *gin.Context) {
 	response.OK(c, http.StatusOK, "Daftar susulan", res)
 }
 
-// RemoveSusulan DELETE /api/admin/aktivasi/:id/susulan/:mahasiswaId
-//
-//	@Summary		Hapus Peserta Susulan
-//	@Description	Menghapus mahasiswa dari daftar peserta susulan
-//	@Tags			Admin - Aktivasi
-//	@Security		bearerAuth
-//	@Produce		json
-//	@Param			id			path		int	true	"ID Aktivasi"
-//	@Param			mahasiswaId	path		int	true	"ID Mahasiswa"
-//	@Success		200			{object}	response.Envelope
-//	@Router			/praktikum/admin/aktivasi/{id}/susulan/{mahasiswaId} [delete]
+// @Summary		Hapus Peserta Susulan
+// @Description	Menghapus mahasiswa dari daftar peserta susulan
+// @Tags			Admin - Aktivasi
+// @Security		bearerAuth
+// @Produce		json
+// @Param			id			path		int	true	"ID Aktivasi"
+// @Param			mahasiswaId	path		int	true	"ID Mahasiswa"
+// @Success		200			{object}	response.Envelope
+// @Router			/praktikum/admin/aktivasi/{id}/susulan/{mahasiswaId} [delete]
 func (h *AktivasiHandler) RemoveSusulan(c *gin.Context) {
 	id, ok := idParam(c, "id")
 	if !ok {
@@ -249,16 +233,14 @@ func (h *AktivasiHandler) RemoveSusulan(c *gin.Context) {
 	response.OK(c, http.StatusOK, "Susulan dihapus", nil)
 }
 
-// GenerateToken POST /api/admin/aktivasi/:id/token
-//
-//	@Summary		Generate PIN/Token Ujian
-//	@Description	Men-generate Token 6 digit acak untuk suatu AktivasiSesi
-//	@Tags			Admin - Aktivasi
-//	@Security		bearerAuth
-//	@Produce		json
-//	@Param			id	path		int	true	"ID Aktivasi"
-//	@Success		200	{object}	response.Envelope{data=entity.AktivasiSesi}
-//	@Router			/praktikum/admin/aktivasi/{id}/token [post]
+// @Summary		Generate PIN/Token Ujian
+// @Description	Men-generate Token 6 digit acak untuk suatu AktivasiSesi
+// @Tags			Admin - Aktivasi
+// @Security		bearerAuth
+// @Produce		json
+// @Param			id	path		int	true	"ID Aktivasi"
+// @Success		200	{object}	response.Envelope{data=entity.AktivasiSesi}
+// @Router			/praktikum/admin/aktivasi/{id}/token [post]
 func (h *AktivasiHandler) GenerateToken(c *gin.Context) {
 	id, ok := idParam(c, "id")
 	if !ok {
@@ -272,16 +254,14 @@ func (h *AktivasiHandler) GenerateToken(c *gin.Context) {
 	response.OK(c, http.StatusOK, "Token berhasil digenerate", res)
 }
 
-// Delete DELETE /api/admin/aktivasi/:id
-//
-//	@Summary		Hapus Aktivasi (beserta semua jawaban & nilai di bawahnya)
-//	@Description	Menghapus satu aktivasi sesi + cascade: jawaban mahasiswa, nilai, soal terpilih, susulan, aktivasi_course.
-//	@Tags			Admin - Aktivasi
-//	@Security		bearerAuth
-//	@Produce		json
-//	@Param			id	path		int	true	"ID Aktivasi"
-//	@Success		200	{object}	response.Envelope
-//	@Router			/praktikum/admin/aktivasi/{id} [delete]
+// @Summary		Hapus Aktivasi (beserta semua jawaban & nilai di bawahnya)
+// @Description	Menghapus satu aktivasi sesi + cascade: jawaban mahasiswa, nilai, soal terpilih, susulan, aktivasi_course.
+// @Tags			Admin - Aktivasi
+// @Security		bearerAuth
+// @Produce		json
+// @Param			id	path		int	true	"ID Aktivasi"
+// @Success		200	{object}	response.Envelope
+// @Router			/praktikum/admin/aktivasi/{id} [delete]
 func (h *AktivasiHandler) Delete(c *gin.Context) {
 	id, ok := idParam(c, "id")
 	if !ok {
@@ -294,16 +274,14 @@ func (h *AktivasiHandler) Delete(c *gin.Context) {
 	response.OK(c, http.StatusOK, "Aktivasi beserta seluruh data terkait dihapus", nil)
 }
 
-// Peserta GET /api/admin/aktivasi/:id/peserta
-//
-//	@Summary		Daftar peserta + status pengerjaan (live monitoring)
-//	@Description	Peserta yang sudah join/mengerjakan aktivasi ini beserta status per course.
-//	@Tags			Admin - Aktivasi
-//	@Security		bearerAuth
-//	@Produce		json
-//	@Param			id	path		int	true	"ID Aktivasi"
-//	@Success		200	{object}	response.Envelope
-//	@Router			/praktikum/admin/aktivasi/{id}/peserta [get]
+// @Summary		Daftar peserta + status pengerjaan (live monitoring)
+// @Description	Peserta yang sudah join/mengerjakan aktivasi ini beserta status per course.
+// @Tags			Admin - Aktivasi
+// @Security		bearerAuth
+// @Produce		json
+// @Param			id	path		int	true	"ID Aktivasi"
+// @Success		200	{object}	response.Envelope
+// @Router			/praktikum/admin/aktivasi/{id}/peserta [get]
 func (h *AktivasiHandler) Peserta(c *gin.Context) {
 	id, ok := idParam(c, "id")
 	if !ok {

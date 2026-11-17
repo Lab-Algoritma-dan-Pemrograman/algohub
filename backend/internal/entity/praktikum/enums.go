@@ -1,7 +1,5 @@
 package entity
 
-// Enum-enum domain (disimpan sebagai string/varchar di MySQL).
-
 type RoleType string
 
 const (

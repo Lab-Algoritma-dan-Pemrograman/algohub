@@ -312,8 +312,6 @@ func (uc *AktivasiUsecase) BukaTutupPeserta(req dto.BukaTutupPesertaRequest) (in
 	return proses, nil
 }
 
-// ---- Susulan ----
-
 func (uc *AktivasiUsecase) AddSusulan(req dto.SusulanRequest) error {
 	if _, err := uc.aktivasi.FindSesiByID(req.AktivasiSesiID); err != nil {
 		return ErrNotFound
