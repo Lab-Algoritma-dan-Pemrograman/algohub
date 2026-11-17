@@ -8,12 +8,14 @@
     readonly = false,
     height = '350px',
     onrun,
+    oninput,
   }: {
     value?: string;
     language?: 'c' | 'python';
     readonly?: boolean;
     height?: string;
     onrun?: () => void;
+    oninput?: () => void;
   } = $props();
 
   let el: HTMLDivElement | undefined = $state();
@@ -64,6 +66,7 @@
     }
     editor.onDidChangeModelContent(() => {
       value = editor?.getValue() ?? '';
+      oninput?.();
     });
     editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => onrun?.());
   });

@@ -47,4 +47,9 @@ export default defineConfig(
     // Aturan ini crash (scope.upper null) pada file sourceType script.
     rules: { 'svelte/no-inner-declarations': 'off' },
   },
+  {
+    // Kode edra di-vendor dari CLI edra; dibiarkan apa adanya agar mudah dibandingkan dengan upstream.
+    files: ['packages/ui/src/lib/components/rich-text/edra/**'],
+    rules: { eqeqeq: 'off', 'no-useless-assignment': 'off' },
+  },
 );

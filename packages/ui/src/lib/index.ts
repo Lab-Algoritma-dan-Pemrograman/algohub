@@ -1,3 +1,5 @@
+// Augmentasi tipe edra harus ikut terbaca oleh app yang memeriksa sumber paket ini.
+import type {} from './components/rich-text/edra-shims.js';
 export { Button, buttonVariants } from './components/ui/button/index.js';
 export type { ButtonProps, ButtonSize, ButtonVariant } from './components/ui/button/index.js';
 export {
@@ -26,4 +28,10 @@ export { toast } from 'svelte-sonner';
 export { default as AppLayout } from './components/layout/AppLayout.svelte';
 export { default as CodeEditor } from './components/code-editor/CodeEditor.svelte';
 export { default as Terminal } from './components/terminal/Terminal.svelte';
+export { default as DataTable } from './components/data-table/DataTable.svelte';
+export { default as VirtualList } from './components/virtual-list/VirtualList.svelte';
+export { renderComponent, renderSnippet } from './components/ui/data-table/index.js';
+export type { ColumnDef } from '@tanstack/table-core';
+export { default as RichTextEditor } from './components/rich-text/RichTextEditor.svelte';
+export type { ImageUploader } from './components/rich-text/edra/types.js';
 export { cn } from './utils.js';
