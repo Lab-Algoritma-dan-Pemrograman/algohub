@@ -3,19 +3,36 @@ import adapter from '@sveltejs/adapter-static';
 import { sveltekit } from '@sveltejs/kit/vite';
 import tailwindcss from '@tailwindcss/vite';
 import { svelteTesting } from '@testing-library/svelte/vite';
+import type { Connect, Plugin } from 'vite';
 import { defineConfig } from 'vitest/config';
 
 // SharedArrayBuffer untuk input C/Python interaktif hanya tersedia saat crossOriginIsolated.
 // credentialless (bukan require-corp) agar gambar Supabase dan CDN tetap dimuat tanpa CORP.
-const isolationHeaders = {
-  'Cross-Origin-Opener-Policy': 'same-origin',
-  'Cross-Origin-Embedder-Policy': 'credentialless',
+// Dipasang sebagai middleware karena halaman dijawab SvelteKit, bukan oleh server statis Vite
+// yang membaca server.headers/preview.headers; di production header datang dari vercel.json.
+const setIsolationHeaders: Connect.NextHandleFunction = (_req, res, next) => {
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+  res.setHeader('Cross-Origin-Embedder-Policy', 'credentialless');
+  next();
 };
 
+function crossOriginIsolation(): Plugin {
+  return {
+    name: 'praktikum-cross-origin-isolation',
+    configureServer(server) {
+      server.middlewares.use(setIsolationHeaders);
+    },
+    configurePreviewServer(server) {
+      server.middlewares.use(setIsolationHeaders);
+    },
+  };
+}
+
 export default defineConfig({
-  // Middleware runner wajib sebelum SvelteKit: middleware dipasang sesuai urutan plugin dan
-  // SvelteKit menjawab request lebih dulu, sehingga worker tidak pernah sampai ke plugin di belakangnya.
+  // Middleware wajib sebelum SvelteKit: middleware dipasang sesuai urutan plugin dan SvelteKit
+  // menjawab request lebih dulu, sehingga plugin di belakangnya tidak pernah dilewati.
   plugins: [
+    crossOriginIsolation(),
     runnerWorkers(),
     compilerDir(),
     tailwindcss(),
@@ -34,10 +51,6 @@ export default defineConfig({
   server: {
     // CORS backend dev hanya mengizinkan port 5173–5176.
     port: 5173,
-    headers: isolationHeaders,
-  },
-  preview: {
-    headers: isolationHeaders,
   },
   test: {
     include: ['src/**/*.test.ts', 'tests/**/*.test.ts'],
