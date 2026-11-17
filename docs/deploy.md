@@ -61,7 +61,7 @@ Tidak bisa dibaca lewat CLI. `vercel usage` di team Hobby mengembalikan "Billing
 | Framework | Go (Go 1.26.11 dari `toolchain` di `go.mod`) |
 | Git integration | **belum disambungkan** (deploy lewat `vercel deploy` dari laptop) |
 | Domain | belum ada. `api.algohub.web.id` masih di `labap-backend`. |
-| Env (preview) | `APP_ENV=production`, `CORS_ORIGINS` (5 domain prod), `CORS_ORIGIN_PATTERNS=https://algohub-[a-z0-9-]+-lab-algoritma-pemrograman\.vercel\.app` |
+| Env (preview) | `APP_ENV=production`, `CORS_ORIGINS` (5 domain prod), `CORS_ORIGIN_PATTERNS=https://algohub-[a-z0-9-]+-lab-algoritma-pemrograman\.vercel\.app`. Sejak Fase 2 juga `DATABASE_URL_PRAKTIKUM` (encrypted, disusun dari `DB_*` `labap-backend`), `JWT_SECRET` (encrypted, sama dengan prod), `JWT_EXPIRE_HOURS`, `AUTH_MODE`, `SUPABASE_JWKS_URL`, `SUPABASE_JWT_ISSUER`, `SUPABASE_JWT_AUD`. `FB_SCRYPT_*` sengaja tidak dipasang supaya login uji tidak memigrasi hash password. |
 | Env (production) | belum diisi |
 
 Deployment:
@@ -82,3 +82,21 @@ Uji di preview (`vercel curl /api/health --deployment <url>`):
 | GET, origin asing | 200 tanpa header CORS |
 | GET, origin tiruan `…vercel.app.evil.com` | 200 tanpa header CORS |
 | Preflight dari origin asing | 204 tanpa header CORS |
+
+### Smoke test Fase 2 dengan DB prod (2026-11-17)
+Deployment preview `algohub-ds05mrkbf-…vercel.app` (commit `28708e4`), DB praktikum `oidwvfcxlxfyojkyurmm` lewat pooler 6543. Disetujui pemilik, dengan satu akun uji mahasiswa.
+
+| Uji | Hasil |
+|---|---|
+| `GET /api/health` | 200 |
+| `GET /api/praktikum/info/{asisten,laporan,modul,jadwal,jadwal/config,announcements}` | 200, JSON identik dengan `api.algohub.web.id/api/info/*` (prod) |
+| `GET /api/info/asisten` (alias lama) | 200, identik dengan prod |
+| `POST /api/praktikum/auth/login` (akun uji) | 200, token HS256, `role=mahasiswa`, tanpa field kredensial di response |
+| `GET /api/praktikum/profile` dengan token | 200, NIM sama |
+| `GET /api/praktikum/profile` tanpa token | 401 |
+| `POST elearning.algohub.web.id/api/verify` (prod lama) dengan token baru | 401, lihat temuan di bawah |
+| `POST elearning.algohub.web.id/api/verify` token rusak | 401 |
+
+Data prod yang tertulis oleh uji ini, sama dengan login biasa: `users.last_login_at` akun uji dan satu baris `audit_logs` (`LOGIN`). Tidak ada data yang dihapus, dan tidak ada data user lain yang berubah.
+
+**Temuan prod (belum diverifikasi lebih lanjut, tidak diubah):** API Vercel mengembalikan **0 env var** untuk project `labap-elearning` dan `labap-siakad`, di level project maupun shared env team. `labap-backend` punya 29. Akibatnya, `elearning/api/verify` prod tidak punya `JWT_SECRET`/`SUPABASE_JWT_SECRET` untuk memverifikasi token apa pun, jadi 401 di atas bukan regresi backend baru. Kode JWT lama dan baru identik. Pemilik perlu mengecek dashboard kedua project (Settings → Environment Variables) untuk memastikan apakah env memang kosong dan fitur apa yang terdampak di prod.
