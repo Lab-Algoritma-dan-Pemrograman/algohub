@@ -159,6 +159,43 @@ func (_m *UserRepository) ListAdmin(ctx context.Context, page int, limit int, q 
 	return r0, r1, r2
 }
 
+// ListStudents provides a mock function with given fields: ctx, page, limit
+func (_m *UserRepository) ListStudents(ctx context.Context, page int, limit int) ([]repository.MonitoringStudent, int64, error) {
+	ret := _m.Called(ctx, page, limit)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ListStudents")
+	}
+
+	var r0 []repository.MonitoringStudent
+	var r1 int64
+	var r2 error
+	if rf, ok := ret.Get(0).(func(context.Context, int, int) ([]repository.MonitoringStudent, int64, error)); ok {
+		return rf(ctx, page, limit)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, int, int) []repository.MonitoringStudent); ok {
+		r0 = rf(ctx, page, limit)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]repository.MonitoringStudent)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, int, int) int64); ok {
+		r1 = rf(ctx, page, limit)
+	} else {
+		r1 = ret.Get(1).(int64)
+	}
+
+	if rf, ok := ret.Get(2).(func(context.Context, int, int) error); ok {
+		r2 = rf(ctx, page, limit)
+	} else {
+		r2 = ret.Error(2)
+	}
+
+	return r0, r1, r2
+}
+
 // NamaByNIM provides a mock function with given fields: ctx, nim
 func (_m *UserRepository) NamaByNIM(ctx context.Context, nim string) (string, error) {
 	ret := _m.Called(ctx, nim)
@@ -176,6 +213,36 @@ func (_m *UserRepository) NamaByNIM(ctx context.Context, nim string) (string, er
 		r0 = rf(ctx, nim)
 	} else {
 		r0 = ret.Get(0).(string)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, nim)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// PrestigeState provides a mock function with given fields: ctx, nim
+func (_m *UserRepository) PrestigeState(ctx context.Context, nim string) (*repository.PrestigeState, error) {
+	ret := _m.Called(ctx, nim)
+
+	if len(ret) == 0 {
+		panic("no return value specified for PrestigeState")
+	}
+
+	var r0 *repository.PrestigeState
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*repository.PrestigeState, error)); ok {
+		return rf(ctx, nim)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *repository.PrestigeState); ok {
+		r0 = rf(ctx, nim)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*repository.PrestigeState)
+		}
 	}
 
 	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {

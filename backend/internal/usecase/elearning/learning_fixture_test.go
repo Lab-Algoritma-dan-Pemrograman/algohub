@@ -21,6 +21,12 @@ type learnFixture struct {
 	progress     *mocks.ProgressRepository
 	achievements *mocks.AchievementRepository
 	logs         *mocks.ActivityLogRepository
+	games        *mocks.GameRepository
+	board        *mocks.LeaderboardRepository
+	prestige     *mocks.PrestigeRepository
+	playground   *mocks.PlaygroundRepository
+	sessions     *mocks.SessionRepository
+	uploader     *fakeUploader
 
 	curriculumUC  *usecase.CurriculumUsecase
 	progressUC    *usecase.ProgressUsecase
@@ -28,6 +34,33 @@ type learnFixture struct {
 	achievementUC *usecase.AchievementUsecase
 	adminUC       *usecase.AdminUserUsecase
 	logUC         *usecase.ActivityLogUsecase
+	gameUC        *usecase.GameUsecase
+	boardUC       *usecase.LeaderboardUsecase
+	prestigeUC    *usecase.PrestigeUsecase
+	playgroundUC  *usecase.PlaygroundUsecase
+	sessionUC     *usecase.SessionUsecase
+	storageUC     *usecase.StorageUsecase
+}
+
+// Urutan soal dibalik supaya hasil acak bisa diperiksa.
+func reverseShuffle(n int, swap func(i, j int)) {
+	for i := 0; i < n/2; i++ {
+		swap(i, n-1-i)
+	}
+}
+
+type fakeUploader struct {
+	path, contentType string
+	upsert, called    bool
+	err               error
+}
+
+func (u *fakeUploader) Upload(path string, _ []byte, contentType string, upsert bool) (string, error) {
+	u.path, u.contentType, u.upsert, u.called = path, contentType, upsert, true
+	if u.err != nil {
+		return "", u.err
+	}
+	return "https://storage.test/" + path, nil
 }
 
 func newLearn(t *testing.T) *learnFixture {
@@ -38,6 +71,12 @@ func newLearn(t *testing.T) *learnFixture {
 		progress:     mocks.NewProgressRepository(t),
 		achievements: mocks.NewAchievementRepository(t),
 		logs:         mocks.NewActivityLogRepository(t),
+		games:        mocks.NewGameRepository(t),
+		board:        mocks.NewLeaderboardRepository(t),
+		prestige:     mocks.NewPrestigeRepository(t),
+		playground:   mocks.NewPlaygroundRepository(t),
+		sessions:     mocks.NewSessionRepository(t),
+		uploader:     &fakeUploader{},
 	}
 	now := func() time.Time { return learnNow }
 	f.curriculumUC = usecase.NewCurriculumUsecase(f.curriculum)
@@ -46,6 +85,12 @@ func newLearn(t *testing.T) *learnFixture {
 	f.progressUC = usecase.NewProgressUsecase(f.users, f.progress, f.curriculum, f.achievementUC, now)
 	f.profileUC = usecase.NewProfileUsecase(f.users, f.achievementUC, now)
 	f.adminUC = usecase.NewAdminUserUsecase(f.users, f.progress, f.curriculum, f.achievements, f.achievementUC, f.logUC)
+	f.gameUC = usecase.NewGameUsecase(f.games, f.users, now, reverseShuffle)
+	f.boardUC = usecase.NewLeaderboardUsecase(f.board, now)
+	f.prestigeUC = usecase.NewPrestigeUsecase(f.users, f.curriculum, f.progress, f.prestige, f.logUC, now)
+	f.playgroundUC = usecase.NewPlaygroundUsecase(f.playground)
+	f.sessionUC = usecase.NewSessionUsecase(f.sessions, f.users, f.progress, f.progressUC, now)
+	f.storageUC = usecase.NewStorageUsecase(f.uploader, now)
 	return f
 }
 

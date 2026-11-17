@@ -1,11 +1,14 @@
 package http
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
+	"net/textproto"
 	"net/url"
 	"strings"
 	"testing"
@@ -60,6 +63,7 @@ func newElearningRouterRepos(t *testing.T) (*gin.Engine, *elRepos) {
 	ai := elusecase.AIClients{}
 	logs := elusecase.NewActivityLogUsecase(elmocks.NewActivityLogRepository(t), time.Now)
 	achievements := elusecase.NewAchievementUsecase(m.achievements, m.users, m.progress, time.Now)
+	learning := elusecase.NewProgressUsecase(m.users, m.progress, m.curriculum, achievements, time.Now)
 	RegisterElearning(r, &Elearning{
 		Auth: uc,
 		Handlers: ElearningHandlers{
@@ -69,13 +73,25 @@ func newElearningRouterRepos(t *testing.T) (*gin.Engine, *elRepos) {
 			Report:      elhandler.NewReportHandler(elusecase.NewReportUsecase(uc, m.curriculum, m.progress, elmocks.NewReportRepository(t), time.Now)),
 			Quiz:        elhandler.NewQuizHandler(elusecase.NewQuizUsecase(uc, m.curriculum)),
 			Curriculum:  elhandler.NewCurriculumHandler(elusecase.NewCurriculumUsecase(m.curriculum)),
-			Progress:    elhandler.NewProgressHandler(elusecase.NewProgressUsecase(m.users, m.progress, m.curriculum, achievements, time.Now)),
+			Progress:    elhandler.NewProgressHandler(learning),
 			Profile:     elhandler.NewProfileHandler(elusecase.NewProfileUsecase(m.users, achievements, time.Now), logs),
 			Achievement: elhandler.NewAchievementHandler(achievements),
 			AdminUser:   elhandler.NewAdminUserHandler(elusecase.NewAdminUserUsecase(m.users, m.progress, m.curriculum, m.achievements, achievements, logs)),
+			Game:        elhandler.NewGameHandler(elusecase.NewGameUsecase(elmocks.NewGameRepository(t), m.users, time.Now, nil)),
+			Leaderboard: elhandler.NewLeaderboardHandler(elusecase.NewLeaderboardUsecase(elmocks.NewLeaderboardRepository(t), time.Now)),
+			Prestige:    elhandler.NewPrestigeHandler(elusecase.NewPrestigeUsecase(m.users, m.curriculum, m.progress, elmocks.NewPrestigeRepository(t), logs, time.Now)),
+			Playground:  elhandler.NewPlaygroundHandler(elusecase.NewPlaygroundUsecase(elmocks.NewPlaygroundRepository(t))),
+			Monitoring:  elhandler.NewMonitoringHandler(elusecase.NewSessionUsecase(elmocks.NewSessionRepository(t), m.users, m.progress, learning, time.Now), logs),
+			Storage:     elhandler.NewStorageHandler(elusecase.NewStorageUsecase(rejectUploader{}, time.Now)),
 		},
 	})
 	return r, m
+}
+
+type rejectUploader struct{}
+
+func (rejectUploader) Upload(string, []byte, string, bool) (string, error) {
+	return "", errors.New("upload tidak boleh dipanggil di test route")
 }
 
 var learningRoutes = []struct{ method, path string }{
@@ -105,6 +121,35 @@ var learningRoutes = []struct{ method, path string }{
 	{http.MethodPut, "/api/elearning/admin/users/202711002/xp"},
 	{http.MethodDelete, "/api/elearning/admin/users/202711002"},
 	{http.MethodPost, "/api/elearning/activity-logs"},
+	{http.MethodGet, "/api/elearning/game/questions"},
+	{http.MethodPost, "/api/elearning/game/questions"},
+	{http.MethodPut, "/api/elearning/game/questions"},
+	{http.MethodPost, "/api/elearning/game/questions/seed"},
+	{http.MethodPatch, "/api/elearning/game/questions/q1"},
+	{http.MethodDelete, "/api/elearning/game/questions/q1"},
+	{http.MethodGet, "/api/elearning/game/settings"},
+	{http.MethodPut, "/api/elearning/game/settings"},
+	{http.MethodGet, "/api/elearning/game/plays/me"},
+	{http.MethodPost, "/api/elearning/game/history"},
+	{http.MethodGet, "/api/elearning/leaderboard"},
+	{http.MethodGet, "/api/elearning/leaderboard/rank"},
+	{http.MethodGet, "/api/elearning/leaderboard/filters"},
+	{http.MethodGet, "/api/elearning/leaderboard/weekly"},
+	{http.MethodGet, "/api/elearning/prestige/eligibility"},
+	{http.MethodPost, "/api/elearning/prestige/reset"},
+	{http.MethodGet, "/api/elearning/playground/examples"},
+	{http.MethodPost, "/api/elearning/playground/examples"},
+	{http.MethodPatch, "/api/elearning/playground/examples/e1"},
+	{http.MethodDelete, "/api/elearning/playground/examples/e1"},
+	{http.MethodPut, "/api/elearning/sessions/me"},
+	{http.MethodDelete, "/api/elearning/sessions/me"},
+	{http.MethodGet, "/api/elearning/monitoring/sessions"},
+	{http.MethodDelete, "/api/elearning/monitoring/sessions/stale"},
+	{http.MethodGet, "/api/elearning/monitoring/students"},
+	{http.MethodGet, "/api/elearning/monitoring/progress"},
+	{http.MethodGet, "/api/elearning/activity-logs"},
+	{http.MethodDelete, "/api/elearning/activity-logs/log-1"},
+	{http.MethodPost, "/api/elearning/storage/lesson-images"},
 }
 
 func TestElearningLearningRoutesRequireToken(t *testing.T) {
@@ -140,6 +185,39 @@ func TestElearningLearningRoutesWithToken(t *testing.T) {
 	rec = sendJSON(r, http.MethodPut, "/api/elearning/curriculum", `{bukan json`, bearer)
 	if msg, _ := envelope(t, rec); rec.Code != http.StatusBadRequest || msg != "Input tidak valid" {
 		t.Errorf("PUT curriculum body rusak = %d %q", rec.Code, msg)
+	}
+}
+
+func TestElearningGameMonitoringStorageRoutesWithToken(t *testing.T) {
+	r := newElearningRouter(t)
+	bearer := map[string]string{"Authorization": "Bearer " + elToken(t, elSupabaseKey, jwt.MapClaims{"nim": "202711001", "nama": "Budi", "user_role": "praktikan"})}
+
+	rec := sendJSON(r, http.MethodPut, "/api/elearning/game/settings", `{"bugHuntActive":false}`, bearer)
+	if msg, _ := envelope(t, rec); rec.Code != http.StatusForbidden || msg != `new row violates row-level security policy for table "game_settings"` {
+		t.Errorf("PUT game/settings praktikan = %d %q", rec.Code, msg)
+	}
+
+	rec = serve(r, http.MethodGet, "/api/elearning/monitoring/sessions", "", bearer)
+	if _, data := envelope(t, rec); rec.Code != http.StatusOK || data["total"] != float64(0) || len(data["items"].([]any)) != 0 {
+		t.Errorf("GET monitoring/sessions praktikan = %d %v", rec.Code, data)
+	}
+
+	var body bytes.Buffer
+	mw := multipart.NewWriter(&body)
+	h := textproto.MIMEHeader{}
+	h.Set("Content-Disposition", `form-data; name="file"; filename="a.png"`)
+	h.Set("Content-Type", "image/png")
+	part, _ := mw.CreatePart(h)
+	_, _ = part.Write([]byte("png"))
+	_ = mw.Close()
+	rec = postBody(r, "/api/elearning/storage/lesson-images", mw.FormDataContentType(), body.String(), bearer)
+	if msg, _ := envelope(t, rec); rec.Code != http.StatusForbidden || msg != "new row violates row-level security policy" {
+		t.Errorf("upload praktikan = %d %q", rec.Code, msg)
+	}
+
+	rec = postBody(r, "/api/elearning/storage/lesson-images", "application/json", `{}`, bearer)
+	if msg, _ := envelope(t, rec); rec.Code != http.StatusBadRequest || msg != "Input tidak valid" {
+		t.Errorf("upload tanpa file = %d %q", rec.Code, msg)
 	}
 }
 

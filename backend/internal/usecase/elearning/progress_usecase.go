@@ -99,9 +99,13 @@ func (uc *ProgressUsecase) Recent(ctx context.Context, p *dto.Principal, limit i
 	return rows, err
 }
 
-// Pengganti store user di browser: nilai diambil dari DB, profil tidak ada berarti nilai awal.
 func (uc *ProgressUsecase) profile(ctx context.Context, nim string) (*entity.User, error) {
-	u, err := uc.users.GetProfile(ctx, nim)
+	return loadProfile(ctx, uc.users, nim)
+}
+
+// Pengganti store user di browser: nilai diambil dari DB, profil tidak ada berarti nilai awal.
+func loadProfile(ctx context.Context, users repository.UserRepository, nim string) (*entity.User, error) {
+	u, err := users.GetProfile(ctx, nim)
 	if err != nil {
 		return nil, err
 	}

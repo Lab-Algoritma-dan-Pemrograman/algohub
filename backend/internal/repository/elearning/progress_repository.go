@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"gorm.io/gorm"
@@ -19,6 +20,12 @@ type ProgressRepository interface {
 	LessonIDsIn(ctx context.Context, nim string, lessonIDs []string) ([]string, error)
 	ListByNIM(ctx context.Context, nim string, page, limit int) ([]entity.StudentProgress, int64, error)
 	Recent(ctx context.Context, nim string, limit int) ([]entity.StudentProgress, error)
+	GroupedCompleted(ctx context.Context, nim string, page, limit int) ([]NIMLessons, int64, error)
+}
+
+type NIMLessons struct {
+	NIM       string   `json:"nim"`
+	LessonIDs []string `json:"lessonIds"`
 }
 
 type progressRepository struct{ db *gorm.DB }
@@ -83,6 +90,39 @@ func (r *progressRepository) LessonIDsIn(ctx context.Context, nim string, lesson
 func (r *progressRepository) ListByNIM(ctx context.Context, nim string, page, limit int) ([]entity.StudentProgress, int64, error) {
 	filter := func(db *gorm.DB) *gorm.DB { return db.Where("nim = ? AND completed = ?", nim, true) }
 	return findPage[entity.StudentProgress](ctx, filter, r.db, "completed_at DESC, id", page, limit)
+}
+
+// Satu GROUP BY menggantikan paging 1000 baris di StudentMonitoring.tsx:109-129; dipaginasi per NIM. nim kosong berarti
+// semua NIM. lesson_id NULL dibuang karena tidak cocok dengan pelajaran mana pun.
+func (r *progressRepository) GroupedCompleted(ctx context.Context, nim string, page, limit int) ([]NIMLessons, int64, error) {
+	where := "completed AND lesson_id IS NOT NULL"
+	args := map[string]any{"limit": limit, "offset": (page - 1) * limit}
+	if nim != "" {
+		where += " AND nim = @nim"
+		args["nim"] = nim
+	}
+	var total int64
+	if err := r.db.WithContext(ctx).Raw("SELECT count(DISTINCT nim) FROM student_progress WHERE "+where, args).Scan(&total).Error; err != nil {
+		return nil, 0, err
+	}
+	var rows []struct {
+		NIM       string
+		LessonIDs string
+	}
+	err := r.db.WithContext(ctx).Raw(`SELECT nim, to_json(array_agg(lesson_id ORDER BY id))::text AS lesson_ids
+FROM student_progress WHERE `+where+`
+GROUP BY nim ORDER BY nim LIMIT @limit OFFSET @offset`, args).Scan(&rows).Error
+	if err != nil {
+		return nil, 0, err
+	}
+	out := make([]NIMLessons, len(rows))
+	for i, row := range rows {
+		out[i].NIM = row.NIM
+		if err := json.Unmarshal([]byte(row.LessonIDs), &out[i].LessonIDs); err != nil {
+			return nil, 0, err
+		}
+	}
+	return out, total, nil
 }
 
 func (r *progressRepository) Recent(ctx context.Context, nim string, limit int) ([]entity.StudentProgress, error) {

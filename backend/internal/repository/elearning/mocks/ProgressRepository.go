@@ -8,6 +8,8 @@ import (
 	entity "github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/entity/elearning"
 	mock "github.com/stretchr/testify/mock"
 
+	repository "github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/repository/elearning"
+
 	time "time"
 )
 
@@ -156,6 +158,43 @@ func (_m *ProgressRepository) Exists(ctx context.Context, nim string, lessonID s
 	}
 
 	return r0, r1
+}
+
+// GroupedCompleted provides a mock function with given fields: ctx, nim, page, limit
+func (_m *ProgressRepository) GroupedCompleted(ctx context.Context, nim string, page int, limit int) ([]repository.NIMLessons, int64, error) {
+	ret := _m.Called(ctx, nim, page, limit)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GroupedCompleted")
+	}
+
+	var r0 []repository.NIMLessons
+	var r1 int64
+	var r2 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, int, int) ([]repository.NIMLessons, int64, error)); ok {
+		return rf(ctx, nim, page, limit)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, int, int) []repository.NIMLessons); ok {
+		r0 = rf(ctx, nim, page, limit)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]repository.NIMLessons)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, int, int) int64); ok {
+		r1 = rf(ctx, nim, page, limit)
+	} else {
+		r1 = ret.Get(1).(int64)
+	}
+
+	if rf, ok := ret.Get(2).(func(context.Context, string, int, int) error); ok {
+		r2 = rf(ctx, nim, page, limit)
+	} else {
+		r2 = ret.Error(2)
+	}
+
+	return r0, r1, r2
 }
 
 // Insert provides a mock function with given fields: ctx, nim, lessonID, completedAt

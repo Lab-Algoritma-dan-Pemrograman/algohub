@@ -39,6 +39,28 @@ func (uc *ActivityLogUsecase) insert(ctx context.Context, p *dto.Principal, nim,
 	return MapDBError(uc.logs.Insert(ctx, &entity.ActivityLog{NIM: &nim, Nama: &nama, EventType: eventType, Timestamp: &at, Details: &details}))
 }
 
+// Policy SELECT activity_logs hanya untuk staf (R-activity_logs-SELECT-1).
+func (uc *ActivityLogUsecase) List(ctx context.Context, p *dto.Principal, page, limit int) (*dto.Page[entity.ActivityLog], error) {
+	return listPage(p, page, limit, func() ([]entity.ActivityLog, int64, error) {
+		if !IsStaff(p.Role) {
+			return nil, 0, nil
+		}
+		return uc.logs.List(ctx, page, limit)
+	})
+}
+
+// Policy DELETE hanya admin/kordas; selain itu 0 baris tanpa error (R-activity_logs-DELETE-1).
+func (uc *ActivityLogUsecase) Delete(ctx context.Context, p *dto.Principal, id string) error {
+	if err := requirePrincipal(p); err != nil {
+		return err
+	}
+	if !IsAdminOrKordas(p.Role) {
+		return nil
+	}
+	_, err := uc.logs.Delete(ctx, id)
+	return err
+}
+
 // monitoringService.addAuditLog tidak memeriksa error, jadi kegagalan mencatat tidak menggagalkan aksi admin.
 func (uc *ActivityLogUsecase) audit(ctx context.Context, p *dto.Principal, eventType, details string) {
 	if err := uc.insert(ctx, p, p.NIM, p.Nama, eventType, details); err != nil {

@@ -19,6 +19,7 @@ import (
 	"github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/pkg/gemini"
 	"github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/pkg/jwt"
 	"github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/pkg/ollama"
+	"github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/pkg/supabase"
 )
 
 func registerElearning(r *gin.Engine, cfg *config.Config, dbs *database.DBs) {
@@ -40,6 +41,8 @@ func newElearning(cfg *config.Config, dbs *database.DBs) *deliveryhttp.Elearning
 	unlocked := elrepo.NewAchievementRepository(db)
 	logs := elusecase.NewActivityLogUsecase(elrepo.NewActivityLogRepository(db), time.Now)
 	achievements := elusecase.NewAchievementUsecase(unlocked, users, progress, time.Now)
+	learning := elusecase.NewProgressUsecase(users, progress, curriculum, achievements, time.Now)
+	images := supabase.New(ecfg.SupabaseURL, ecfg.SupabaseServiceRoleKey, "lesson-images")
 	ai := elusecase.AIClients{Gemini: gemini.NewClient(""), GeminiKeys: ecfg.GeminiAPIKeys}
 	if ecfg.OllamaURL != "" {
 		ai.Ollama = ollama.NewClient(ollama.Config{URL: ecfg.OllamaURL, Model: ecfg.OllamaModel, APIKey: ecfg.OllamaAPIKey})
@@ -54,10 +57,16 @@ func newElearning(cfg *config.Config, dbs *database.DBs) *deliveryhttp.Elearning
 			Report:      elhandler.NewReportHandler(elusecase.NewReportUsecase(authUC, curriculum, progress, elrepo.NewReportRepository(db), time.Now)),
 			Quiz:        elhandler.NewQuizHandler(elusecase.NewQuizUsecase(authUC, curriculum)),
 			Curriculum:  elhandler.NewCurriculumHandler(elusecase.NewCurriculumUsecase(curriculum)),
-			Progress:    elhandler.NewProgressHandler(elusecase.NewProgressUsecase(users, progress, curriculum, achievements, time.Now)),
+			Progress:    elhandler.NewProgressHandler(learning),
 			Profile:     elhandler.NewProfileHandler(elusecase.NewProfileUsecase(users, achievements, time.Now), logs),
 			Achievement: elhandler.NewAchievementHandler(achievements),
 			AdminUser:   elhandler.NewAdminUserHandler(elusecase.NewAdminUserUsecase(users, progress, curriculum, unlocked, achievements, logs)),
+			Game:        elhandler.NewGameHandler(elusecase.NewGameUsecase(elrepo.NewGameRepository(db), users, time.Now, nil)),
+			Leaderboard: elhandler.NewLeaderboardHandler(elusecase.NewLeaderboardUsecase(elrepo.NewLeaderboardRepository(db), time.Now)),
+			Prestige:    elhandler.NewPrestigeHandler(elusecase.NewPrestigeUsecase(users, curriculum, progress, elrepo.NewPrestigeRepository(db), logs, time.Now)),
+			Playground:  elhandler.NewPlaygroundHandler(elusecase.NewPlaygroundUsecase(elrepo.NewPlaygroundRepository(db))),
+			Monitoring:  elhandler.NewMonitoringHandler(elusecase.NewSessionUsecase(elrepo.NewSessionRepository(db), users, progress, learning, time.Now), logs),
+			Storage:     elhandler.NewStorageHandler(elusecase.NewStorageUsecase(images, time.Now)),
 		},
 	}
 }

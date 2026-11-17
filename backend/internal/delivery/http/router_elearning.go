@@ -27,6 +27,12 @@ type ElearningHandlers struct {
 	Profile     *elhandler.ProfileHandler
 	Achievement *elhandler.AchievementHandler
 	AdminUser   *elhandler.AdminUserHandler
+	Game        *elhandler.GameHandler
+	Leaderboard *elhandler.LeaderboardHandler
+	Prestige    *elhandler.PrestigeHandler
+	Playground  *elhandler.PlaygroundHandler
+	Monitoring  *elhandler.MonitoringHandler
+	Storage     *elhandler.StorageHandler
 }
 
 type Elearning struct {
@@ -83,6 +89,41 @@ func RegisterElearning(r *gin.Engine, e *Elearning) {
 	authed.POST("/admin/users/:nim/reset-lesson", h.AdminUser.ResetLesson)
 	authed.PUT("/admin/users/:nim/xp", h.AdminUser.AdjustXP)
 	authed.DELETE("/admin/users/:nim", h.AdminUser.Delete)
+
+	authed.GET("/game/questions", h.Game.Questions)
+	authed.POST("/game/questions", h.Game.Add)
+	authed.PUT("/game/questions", h.Game.Reset)
+	authed.POST("/game/questions/seed", h.Game.Seed)
+	authed.PATCH("/game/questions/:id", h.Game.Update)
+	authed.DELETE("/game/questions/:id", h.Game.Delete)
+	authed.GET("/game/settings", h.Game.Settings)
+	authed.PUT("/game/settings", h.Game.UpdateSettings)
+	authed.GET("/game/plays/me", h.Game.PlaysMe)
+	authed.POST("/game/history", h.Game.History)
+
+	authed.GET("/leaderboard", h.Leaderboard.List)
+	authed.GET("/leaderboard/rank", h.Leaderboard.Rank)
+	authed.GET("/leaderboard/filters", h.Leaderboard.Filters)
+	authed.GET("/leaderboard/weekly", h.Leaderboard.Weekly)
+
+	authed.GET("/prestige/eligibility", h.Prestige.Eligibility)
+	authed.POST("/prestige/reset", h.Prestige.Reset)
+
+	authed.GET("/playground/examples", h.Playground.List)
+	authed.POST("/playground/examples", h.Playground.Add)
+	authed.PATCH("/playground/examples/:id", h.Playground.Update)
+	authed.DELETE("/playground/examples/:id", h.Playground.Delete)
+
+	authed.PUT("/sessions/me", h.Monitoring.Heartbeat)
+	authed.DELETE("/sessions/me", h.Monitoring.EndSession)
+	authed.GET("/monitoring/sessions", h.Monitoring.Sessions)
+	authed.DELETE("/monitoring/sessions/stale", h.Monitoring.CleanupStale)
+	authed.GET("/monitoring/students", h.Monitoring.Students)
+	authed.GET("/monitoring/progress", h.Monitoring.Progress)
+	authed.GET("/activity-logs", h.Monitoring.Logs)
+	authed.DELETE("/activity-logs/:id", h.Monitoring.DeleteLog)
+
+	authed.POST("/storage/lesson-images", h.Storage.UploadLessonImage)
 }
 
 // Respons elearning ber-token bergantung pada pengguna dan perannya, jadi tidak boleh disimpan CDN Vercel atau cache bersama.

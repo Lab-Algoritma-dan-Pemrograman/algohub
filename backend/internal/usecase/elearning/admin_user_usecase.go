@@ -46,9 +46,13 @@ func NewAdminUserUsecase(users repository.UserRepository, progress repository.Pr
 	return &AdminUserUsecase{users: users, progress: progress, curriculum: curriculum, unlocked: unlocked, achievements: achievements, logs: logs, guard: userGuard{users: users}}
 }
 
-// Peran efektif UI (keputusan 2): resolveElearningRole dari DB, dan bila praktikan memakai peran token, seperti SupabaseProvider.
 func (uc *AdminUserUsecase) uiRole(ctx context.Context, p *dto.Principal) (string, error) {
-	u, err := uc.users.GetProfile(ctx, p.NIM)
+	return uiRole(ctx, uc.users, p)
+}
+
+// Peran efektif UI (keputusan 2): resolveElearningRole dari DB, dan bila praktikan memakai peran token, seperti SupabaseProvider.
+func uiRole(ctx context.Context, users repository.UserRepository, p *dto.Principal) (string, error) {
+	u, err := users.GetProfile(ctx, p.NIM)
 	if err != nil {
 		return "", err
 	}

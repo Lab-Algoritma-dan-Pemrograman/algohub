@@ -14,6 +14,34 @@ type ActivityLogRepository struct {
 	mock.Mock
 }
 
+// Delete provides a mock function with given fields: ctx, id
+func (_m *ActivityLogRepository) Delete(ctx context.Context, id string) (int64, error) {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Delete")
+	}
+
+	var r0 int64
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (int64, error)); ok {
+		return rf(ctx, id)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) int64); ok {
+		r0 = rf(ctx, id)
+	} else {
+		r0 = ret.Get(0).(int64)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // Insert provides a mock function with given fields: ctx, log
 func (_m *ActivityLogRepository) Insert(ctx context.Context, log *entity.ActivityLog) error {
 	ret := _m.Called(ctx, log)
@@ -30,6 +58,43 @@ func (_m *ActivityLogRepository) Insert(ctx context.Context, log *entity.Activit
 	}
 
 	return r0
+}
+
+// List provides a mock function with given fields: ctx, page, limit
+func (_m *ActivityLogRepository) List(ctx context.Context, page int, limit int) ([]entity.ActivityLog, int64, error) {
+	ret := _m.Called(ctx, page, limit)
+
+	if len(ret) == 0 {
+		panic("no return value specified for List")
+	}
+
+	var r0 []entity.ActivityLog
+	var r1 int64
+	var r2 error
+	if rf, ok := ret.Get(0).(func(context.Context, int, int) ([]entity.ActivityLog, int64, error)); ok {
+		return rf(ctx, page, limit)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, int, int) []entity.ActivityLog); ok {
+		r0 = rf(ctx, page, limit)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]entity.ActivityLog)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, int, int) int64); ok {
+		r1 = rf(ctx, page, limit)
+	} else {
+		r1 = ret.Get(1).(int64)
+	}
+
+	if rf, ok := ret.Get(2).(func(context.Context, int, int) error); ok {
+		r2 = rf(ctx, page, limit)
+	} else {
+		r2 = ret.Error(2)
+	}
+
+	return r0, r1, r2
 }
 
 // NewActivityLogRepository creates a new instance of ActivityLogRepository. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.

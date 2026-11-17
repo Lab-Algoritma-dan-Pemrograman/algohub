@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/stretchr/testify/assert"
@@ -600,4 +601,483 @@ func TestRLS_T_check_progress_velocity_1_Ditolak(t *testing.T) {
 	_, err := f.progressUC.Complete(bg, who(usecase.RolePraktikan), "l1", &dto.CompleteLessonRequest{XPReward: 60})
 	assertUCError(t, err, http.StatusBadRequest, msg)
 	f.users.AssertNotCalled(t, "UpdateUser", mock.Anything, mock.Anything, mock.Anything, mock.Anything)
+}
+
+// Senin 16 November 2026 00:00 WIB, awal minggu learnNow.
+var learnWeekStart = time.Date(2026, 11, 15, 17, 0, 0, 0, time.UTC)
+
+func intp(v int) *int    { return &v }
+func boolp(v bool) *bool { return &v }
+
+func oneQuestion() *dto.GameQuestionsRequest {
+	return &dto.GameQuestionsRequest{Questions: []dto.GameQuestionInput{{Language: str("c"), Title: str("Bug"), BugLine: intp(3)}}}
+}
+
+var oneQuestionFields = []repository.QuestionFields{{Language: str("c"), Title: str("Bug"), BugLine: intp(3)}}
+
+var nonAdminRoles = []string{usecase.RoleAsisten, usecase.RolePraktikan}
+
+func TestRLS_R_game_questions_SELECT_1_Diizinkan(t *testing.T) {
+	f := newLearn(t)
+	f.games.On("QuestionsByLanguage", mock.Anything, "c").Return([]entity.GameQuestion{{ID: "q1", Language: "c"}}, nil)
+	qs, err := f.gameUC.Questions(bg, who(usecase.RolePraktikan), "c", 5)
+	require.NoError(t, err)
+	assert.Equal(t, []dto.GameQuestion{{ID: "q1", Language: "c"}}, qs)
+}
+
+func TestRLS_R_game_questions_SELECT_1_Ditolak(t *testing.T) {
+	_, err := newLearn(t).gameUC.Questions(bg, nil, "c", 5)
+	assertMissingToken(t, err)
+}
+
+func TestRLS_R_game_questions_INSERT_1_Diizinkan(t *testing.T) {
+	f := newLearn(t)
+	f.games.On("InsertQuestion", mock.Anything, &oneQuestionFields[0]).Return("q9", nil)
+	f.games.On("CountQuestions", mock.Anything).Return(int64(0), nil)
+	f.games.On("InsertQuestions", mock.Anything, oneQuestionFields).Return(nil)
+	f.games.On("ReplaceAll", mock.Anything, oneQuestionFields).Return(nil)
+
+	res, err := f.gameUC.Add(bg, who(usecase.RoleAdmin), &oneQuestion().Questions[0])
+	require.NoError(t, err)
+	assert.Equal(t, "q9", res.ID)
+	seed, err := f.gameUC.Seed(bg, who(usecase.RoleKordas), oneQuestion())
+	require.NoError(t, err)
+	assert.True(t, seed.Seeded)
+	require.NoError(t, f.gameUC.ForceReset(bg, who(usecase.RoleAdmin), oneQuestion()))
+}
+
+func TestRLS_R_game_questions_INSERT_1_Ditolak(t *testing.T) {
+	f := newLearn(t)
+	f.games.On("CountQuestions", mock.Anything).Return(int64(0), nil)
+	for _, role := range nonAdminRoles {
+		_, err := f.gameUC.Add(bg, who(role), &oneQuestion().Questions[0])
+		assertUCError(t, err, http.StatusForbidden, rlsMessage("game_questions"))
+		_, err = f.gameUC.Seed(bg, who(role), oneQuestion())
+		assertUCError(t, err, http.StatusForbidden, rlsMessage("game_questions"))
+		err = f.gameUC.ForceReset(bg, who(role), oneQuestion())
+		assertUCError(t, err, http.StatusForbidden, rlsMessage("game_questions"))
+	}
+	f.games.AssertNotCalled(t, "ReplaceAll", mock.Anything, mock.Anything)
+}
+
+func TestRLS_R_game_questions_UPDATE_1_Diizinkan(t *testing.T) {
+	f := newLearn(t)
+	f.games.On("UpdateQuestion", mock.Anything, "q1", map[string]any{"title": "Baru", "bug_line": (*int)(nil)}).Return(int64(1), nil)
+	req := &dto.GameQuestionUpdate{Title: "Baru", BugLine: dto.Optional[int]{Set: true}}
+	require.NoError(t, f.gameUC.Update(bg, who(usecase.RoleKordas), "q1", req))
+}
+
+func TestRLS_R_game_questions_UPDATE_1_Ditolak(t *testing.T) {
+	f := newLearn(t)
+	for _, role := range nonAdminRoles {
+		require.NoError(t, f.gameUC.Update(bg, who(role), "q1", &dto.GameQuestionUpdate{Title: "Baru"}))
+	}
+	f.games.AssertNotCalled(t, "UpdateQuestion", mock.Anything, mock.Anything, mock.Anything)
+}
+
+func TestRLS_R_game_questions_DELETE_1_Diizinkan(t *testing.T) {
+	f := newLearn(t)
+	f.games.On("DeleteQuestion", mock.Anything, "q1").Return(int64(1), nil)
+	require.NoError(t, f.gameUC.Delete(bg, who(usecase.RoleAdmin), "q1"))
+}
+
+// DELETE di forceResetGameQuestions juga 0 baris untuk selain admin/kordas; tanpa soal baru tidak ada INSERT yang ditolak.
+func TestRLS_R_game_questions_DELETE_1_Ditolak(t *testing.T) {
+	f := newLearn(t)
+	for _, role := range nonAdminRoles {
+		require.NoError(t, f.gameUC.Delete(bg, who(role), "q1"))
+		require.NoError(t, f.gameUC.ForceReset(bg, who(role), &dto.GameQuestionsRequest{Questions: []dto.GameQuestionInput{}}))
+	}
+	f.games.AssertNotCalled(t, "DeleteQuestion", mock.Anything, mock.Anything)
+	f.games.AssertNotCalled(t, "ReplaceAll", mock.Anything, mock.Anything)
+}
+
+func TestRLS_R_game_settings_SELECT_1_Diizinkan(t *testing.T) {
+	f := newLearn(t)
+	f.games.On("Settings", mock.Anything).Return(&entity.GameSettings{ID: "default", BugHuntActive: boolp(false), BugHuntWeeklyLimit: intp(0)}, nil)
+	s, err := f.gameUC.Settings(bg, who(usecase.RolePraktikan))
+	require.NoError(t, err)
+	assert.Equal(t, &dto.GameSettings{BugHuntActive: boolp(false), BugHuntWeeklyLimit: intp(0), BugHuntQuestionCount: 5}, s)
+}
+
+func TestRLS_R_game_settings_SELECT_1_Ditolak(t *testing.T) {
+	_, err := newLearn(t).gameUC.Settings(bg, nil)
+	assertMissingToken(t, err)
+}
+
+func TestRLS_R_game_settings_INSERT_1_Diizinkan(t *testing.T) {
+	f := newLearn(t)
+	f.games.On("UpsertSettings", mock.Anything, map[string]any{"bug_hunt_weekly_limit": intp(4)}).Return(nil)
+	req := &dto.GameSettingsUpdate{BugHuntWeeklyLimit: dto.Optional[int]{Set: true, Value: intp(4)}}
+	require.NoError(t, f.gameUC.UpdateSettings(bg, who(usecase.RoleAdmin), req))
+}
+
+func TestRLS_R_game_settings_INSERT_1_Ditolak(t *testing.T) {
+	f := newLearn(t)
+	for _, role := range nonAdminRoles {
+		err := f.gameUC.UpdateSettings(bg, who(role), &dto.GameSettingsUpdate{})
+		assertUCError(t, err, http.StatusForbidden, rlsMessage("game_settings"))
+	}
+}
+
+// updateGameSettings selalu upsert, jadi baris 'default' yang sudah ada ikut aturan R-game_settings-INSERT-1.
+func TestRLS_R_game_settings_UPDATE_1_Diizinkan(t *testing.T) {
+	f := newLearn(t)
+	f.games.On("UpsertSettings", mock.Anything, map[string]any{"bug_hunt_active": boolp(false)}).Return(nil)
+	req := &dto.GameSettingsUpdate{BugHuntActive: dto.Optional[bool]{Set: true, Value: boolp(false)}}
+	require.NoError(t, f.gameUC.UpdateSettings(bg, who(usecase.RoleKordas), req))
+}
+
+func TestRLS_R_game_settings_UPDATE_1_Ditolak(t *testing.T) {
+	f := newLearn(t)
+	req := &dto.GameSettingsUpdate{BugHuntActive: dto.Optional[bool]{Set: true, Value: boolp(false)}}
+	assertUCError(t, f.gameUC.UpdateSettings(bg, who(usecase.RoleAsisten), req), http.StatusForbidden, rlsMessage("game_settings"))
+	f.games.AssertNotCalled(t, "UpsertSettings", mock.Anything, mock.Anything)
+}
+
+func (f *learnFixture) bugHuntLimit(limit int) {
+	f.games.On("Settings", mock.Anything).Return(&entity.GameSettings{ID: "default", BugHuntActive: boolp(true), BugHuntWeeklyLimit: intp(limit)}, nil)
+}
+
+func TestRLS_R_game_history_SELECT_1_Diizinkan(t *testing.T) {
+	f := newLearn(t)
+	f.bugHuntLimit(3)
+	f.games.On("CountPlaysSince", mock.Anything, nimSelf, "bug_hunt", learnWeekStart).Return(int64(2), nil)
+	for _, p := range []*dto.Principal{who(usecase.RolePraktikan), mismatched(usecase.RoleAsisten)} {
+		res, err := f.gameUC.PlaysMe(bg, p)
+		require.NoError(t, err)
+		assert.Equal(t, &dto.BugHuntAccess{Allowed: true, PlaysUsed: 2, Limit: 3}, res)
+	}
+}
+
+func TestRLS_R_game_history_SELECT_1_Ditolak(t *testing.T) {
+	f := newLearn(t)
+	f.bugHuntLimit(3)
+	res, err := f.gameUC.PlaysMe(bg, mismatched(usecase.RolePraktikan))
+	require.NoError(t, err)
+	assert.Equal(t, &dto.BugHuntAccess{Allowed: true, PlaysUsed: 0, Limit: 3}, res)
+	f.games.AssertNotCalled(t, "CountPlaysSince", mock.Anything, mock.Anything, mock.Anything, mock.Anything)
+}
+
+func TestRLS_R_game_history_INSERT_1_Diizinkan(t *testing.T) {
+	f := newLearn(t)
+	yesterday := learnNow.Add(-24 * time.Hour)
+	f.users.On("GetProfile", mock.Anything, nimSelf).Return(&entity.User{NIM: nimSelf, XP: 100, Level: 2, Streak: 1, LastActive: &yesterday, PrestigeMult: 1}, nil)
+	cols := map[string]any{"xp": 140, "level": 2, "streak": 2, "last_active": learnNow}
+	f.games.On("InsertHistory", mock.Anything, nimSelf, "quiz", 40, learnNow).Return(nil).Twice()
+	f.users.On("UpdateUser", mock.Anything, nimSelf, cols, true).Return(int64(1), nil).Once()
+	f.users.On("UpdateUser", mock.Anything, nimSelf, cols, false).Return(int64(1), nil).Once()
+
+	for _, role := range []string{usecase.RolePraktikan, usecase.RoleAdmin} {
+		res, err := f.gameUC.History(bg, who(role), &dto.GameHistoryRequest{GameType: "quiz", XPEarned: 40})
+		require.NoError(t, err)
+		assert.Equal(t, &dto.GameHistoryResponse{XP: 140, Level: 2, Streak: 2, LastActive: learnNow}, res)
+	}
+}
+
+func TestRLS_R_game_history_INSERT_1_Ditolak(t *testing.T) {
+	f := newLearn(t)
+	for _, role := range []string{usecase.RoleAdmin, usecase.RolePraktikan} {
+		_, err := f.gameUC.History(bg, mismatched(role), &dto.GameHistoryRequest{GameType: "quiz", XPEarned: 40})
+		assertUCError(t, err, http.StatusForbidden, rlsMessage("game_history"))
+	}
+	f.games.AssertNotCalled(t, "InsertHistory", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything)
+}
+
+func TestRLS_R_playground_examples_SELECT_1_Diizinkan(t *testing.T) {
+	f := newLearn(t)
+	f.playground.On("List", mock.Anything, "python", 1, 100).Return([]entity.PlaygroundExample{{ID: "e1", Title: "Halo", Language: "python", Code: "print()", SortOrder: 2}}, int64(1), nil)
+	page, err := f.playgroundUC.List(bg, who(usecase.RolePraktikan), "python", 1, 100)
+	require.NoError(t, err)
+	assert.Equal(t, []dto.PlaygroundExample{{ID: "e1", Title: "Halo", Language: "python", Code: "print()", SortOrder: 2}}, page.Items)
+}
+
+func TestRLS_R_playground_examples_SELECT_1_Ditolak(t *testing.T) {
+	_, err := newLearn(t).playgroundUC.List(bg, nil, "", 1, 100)
+	assertMissingToken(t, err)
+}
+
+func TestRLS_R_playground_examples_INSERT_1_Diizinkan(t *testing.T) {
+	f := newLearn(t)
+	cols := map[string]any{"title": str("Halo"), "language": str("c"), "code": str("int main(){}"), "description": (*string)(nil), "sort_order": 1}
+	f.playground.On("Insert", mock.Anything, cols).Return("e9", nil)
+	res, err := f.playgroundUC.Add(bg, who(usecase.RoleAdmin), &dto.PlaygroundInput{Title: str("Halo"), Language: str("c"), Code: str("int main(){}"), SortOrder: intp(1)})
+	require.NoError(t, err)
+	assert.Equal(t, "e9", res.ID)
+}
+
+func TestRLS_R_playground_examples_INSERT_1_Ditolak(t *testing.T) {
+	f := newLearn(t)
+	for _, role := range nonAdminRoles {
+		_, err := f.playgroundUC.Add(bg, who(role), &dto.PlaygroundInput{Title: str("Halo")})
+		assertUCError(t, err, http.StatusForbidden, rlsMessage("playground_examples"))
+	}
+}
+
+func TestRLS_R_playground_examples_UPDATE_1_Diizinkan(t *testing.T) {
+	f := newLearn(t)
+	f.playground.On("Update", mock.Anything, "e1", map[string]any{"code": "x", "description": str("d")}).Return(int64(1), nil)
+	req := &dto.PlaygroundUpdate{Code: "x", Description: dto.Optional[string]{Set: true, Value: str("d")}}
+	require.NoError(t, f.playgroundUC.Update(bg, who(usecase.RoleKordas), "e1", req))
+}
+
+func TestRLS_R_playground_examples_UPDATE_1_Ditolak(t *testing.T) {
+	f := newLearn(t)
+	for _, role := range nonAdminRoles {
+		require.NoError(t, f.playgroundUC.Update(bg, who(role), "e1", &dto.PlaygroundUpdate{Code: "x"}))
+	}
+	f.playground.AssertNotCalled(t, "Update", mock.Anything, mock.Anything, mock.Anything)
+}
+
+func TestRLS_R_playground_examples_DELETE_1_Diizinkan(t *testing.T) {
+	f := newLearn(t)
+	f.playground.On("Delete", mock.Anything, "e1").Return(int64(1), nil)
+	require.NoError(t, f.playgroundUC.Delete(bg, who(usecase.RoleAdmin), "e1"))
+}
+
+func TestRLS_R_playground_examples_DELETE_1_Ditolak(t *testing.T) {
+	f := newLearn(t)
+	for _, role := range nonAdminRoles {
+		require.NoError(t, f.playgroundUC.Delete(bg, who(role), "e1"))
+	}
+	f.playground.AssertNotCalled(t, "Delete", mock.Anything, mock.Anything)
+}
+
+func TestRLS_R_active_sessions_SELECT_1_Diizinkan(t *testing.T) {
+	f := newLearn(t)
+	f.sessions.On("ListWithRole", mock.Anything, 1, 100).Return([]repository.SessionRole{
+		{NIM: nimOther, LastHeartbeat: &learnNow, Role: str("mahasiswa"), HasUser: true},
+		{NIM: "tanpa-user", LastHeartbeat: &learnNow},
+	}, int64(2), nil)
+	page, err := f.sessionUC.Sessions(bg, who(usecase.RoleAsisten), 1, 100)
+	require.NoError(t, err)
+	assert.Equal(t, []dto.ActiveSessionRole{
+		{NIM: nimOther, LastHeartbeat: &learnNow, Users: &dto.SessionUser{Role: str("mahasiswa")}},
+		{NIM: "tanpa-user", LastHeartbeat: &learnNow},
+	}, page.Items)
+}
+
+func TestRLS_R_active_sessions_SELECT_1_Ditolak(t *testing.T) {
+	page, err := newLearn(t).sessionUC.Sessions(bg, who(usecase.RolePraktikan), 1, 100)
+	require.NoError(t, err)
+	assert.Empty(t, page.Items)
+}
+
+func TestRLS_R_active_sessions_INSERT_1_Diizinkan(t *testing.T) {
+	f := newLearn(t)
+	s := &entity.ActiveSession{NIM: nimSelf, Nama: "Nama " + nimSelf, Kelas: "TI-1", LastHeartbeat: &learnNow, CurrentActivity: str("courses")}
+	f.sessions.On("Upsert", mock.Anything, s, false).Return(nil)
+	res, err := f.sessionUC.Heartbeat(bg, who(usecase.RoleAsisten), &dto.HeartbeatRequest{CurrentActivity: str("courses")})
+	require.NoError(t, err)
+	assert.True(t, res.SessionSaved)
+}
+
+// Layout.tsx menelan penolakan upsert dan tetap memperbarui users, jadi touchStreak tetap jalan.
+func TestRLS_R_active_sessions_INSERT_1_Ditolak(t *testing.T) {
+	f := newLearn(t)
+	f.users.On("GetProfile", mock.Anything, nimSelf).Return(&entity.User{NIM: nimSelf, Streak: 3, LastActive: &learnNow, PrestigeMult: 1}, nil)
+	f.users.On("UpdateUser", mock.Anything, nimSelf, map[string]any{"last_active": learnNow}, true).Return(int64(1), nil)
+	res, err := f.sessionUC.Heartbeat(bg, who(usecase.RolePraktikan), &dto.HeartbeatRequest{CurrentActivity: str("lesson"), TouchStreak: true})
+	require.NoError(t, err)
+	assert.Equal(t, &dto.HeartbeatResponse{Streak: &dto.StreakResponse{Streak: 3, LastActive: learnNow}}, res)
+	f.sessions.AssertNotCalled(t, "Upsert", mock.Anything, mock.Anything, mock.Anything)
+}
+
+func TestRLS_R_active_sessions_UPDATE_1_Diizinkan(t *testing.T) {
+	f := newLearn(t)
+	s := &entity.ActiveSession{NIM: nimSelf, Nama: "Budi", Kelas: "TI-1", LastHeartbeat: &learnNow, AttemptID: str("att-1")}
+	f.sessions.On("Upsert", mock.Anything, s, true).Return(nil)
+	req := &dto.HeartbeatRequest{Nama: "Budi", AttemptID: dto.Optional[string]{Set: true, Value: str("att-1")}}
+	res, err := f.sessionUC.Heartbeat(bg, who(usecase.RoleKordas), req)
+	require.NoError(t, err)
+	assert.True(t, res.SessionSaved)
+}
+
+func TestRLS_R_active_sessions_UPDATE_1_Ditolak(t *testing.T) {
+	f := newLearn(t)
+	req := &dto.HeartbeatRequest{AttemptID: dto.Optional[string]{Set: true, Value: str("att-1")}}
+	res, err := f.sessionUC.Heartbeat(bg, who(usecase.RolePraktikan), req)
+	require.NoError(t, err)
+	assert.False(t, res.SessionSaved)
+	f.sessions.AssertNotCalled(t, "Upsert", mock.Anything, mock.Anything, mock.Anything)
+}
+
+func TestRLS_R_active_sessions_DELETE_1_Diizinkan(t *testing.T) {
+	f := newLearn(t)
+	f.sessions.On("DeleteByNIM", mock.Anything, nimSelf).Return(int64(1), nil)
+	f.sessions.On("DeleteStale", mock.Anything, learnNow.Add(-5*time.Minute)).Return(int64(4), nil)
+	require.NoError(t, f.sessionUC.End(bg, who(usecase.RoleAdmin)))
+	require.NoError(t, f.sessionUC.CleanupStale(bg, who(usecase.RoleAsisten), 5))
+}
+
+func TestRLS_R_active_sessions_DELETE_1_Ditolak(t *testing.T) {
+	f := newLearn(t)
+	require.NoError(t, f.sessionUC.End(bg, who(usecase.RolePraktikan)))
+	require.NoError(t, f.sessionUC.CleanupStale(bg, who(usecase.RolePraktikan), 2))
+	f.sessions.AssertNotCalled(t, "DeleteByNIM", mock.Anything, mock.Anything)
+	f.sessions.AssertNotCalled(t, "DeleteStale", mock.Anything, mock.Anything)
+}
+
+func TestRLS_R_activity_logs_SELECT_1_Diizinkan(t *testing.T) {
+	f := newLearn(t)
+	f.logs.On("List", mock.Anything, 1, 100).Return([]entity.ActivityLog{{ID: "log-1", EventType: "login"}}, int64(1), nil)
+	page, err := f.logUC.List(bg, who(usecase.RoleAsisten), 1, 100)
+	require.NoError(t, err)
+	assert.Equal(t, "log-1", page.Items[0].ID)
+}
+
+func TestRLS_R_activity_logs_SELECT_1_Ditolak(t *testing.T) {
+	page, err := newLearn(t).logUC.List(bg, who(usecase.RolePraktikan), 1, 100)
+	require.NoError(t, err)
+	assert.Empty(t, page.Items)
+	assert.Zero(t, page.Total)
+}
+
+func TestRLS_R_activity_logs_DELETE_1_Diizinkan(t *testing.T) {
+	f := newLearn(t)
+	f.logs.On("Delete", mock.Anything, "log-1").Return(int64(1), nil)
+	require.NoError(t, f.logUC.Delete(bg, who(usecase.RoleKordas), "log-1"))
+}
+
+func TestRLS_R_activity_logs_DELETE_1_Ditolak(t *testing.T) {
+	f := newLearn(t)
+	for _, role := range nonAdminRoles {
+		require.NoError(t, f.logUC.Delete(bg, who(role), "log-1"))
+	}
+	f.logs.AssertNotCalled(t, "Delete", mock.Anything, mock.Anything)
+}
+
+// Awal semester Ganjil 2026 (1 Agustus 2026 00:00 WIB) untuk learnNow.
+var learnSemesterStart = time.Date(2026, 7, 31, 17, 0, 0, 0, time.UTC)
+
+func TestRLS_R_prestige_history_SELECT_1_Diizinkan(t *testing.T) {
+	f := newLearn(t)
+	f.curriculum.On("LevelTree", mock.Anything).Return([]repository.LevelLessons{{ID: "lv1", LessonIDs: []string{"a", "b"}}}, nil)
+	f.progress.On("CompletedLessonIDs", mock.Anything, nimOther).Return([]string{"a"}, nil)
+	f.prestige.On("CountSince", mock.Anything, nimOther, learnSemesterStart).Return(int64(1), nil)
+	f.users.On("PrestigeState", mock.Anything, nimOther).Return(&repository.PrestigeState{}, nil)
+	e, err := f.prestigeUC.Eligibility(bg, who(usecase.RoleAsisten), nimOther)
+	require.NoError(t, err)
+	assert.Equal(t, int64(1), e.SemesterUsed)
+	assert.Equal(t, 1, e.LessonsDone)
+	assert.Equal(t, 2, e.TotalLessons)
+}
+
+// Praktikan juga tidak bisa membaca tabel lessons (R-lessons-SELECT-1), jadi total pelajaran 0.
+func TestRLS_R_prestige_history_SELECT_1_Ditolak(t *testing.T) {
+	f := newLearn(t)
+	f.curriculum.On("LevelTree", mock.Anything).Return([]repository.LevelLessons{{ID: "lv1", LessonIDs: []string{"a", "b"}}}, nil)
+	f.users.On("PrestigeState", mock.Anything, nimOther).Return(nil, nil)
+	e, err := f.prestigeUC.Eligibility(bg, who(usecase.RolePraktikan), nimOther)
+	require.NoError(t, err)
+	assert.Zero(t, e.SemesterUsed)
+	assert.Zero(t, e.LessonsDone)
+	assert.Zero(t, e.TotalLessons)
+	f.prestige.AssertNotCalled(t, "CountSince", mock.Anything, mock.Anything, mock.Anything)
+}
+
+// prestige_history hanya ditulis do_prestige_reset (SECURITY DEFINER); tidak ada jalur Go yang menulisnya langsung.
+func TestRLS_R_prestige_history_INSERT_1_Diizinkan(t *testing.T) {
+	f := newLearn(t)
+	f.eligible(nimSelf)
+	f.prestige.On("Reset", mock.Anything, nimSelf).Return(`{"tier":"Master","mult":1.5,"prestige_no":2}`, nil)
+	f.expectAudit("progress_reset", "Prestige sukarela #2 NIM 202711001: tamat penuh 6/6 → tier Master x1.50 (lesson-only, RPC atomik). Progres diarsip, bukan dihapus.")
+	res, err := f.prestigeUC.Reset(bg, who(usecase.RoleKordas), &dto.PrestigeResetRequest{})
+	require.NoError(t, err)
+	assert.Equal(t, &dto.PrestigeResetResponse{Tier: "Master", Mult: 1.5, PrestigeNo: 2}, res)
+}
+
+func TestRLS_R_prestige_history_INSERT_1_Ditolak(t *testing.T) {
+	f := newLearn(t)
+	f.eligible(nimSelf)
+	_, err := f.prestigeUC.Reset(bg, who(usecase.RolePraktikan), &dto.PrestigeResetRequest{NIM: nimSelf})
+	assertUCError(t, err, http.StatusBadRequest, "Syarat belum terpenuhi: tamat 0/6 level (6/0 lesson). Reset sukarela hanya untuk yang tamat penuh 6/6.")
+	f.prestige.AssertNotCalled(t, "Reset", mock.Anything, mock.Anything)
+}
+
+func TestRLS_T_do_prestige_reset_1_Diizinkan(t *testing.T) {
+	f := newLearn(t)
+	f.profileRole(nimSelf, "asisten", nil)
+	f.eligible(nimOther)
+	f.prestige.On("Reset", mock.Anything, nimOther).Return(`{"tier":"Master","mult":1.5,"prestige_no":1}`, nil)
+	f.expectAudit("progress_reset", "Prestige sukarela #1 NIM 202711002: tamat penuh 6/6 → tier Master x1.50 (lesson-only, RPC atomik). Progres diarsip, bukan dihapus.")
+	_, err := f.prestigeUC.Reset(bg, who(usecase.RoleAsisten), &dto.PrestigeResetRequest{NIM: nimOther})
+	require.NoError(t, err)
+}
+
+func TestRLS_T_do_prestige_reset_1_Ditolak(t *testing.T) {
+	f := newLearn(t)
+	f.profileRole(nimSelf, "mahasiswa", nil)
+	_, err := f.prestigeUC.Reset(bg, who(usecase.RolePraktikan), &dto.PrestigeResetRequest{NIM: nimOther})
+	assertUCError(t, err, http.StatusForbidden, "Akses ditolak.")
+
+	f = newLearn(t)
+	f.eligible(nimSelf)
+	f.prestige.On("Reset", mock.Anything, nimSelf).Return("", &pgconn.PgError{Code: "P0001", Message: "Cooldown 14 hari belum lewat."})
+	_, err = f.prestigeUC.Reset(bg, who(usecase.RoleAdmin), &dto.PrestigeResetRequest{NIM: nimSelf})
+	assertUCError(t, err, http.StatusBadRequest, "Cooldown 14 hari belum lewat.")
+	f.logs.AssertNotCalled(t, "Insert", mock.Anything, mock.Anything)
+}
+
+func TestRLS_R_lessons_SELECT_2_Diizinkan(t *testing.T) {
+	f := newLearn(t)
+	f.board.On("Weekly", mock.Anything, repository.LeaderboardFilter{}, learnWeekStart, learnWeekStart.Add(7*24*time.Hour), (*string)(nil)).Return([]repository.WeeklyRow{}, nil)
+	_, err := f.boardUC.Weekly(bg, who(usecase.RoleAsisten), repository.LeaderboardFilter{}, 1, 10)
+	require.NoError(t, err)
+}
+
+// Penampil praktikan: agregat hanya baris miliknya dan reward lesson 60 (embed lessons null), lihat leaderboard_repository.go.
+func TestRLS_R_lessons_SELECT_2_Ditolak(t *testing.T) {
+	f := newLearn(t)
+	f.board.On("Weekly", mock.Anything, repository.LeaderboardFilter{Kelas: "TI-1"}, learnWeekStart, learnWeekStart.Add(7*24*time.Hour), str(nimSelf)).Return([]repository.WeeklyRow{}, nil)
+	_, err := f.boardUC.Weekly(bg, who(usecase.RolePraktikan), repository.LeaderboardFilter{Kelas: "TI-1"}, 1, 10)
+	require.NoError(t, err)
+}
+
+func pngFile() *dto.ImageFile {
+	return &dto.ImageFile{Name: "diagram.png", ContentType: "image/png", Content: []byte("png")}
+}
+
+func TestRLS_R_storage_objects_SELECT_1_Diizinkan(t *testing.T) {
+	f := newLearn(t)
+	res, err := f.storageUC.UploadLessonImage(who(usecase.RoleAdmin), pngFile())
+	require.NoError(t, err)
+	assert.Equal(t, "https://storage.test/"+f.uploader.path, res.PublicURL)
+}
+
+func TestRLS_R_storage_objects_SELECT_1_Ditolak(t *testing.T) {
+	_, err := newLearn(t).storageUC.UploadLessonImage(nil, pngFile())
+	assertMissingToken(t, err)
+}
+
+func TestRLS_R_storage_objects_INSERT_1_Diizinkan(t *testing.T) {
+	f := newLearn(t)
+	_, err := f.storageUC.UploadLessonImage(who(usecase.RoleAsisten), pngFile())
+	require.NoError(t, err)
+	assert.Equal(t, "image/png", f.uploader.contentType)
+}
+
+// Validasi tipe file jalan lebih dulu, baru syarat staf.
+func TestRLS_R_storage_objects_INSERT_1_Ditolak(t *testing.T) {
+	f := newLearn(t)
+	_, err := f.storageUC.UploadLessonImage(who(usecase.RolePraktikan), pngFile())
+	assertUCError(t, err, http.StatusForbidden, "new row violates row-level security policy")
+	_, err = f.storageUC.UploadLessonImage(who(usecase.RolePraktikan), &dto.ImageFile{Name: "a.txt", ContentType: "text/plain"})
+	assertUCError(t, err, http.StatusBadRequest, "Format file tidak didukung. Harap upload gambar (JPG, PNG, GIF, WEBP).")
+	assert.False(t, f.uploader.called)
+}
+
+// upsert:false: staf tidak pernah menimpa objek yang sudah ada.
+func TestRLS_R_storage_objects_UPDATE_1_Diizinkan(t *testing.T) {
+	f := newLearn(t)
+	_, err := f.storageUC.UploadLessonImage(who(usecase.RoleKordas), pngFile())
+	require.NoError(t, err)
+	assert.False(t, f.uploader.upsert)
+}
+
+func TestRLS_R_storage_objects_UPDATE_1_Ditolak(t *testing.T) {
+	f := newLearn(t)
+	_, err := f.storageUC.UploadLessonImage(who(usecase.RolePraktikan), pngFile())
+	assertUCError(t, err, http.StatusForbidden, "new row violates row-level security policy")
+	assert.False(t, f.uploader.called)
 }

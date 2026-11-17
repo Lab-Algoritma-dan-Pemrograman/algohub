@@ -44,9 +44,33 @@ type AdminUser struct {
 
 func (AdminUser) TableName() string { return "users" }
 
+// Kolom persis select StudentMonitoring.tsx:82.
+type MonitoringStudent struct {
+	NIM                  string         `gorm:"column:nim" json:"nim"`
+	Nama                 *string        `gorm:"column:nama" json:"nama"`
+	Kelas                *string        `gorm:"column:kelas" json:"kelas"`
+	Jurusan              *string        `gorm:"column:jurusan" json:"jurusan"`
+	Email                *string        `gorm:"column:email" json:"email"`
+	Role                 *string        `gorm:"column:role" json:"role"`
+	XP                   *int           `gorm:"column:xp" json:"xp"`
+	Level                *int           `gorm:"column:level" json:"level"`
+	Streak               *int           `gorm:"column:streak" json:"streak"`
+	StudyTime            *int           `gorm:"column:study_time" json:"study_time"`
+	LastActive           *time.Time     `gorm:"column:last_active" json:"last_active"`
+	AssessmentAccess     datatypes.JSON `gorm:"column:assessment_access" json:"assessment_access"`
+	LevelAccessOverrides datatypes.JSON `gorm:"column:level_access_overrides" json:"level_access_overrides"`
+}
+
+func (MonitoringStudent) TableName() string { return "users" }
+
 type XPLevel struct {
 	XP    int
 	Level int
+}
+
+type PrestigeState struct {
+	Count          int        `gorm:"column:prestige_count"`
+	LastPrestigeAt *time.Time `gorm:"column:last_prestige_at"`
 }
 
 type UserRepository interface {
@@ -60,6 +84,8 @@ type UserRepository interface {
 	ListAdmin(ctx context.Context, page, limit int, q string) ([]AdminUser, int64, error)
 	Delete(ctx context.Context, nim string) (int64, error)
 	XPLevel(ctx context.Context, nim string) (*XPLevel, error)
+	ListStudents(ctx context.Context, page, limit int) ([]MonitoringStudent, int64, error)
+	PrestigeState(ctx context.Context, nim string) (*PrestigeState, error)
 }
 
 type userRepository struct{ db *gorm.DB }
@@ -225,6 +251,25 @@ func (r *userRepository) XPLevel(ctx context.Context, nim string) (*XPLevel, err
 	}
 	if len(rows) != 1 {
 		return nil, gorm.ErrRecordNotFound
+	}
+	return &rows[0], nil
+}
+
+// role in ('praktikan', 'mahasiswa') seperti StudentMonitoring.tsx:83; nim menjadi urutan stabil untuk halaman.
+func (r *userRepository) ListStudents(ctx context.Context, page, limit int) ([]MonitoringStudent, int64, error) {
+	filter := func(db *gorm.DB) *gorm.DB { return db.Where("role IN ?", []string{"praktikan", "mahasiswa"}) }
+	return findPage[MonitoringStudent](ctx, filter, r.db, "nim", page, limit)
+}
+
+// Hasil nil berarti tidak tepat satu baris; checkPrestigeEligibility membaca .maybeSingle() yang gagal sebagai 0/null.
+func (r *userRepository) PrestigeState(ctx context.Context, nim string) (*PrestigeState, error) {
+	var rows []PrestigeState
+	err := r.db.WithContext(ctx).Model(&entity.User{}).Select("COALESCE(prestige_count, 0) AS prestige_count, last_prestige_at").Where("nim = ?", nim).Limit(2).Scan(&rows).Error
+	if err != nil {
+		return nil, err
+	}
+	if len(rows) != 1 {
+		return nil, nil
 	}
 	return &rows[0], nil
 }
