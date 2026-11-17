@@ -4,6 +4,17 @@ import { session } from './session.ts';
 
 export const LOGIN_PATH = '/praktikum/login';
 
+export const PUBLIC_PATHS = [
+  LOGIN_PATH,
+  '/praktikum/register',
+  '/praktikum/lupa-password',
+  '/praktikum/reset-password',
+];
+
+export function homeFor(role: string): string {
+  return role === 'asisten' || role === 'koordinator' ? '/praktikum/admin' : '/praktikum/dashboard';
+}
+
 export function signOut(): Promise<void> {
   return logout({ queryClient, persister: takePersister(), session });
 }
