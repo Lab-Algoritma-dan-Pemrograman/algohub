@@ -5,7 +5,8 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./praktikum": "./src/praktikum/index.ts"
+    "./praktikum": "./src/praktikum/index.ts",
+    "./siakad": "./src/siakad/index.ts"
   },
   "scripts": {
     "check": "tsc -p tsconfig.json",
