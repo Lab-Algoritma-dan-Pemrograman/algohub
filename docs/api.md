@@ -217,3 +217,82 @@ Base URL produksi: `https://api.algohub.web.id`. Semua route di bawah `/api`.
 | POST | `/api/sync-elearning` | `/api/siakad/sync-elearning` | Bearer | baca DB elearning, tulis `elearning_progress` di DB siakad |
 | GET | `/api/cron-check-shifts` | `/api/cron/siakad/check-shifts` | `CRON_SECRET` | push pengingat shift jaga hari ini |
 | GET | `/api/keep-alive` | `/api/cron/keep-alive` | `CRON_SECRET` | ping DB siakad dan elearning |
+
+## E-Learning
+
+Semua route di bawah `/api/elearning`. Pengganti `api/*.ts` lama dan query Supabase langsung dari browser `elearning`.
+
+- Response memakai envelope `pkg/response`: `{success, message, data, error}`. Pesan error lama masuk `message` persis, status code sama, field tambahan lama (`receivedKeys`, `code`) masuk `error`, dan body sukses lama masuk `data`.
+- Tanpa `DATABASE_URL_ELEARNING`, semua path `/api/elearning/*` dijawab `503 "Backend elearning belum dikonfigurasi (DATABASE_URL_ELEARNING)."`. Route praktikum tidak terpengaruh.
+- `POST /api/elearning/login` dibatasi 10 request/menit per IP klien (`X-Forwarded-For` entri pertama atau `X-Real-IP`).
+- Auth "Bearer" = header `Authorization: Bearer <token>`. Token yang diterima: token Supabase elearning (HS256/384/512, `ELEARNING_SUPABASE_JWT_SECRET`), token Go praktikum (`JWT_SECRET`), dan token siakad (`SIAKAD_JWT_SECRET`). Tanpa token atau token rusak → `401`. Semua route Bearer mengirim `Cache-Control: private, no-store`, termasuk respons `401`.
+- Peran A/K/S/P = peran token ternormalisasi (`admin`, `kordas`, `asisten`, `praktikan`); aturan RLS lama ditiru di Go dengan peran ini (`docs/updates/elearning-rls.md`). "Peran UI" = `resolveElearningRole(users.role, users.elearning_role)` dari DB, dipakai untuk guard service lama.
+- Penolakan mengikuti semantik RLS: baca yang tersaring → `200` kosong, UPDATE/DELETE yang tidak lolos → `200` tanpa efek, INSERT yang tidak lolos → `403 new row violates row-level security policy for table "<tabel>"`, exception trigger/RPC (`P0001`) → `400` dengan pesan apa adanya.
+- Pagination `?page=&limit=`: default limit 100, maksimum 100; `data` berbentuk `{items, total, page, limit}`.
+
+| Method | Path | Auth/peran | Sumber lama | Pagination | Catatan |
+|---|---|---|---|---|---|
+| POST | `/api/elearning/sso` | publik (`token` form/JSON) | `api/index.ts` | — | `303` ke `<ELEARNING_APP_URL>/sso?code=…` (code AES-GCM, sekali pakai, 60 detik); error `302` ke `/?error=invalid_token\|missing_fields\|server_error` |
+| POST | `/api/elearning/receive-token` | publik | `api/receive-token.ts` | — | `{token}` atau `{code}` dari `/sso` |
+| POST | `/api/elearning/login` | publik, 10/menit/IP | `api/login.ts` | — | lewat usecase login praktikum + audit `LOGIN`/`LOGIN_FAILED`; gagal → `401 "NIM/email atau password salah."` |
+| POST | `/api/elearning/verify` | publik | `api/verify.ts` | — | |
+| POST | `/api/elearning/ai` | Bearer atau `token` body; `users.role` admin/kordas | `api/ai.ts` | — | Gemini (rotasi `GEMINI_API_KEY`) atau Ollama `ELEARNING_OLLAMA_*`; role mentah (T-14) |
+| POST | `/api/elearning/grade` | Bearer atau `token` body; `users.role` admin/kordas/asisten | `api/grade.ts` | — | maks 3 attempt dinilai bersamaan |
+| POST | `/api/elearning/report` | `token` + `nim` body (atau Bearer) | `api/report.ts` | — | upsert `elearning_progress` |
+| POST | `/api/elearning/validate-quiz` | Bearer | `api/validate-quiz.ts` | — | token rusak → `500` seperti lama (T-12) |
+| POST | `/api/elearning/auth/supabase-token` | Bearer | `api/auth.ts` | — | token re-sign Supabase |
+| GET | `/api/elearning/curriculum/levels` | Bearer | `curriculumService.ts:12`, `SupabaseProvider.tsx:370` | ya | |
+| GET | `/api/elearning/curriculum/modules` | Bearer | `curriculumService.ts:38`, `SupabaseProvider.tsx:397` | ya | |
+| GET | `/api/elearning/curriculum/lessons` | Bearer | `curriculumService.ts:43`, `SupabaseProvider.tsx:405` | ya | A/K/S: tabel `lessons`; P: view `student_lessons` |
+| PUT | `/api/elearning/curriculum` | A/K | `curriculumService.saveFullCurriculum` | — | `{levels:[...]}`, satu transaksi; S/P → `403` (`levels`) |
+| DELETE | `/api/elearning/curriculum` | A/K | `curriculumService.clearCurriculum` | — | S/P → `200` tanpa efek |
+| GET | `/api/elearning/progress/me/lessons` | Bearer | `SupabaseProvider.tsx:298` | ya | |
+| GET | `/api/elearning/progress/me/recent` | Bearer | `Dashboard.tsx:81` | `?limit` (default 5, maks 100) | |
+| POST | `/api/elearning/progress/lessons/:lessonId/complete` | Bearer | `progressService.completeLesson` | — | `{xpReward}` |
+| POST | `/api/elearning/progress/xp` | Bearer | `progressService.grantXp` | — | `{amount}` (T-15) |
+| POST | `/api/elearning/progress/study-time` | Bearer | `Layout.tsx:143` | — | `{seconds}`, increment dalam satu UPDATE |
+| POST | `/api/elearning/streak` | Bearer | `Layout.tsx:218` | — | |
+| POST | `/api/elearning/profile/sync` | Bearer | `SupabaseProvider.tsx:91` | — | |
+| POST | `/api/elearning/activity-logs` | Bearer | `monitoringService.addAuditLog` | — | `{eventType, details, nama?}`, `nim` dari token |
+| GET | `/api/elearning/activity-logs` | Bearer; A/K/S (lainnya kosong) | `monitoringService.getAuditLogs` | ya | urut `timestamp` desc |
+| DELETE | `/api/elearning/activity-logs/:id` | A/K (lainnya `200` tanpa efek) | `monitoringService.deleteAuditLog` | — | |
+| GET | `/api/elearning/achievements` | Bearer | `achievementService.ts:116` | tidak (katalog) | `?requirementType=` |
+| GET | `/api/elearning/achievements/me` | Bearer | `Profile.tsx:27` | tidak | |
+| POST | `/api/elearning/achievements/check` | Bearer | `achievementService.checkAndUnlockAchievements` | — | |
+| POST | `/api/elearning/achievements/check-xp` | Bearer | `achievementService.ts:145` | — | `{xp}` |
+| GET | `/api/elearning/admin/users` | Bearer | `AdminDashboard.tsx:1219` | ya | `?q=` (nama/email) |
+| GET | `/api/elearning/admin/users/:nim/progress` | Bearer; progres orang lain hanya A/K/S | `AdminDashboard.tsx:1266` | ya | |
+| PATCH | `/api/elearning/admin/users/:nim/level-access` | peran UI A/K | `AdminDashboard.tsx:1196` | — | `{levelAccessOverrides}` |
+| PATCH | `/api/elearning/admin/users/:nim/role` | guard `handleToggleRole` | `AdminDashboard.tsx:1328` | — | `{role}` |
+| POST | `/api/elearning/admin/users/:nim/reset` | peran UI A/K/S | `progressService.resetUserProgress` | — | audit `progress_reset` |
+| POST | `/api/elearning/admin/users/:nim/reset-level` | peran UI A/K/S | `progressService.resetLevelProgress` | — | `{levelId}` |
+| POST | `/api/elearning/admin/users/:nim/reset-lesson` | peran UI A/K/S | `progressService.resetLessonProgress` | — | `{lessonId, lessonTitle?}` |
+| PUT | `/api/elearning/admin/users/:nim/xp` | peran UI A/K | `progressService.adjustUserXp` | — | `{xp}` |
+| DELETE | `/api/elearning/admin/users/:nim` | peran UI A/K | `progressService.deleteUser` | — | |
+| GET | `/api/elearning/game/questions` | Bearer | `gameService.getGameQuestions` | `?limit` (default 5, maks 100) | `?language=`; diacak lalu dipotong |
+| POST | `/api/elearning/game/questions` | A/K (lainnya `403`) | `gameService.addGameQuestion` | — | `{language, difficulty, title, code, bugLine, explanation}` → `{id}` |
+| PUT | `/api/elearning/game/questions` | A/K (lainnya `403`) | `gameService.forceResetGameQuestions` | — | `{questions:[...]}`, hapus semua + insert dalam satu transaksi |
+| POST | `/api/elearning/game/questions/seed` | Bearer; insert hanya A/K | `gameService.seedInitialQuestions` | — | `{questions:[...]}`, hanya bila bank soal kosong → `{seeded}` |
+| PATCH | `/api/elearning/game/questions/:id` | A/K (lainnya `200` tanpa efek) | `gameService.updateGameQuestion` | — | field kosong dilewati, `bugLine` ditulis bila dikirim |
+| DELETE | `/api/elearning/game/questions/:id` | A/K (lainnya `200` tanpa efek) | `gameService.deleteGameQuestion` | — | |
+| GET | `/api/elearning/game/settings` | Bearer | `gameService.getGameSettings` | — | baris `default` tidak ada/error → `{true,true,true,3,5}` |
+| PUT | `/api/elearning/game/settings` | A/K (lainnya `403`) | `gameService.updateGameSettings` | — | upsert `id='default'`, field yang dikirim saja |
+| GET | `/api/elearning/game/plays/me` | Bearer | `gameService.canPlayBugHunt` | — | `{allowed, playsUsed, limit}`, minggu mulai Senin 00:00 WIB |
+| POST | `/api/elearning/game/history` | Bearer | `gameService.saveGameHistory` | — | `{gameType, xpEarned}`; kuota habis → `400 WEEKLY_LIMIT_REACHED` |
+| GET | `/api/elearning/leaderboard` | Bearer | `leaderboardService.getLeaderboard` | ya (default 10, `limit=0` → 100) | `?kelas&jurusan&shift`, role `mahasiswa`, urut xp desc |
+| GET | `/api/elearning/leaderboard/rank` | Bearer | `leaderboardService.getUserRank` | — | `?xp&kelas&jurusan&shift`; xp 0 → `rank: null` |
+| GET | `/api/elearning/leaderboard/filters` | Bearer | `leaderboardService.getLeaderboardFilters` | — | |
+| GET | `/api/elearning/leaderboard/weekly` | Bearer | `leaderboardService.getWeeklyLeaderboard` | ya (default 10, `limit=0` → 100) | P hanya melihat XP mingguan miliknya, reward lesson 60 (T-19) |
+| GET | `/api/elearning/prestige/eligibility` | Bearer | `prestigeService.checkPrestigeEligibility` | — | `?nim=` (default diri sendiri) |
+| POST | `/api/elearning/prestige/reset` | diri sendiri atau peran UI A/K/S | `prestigeService.doVoluntaryPrestigeReset` | — | `{nim?}`; RPC `do_prestige_reset` apa adanya; lainnya `403 "Akses ditolak."` |
+| GET | `/api/elearning/playground/examples` | Bearer | `playgroundService.getPlaygroundExamples` | ya | `?language=`, urut `sort_order` |
+| POST | `/api/elearning/playground/examples` | A/K (lainnya `403`) | `playgroundService.addPlaygroundExample` | — | → `{id}` |
+| PATCH | `/api/elearning/playground/examples/:id` | A/K (lainnya `200` tanpa efek) | `playgroundService.updatePlaygroundExample` | — | |
+| DELETE | `/api/elearning/playground/examples/:id` | A/K (lainnya `200` tanpa efek) | `playgroundService.deletePlaygroundExample` | — | |
+| PUT | `/api/elearning/sessions/me` | Bearer | `Layout.tsx:198`, `:237` | — | `{currentActivity, nama?, kelas?, attemptId?, touchStreak?, studySeconds?}`; P → `sessionSaved:false` (RLS), streak/waktu belajar tetap jalan |
+| DELETE | `/api/elearning/sessions/me` | Bearer | `Layout.tsx:70` | — | P → `200` tanpa efek |
+| GET | `/api/elearning/monitoring/sessions` | A/K/S (lainnya kosong) | `StudentMonitoring.tsx:62` | ya | `{nim, last_heartbeat, users:{role}}` |
+| DELETE | `/api/elearning/monitoring/sessions/stale` | A/K/S (lainnya `200` tanpa efek) | `monitoringService.cleanupStaleSessions` | — | `?thresholdMinutes=2` |
+| GET | `/api/elearning/monitoring/students` | Bearer | `StudentMonitoring.tsx:81` | ya | role `praktikan`/`mahasiswa` |
+| GET | `/api/elearning/monitoring/progress` | Bearer; P hanya miliknya | `StudentMonitoring.tsx:111` | ya (per NIM) | `{nim, lessonIds}` |
+| POST | `/api/elearning/storage/lesson-images` | A/K/S (lainnya `403`) | `storageService.uploadImage` | — | multipart `file` (JPG/PNG/GIF/WEBP) → `{publicUrl}`, bucket `lesson-images` |
