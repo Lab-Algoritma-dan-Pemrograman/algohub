@@ -1,4 +1,4 @@
-import { mkdir, rename, rm } from 'node:fs/promises';
+import { mkdir, readFile, rename } from 'node:fs/promises';
 import { join } from 'node:path';
 const RELEASE_URL =
   'https://github.com/Lab-Algoritma-dan-Pemrograman/algohub/releases/download/compiler-v1/';
@@ -7,12 +7,17 @@ function fail(message: string): never {
   console.error(message);
   process.exit(1);
 }
-async function sha256(path: string): Promise<string | null> {
-  const file = Bun.file(path);
-  if (!(await file.exists())) return null;
-  const hasher = new Bun.CryptoHasher('sha256');
-  for await (const chunk of file.stream()) hasher.update(chunk);
-  return hasher.digest('hex');
+// Streaming Bun (Bun.write dari Response, Bun.file().stream()) kadang macet tanpa error di
+// Windows (Bun 1.3.14). File terbesar ±30 MB, jadi isi file diproses utuh di memori.
+function sha256(data: ArrayBuffer | Uint8Array): string {
+  return new Bun.CryptoHasher('sha256').update(data).digest('hex');
+}
+async function existingSha256(path: string): Promise<string | null> {
+  try {
+    return sha256(await readFile(path));
+  } catch {
+    return null;
+  }
 }
 async function download(name: string): Promise<Response> {
   const res = await fetch(RELEASE_URL + name);
@@ -40,17 +45,17 @@ const sums = parseSums(await (await download('SHA256SUMS')).text());
 for (const name of FILES) {
   const expected = sums.get(name);
   const target = join(dest, name);
-  if ((await sha256(target)) === expected) {
+  if ((await existingSha256(target)) === expected) {
     process.stdout.write(`${name}: dilewati (hash cocok)\n`);
     continue;
   }
-  const tmp = `${target}.tmp`;
-  await Bun.write(tmp, await download(name));
-  const actual = await sha256(tmp);
+  const body = await (await download(name)).arrayBuffer();
+  const actual = sha256(body);
   if (actual !== expected) {
-    await rm(tmp, { force: true });
     fail(`SHA-256 ${name} tidak cocok: diharapkan ${expected}, didapat ${actual}`);
   }
+  const tmp = `${target}.tmp`;
+  await Bun.write(tmp, body);
   await rename(tmp, target);
   process.stdout.write(`${name}: diunduh\n`);
 }
