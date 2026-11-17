@@ -4,6 +4,7 @@ node_modules/
 build/
 dist/
 .worktrees/
+.agents/
 coverage/
 playwright-report/
 test-results/
