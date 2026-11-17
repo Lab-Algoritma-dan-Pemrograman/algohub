@@ -9,6 +9,7 @@
   let sampleId = $state(samples[0].id);
   let language = $state<Language>(samples[0].language);
   let code = $state(samples[0].code);
+  let stdin = $state('');
   let running = $state(false);
   let terminal: ReturnType<typeof Terminal> | undefined = $state();
   const isolated = globalThis.crossOriginIsolated === true;
@@ -61,7 +62,12 @@
       );
     terminal?.focus();
     try {
-      report(await runner.run(lang, code, { onOutput: (data) => terminal?.write(data) }));
+      report(
+        await runner.run(lang, code, {
+          stdin: stdin || undefined,
+          onOutput: (data) => terminal?.write(data),
+        }),
+      );
     } finally {
       running = false;
     }
@@ -107,6 +113,14 @@
   <div class="overflow-hidden rounded-xl border border-zinc-800">
     <CodeEditor bind:value={code} {language} onrun={run} />
   </div>
+  <label class="text-ink-caption flex flex-col gap-1 text-xs">
+    Stdin batch (kosong = interaktif)
+    <textarea
+      data-testid="stdin"
+      class="border-border rounded-md border bg-white p-2 font-mono text-sm"
+      rows="2"
+      bind:value={stdin}></textarea>
+  </label>
   <Terminal
     bind:this={terminal}
     data-testid="terminal"

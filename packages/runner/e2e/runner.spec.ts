@@ -56,6 +56,33 @@ test('C infinite loop di-reset setelah 40 detik lalu program berikutnya jalan', 
   await expect(page.getByTestId('run')).toBeEnabled();
   await runTwoScanf(page);
 });
+test('C mode batch membaca stdin tanpa input interaktif', async ({ page }) => {
+  await page.getByTestId('stdin').fill('3\n4');
+  await runSample(page, 'c-two-scanf');
+  await expect(output(page)).toContainText('Hasil: 7', { timeout: 120_000 });
+  await expect(output(page)).toContainText('Program selesai');
+});
+test('Python mode batch membaca stdin baris per baris', async ({ page }) => {
+  await page.getByTestId('stdin').fill('Budi\nBandung');
+  await runSample(page, 'python-input');
+  await expect(output(page)).toContainText('Halo Budi dari Bandung', { timeout: 120_000 });
+  await expect(output(page)).toContainText('Program selesai');
+});
+test('Stop menghentikan C yang berputar lalu program berikutnya jalan', async ({ page }) => {
+  await runSample(page, 'c-infinite-loop');
+  await expect(output(page)).toContainText('Mulai loop', { timeout: 120_000 });
+  await page.getByTestId('stop').click();
+  await expect(output(page)).toContainText('dihentikan oleh pengguna');
+  await expect(page.getByTestId('run')).toBeEnabled();
+  await runTwoScanf(page);
+});
+test('Stop membatalkan Python yang menunggu input()', async ({ page }) => {
+  await runSample(page, 'python-input');
+  await expect(output(page)).toContainText('Nama:', { timeout: 120_000 });
+  await page.getByTestId('stop').click();
+  await expect(output(page)).toContainText('dihentikan oleh pengguna');
+  await expect(page.getByTestId('run')).toBeEnabled();
+});
 test('Monaco dimuat dari CDN jsDelivr dan tidak ikut bundle', async ({ page }) => {
   const monacoRequest = page.waitForRequest(/cdn\.jsdelivr\.net\/npm\/monaco-editor/);
   await page.reload();
