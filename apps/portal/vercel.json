@@ -1,0 +1,69 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "cd ../.. && bun install --frozen-lockfile",
+  "buildCommand": "bun run build",
+  "outputDirectory": "build",
+  "regions": ["sin1"],
+  "redirects": [
+    {
+      "source": "/info/:path*",
+      "destination": "https://praktikum.algohub.web.id/info/:path*",
+      "statusCode": 301
+    },
+    {
+      "source": "/praktikum/:path*",
+      "destination": "https://praktikum.algohub.web.id/praktikum/:path*",
+      "statusCode": 301
+    },
+    {
+      "source": "/playground",
+      "destination": "https://praktikum.algohub.web.id/playground",
+      "statusCode": 301
+    },
+    {
+      "source": "/playground-c",
+      "destination": "https://praktikum.algohub.web.id/playground-c",
+      "statusCode": 301
+    },
+    {
+      "source": "/layanan/:path*",
+      "destination": "https://praktikum.algohub.web.id/layanan/:path*",
+      "statusCode": 301
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=63072000; includeSubDomains; preload"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(self), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'none'; object-src 'none'"
+        }
+      ]
+    },
+    {
+      "source": "/compiler/v1/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" },
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Cross-Origin-Resource-Policy", "value": "cross-origin" }
+      ]
+    },
+    {
+      "source": "/_app/immutable/(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+    }
+  ]
+}

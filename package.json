@@ -10,6 +10,7 @@
   "prettier": "@algohub/config/prettier",
   "scripts": {
     "dev:api": "cd backend && go run ./cmd/server",
+    "dev:portal": "bun run --filter @algohub/portal dev",
     "dev:praktikum": "bun run --filter @algohub/praktikum dev",
     "dev:siakad": "bun run --filter @algohub/siakad dev",
     "dev:elearning": "bun run --filter @algohub/elearning dev",
