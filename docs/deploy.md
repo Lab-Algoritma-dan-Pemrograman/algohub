@@ -15,7 +15,7 @@ Semua ada di team `lab-algoritma-pemrograman` (Hobby), akun `lordbgsdts-afk`. Su
 | `elearning.algohub.web.id` | `labap-elearning` | `labap-elearning-gknsdm2fm-…` |
 | `praktikum.algohub.web.id` | — (belum dipakai, 404) | — |
 
-DNS di Cloudflare (`CNAME cname.vercel-dns.com`). `vercel domains ls` menampilkan 0 domain, karena domain dikelola di luar Vercel. Itu sebabnya `vercel domains inspect` menolak, padahal alias-nya ada di team ini.
+Domain dibeli di IDCloudHost, nameserver di Cloudflare. Record `CNAME cname.vercel-dns.com` dengan mode DNS only: IP hasil resolve (`76.76.21.x`, `66.33.60.x`) adalah IP Vercel, bukan IP Cloudflare. `vercel domains ls` menampilkan 0 domain, karena domain dikelola di luar Vercel. Itu sebabnya `vercel domains inspect` menolak, padahal alias-nya ada di team ini.
 
 ### Project Supabase per app
 Hanya project ref yang dicatat. Sumber: bundle JS produksi yang publik, response publik `/api/info/*`, dan file `.env` lokal (hanya ref yang dibaca).
