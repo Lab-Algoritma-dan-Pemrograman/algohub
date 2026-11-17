@@ -62,7 +62,7 @@ Tidak bisa dibaca lewat CLI. `vercel usage` di team Hobby mengembalikan "Billing
 | Git integration | **belum disambungkan** (deploy lewat `vercel deploy` dari laptop) |
 | Domain | belum ada. `api.algohub.web.id` masih di `labap-backend`. |
 | Env (preview) | `APP_ENV=production`, `CORS_ORIGINS` (5 domain prod), `CORS_ORIGIN_PATTERNS=https://algohub-[a-z0-9-]+-lab-algoritma-pemrograman\.vercel\.app`. Sejak Fase 2 juga `DATABASE_URL_PRAKTIKUM` (encrypted, disusun dari `DB_*` `labap-backend`), `JWT_SECRET` (encrypted, sama dengan prod), `JWT_EXPIRE_HOURS`, `AUTH_MODE`, `SUPABASE_JWKS_URL`, `SUPABASE_JWT_ISSUER`, `SUPABASE_JWT_AUD`. `FB_SCRYPT_*` sengaja tidak dipasang supaya login uji tidak memigrasi hash password. |
-| Env (production) | belum diisi |
+| Env (production) | belum diisi. **Jangan deploy production `algohub-api` sebelum cutover**: `vercel.json` berisi cron `check-shifts` (07.00) dan `keep-alive`, sehingga deployment production akan mengirim notifikasi push shift **ganda** bersama siakad lama. |
 
 Deployment:
 - `algohub-r1g6oxqvq-…vercel.app` (preview): lulus uji `/api/health` dan CORS (lihat di bawah).

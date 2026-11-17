@@ -13,3 +13,6 @@ Bug dan kejanggalan dari kode lama yang **sengaja tidak diperbaiki** selama port
 | T-7 | backend baru | Rantai middleware alias hanya diuji lewat nama handler, belum lewat respons 403 | jaminan lewat struktur `mountPraktikum`, bukan test | tambah test 403 untuk satu route `write(...)` dan satu route admin di kedua path |
 | T-8 | runner | Stop Python pada program CPU-bound (`while True: pass`) tidak menghentikan program, sama dengan kedua app lama | run berikutnya ditolak sampai reload | terminate + respawn setelah masa tenggang |
 | T-9 | runner | `Runner.stop()` dan `Runner.sendInput()` belum dibedakan per bahasa | aman selama satu run per halaman | tambah argumen `Language` |
+| T-10 | backend siakad (desain Fase 5) | Satu `CRON_SECRET` membuka cron praktikum, cron siakad, dan bypass `send-push`/`send-wa`. Push tanpa `targetUserId` dikirim ke semua subscription. | kalau secret cron-job.org bocor, pelaku bisa broadcast ke semua user siakad | pisahkan secret untuk bypass notifikasi |
+| T-11 | siakad `send-wa.ts` | WA bisa diarahkan ke URL gateway kustom | penyalahgunaan oleh pemegang token staf | batasi URL ke daftar gateway yang dikenal |
+| T-12 | siakad metadata RPC | Cache `pg_proc` per instance tidak pernah diinvalidasi | perubahan signature fungsi baru terlihat setelah instance didaur ulang | TTL cache |

@@ -4,6 +4,25 @@ Semua perubahan penting dicatat di file ini. Format mengikuti [Keep a Changelog]
 
 ## [Belum dirilis]
 
+### Fase 5 — Backend siakad (2026-11-18)
+
+#### Ditambahkan
+- Domain siakad di backend Go (`internal/*/siakad/`, `handler/siakad/`, `handler/cron/`, `router_siakad.go`, `config/siakad.go`, `app/siakad.go`), port dari 11 file `siakad/api/*.ts`. Pemetaan endpoint lama → baru ada di `docs/api.md` § Siakad.
+- Gateway `POST /api/siakad/rpc?fn=<nama>`: alias role, `PUBLIC_RPCS`, `ROLE_PERMISSIONS`, injeksi `p_*_id` dari JWT, dan `stripCredentials`, sama dengan `rpc.ts`. Nama fungsi hanya diambil dari whitelist. Nama dan tipe argumen dibaca dari `pg_proc`, dan seluruh body dikirim sebagai satu parameter `?::json` (`json_to_record`).
+- Auth siakad: login (rate limit, bcrypt lewat `login_user`, `system_settings`), logout (`revoke_token`), dan verify (cookie `siakad_token` `Domain=.algohub.web.id; SameSite=Lax` atau header `Authorization`).
+- `generate-jwt` (SSO ke elearning), `analyze-schedule` (Gemini atau Bynara, Stepfun hanya menerima gambar), `send-push` (VAPID), `send-wa`, dan `sync-elearning` (membaca `DBs.Elearning`, menulis `elearning_progress` di `DBs.Siakad`, sesuai lokasi tabel di prod).
+- Cron `GET /api/cron/siakad/check-shifts` (07.00) dan `GET /api/cron/keep-alive` (00.00, ping kedua project Supabase) dengan `CRON_SECRET` Bearer yang dibandingkan secara constant-time. Keduanya terdaftar di `backend/vercel.json`.
+- Package `pkg/jwt/roles.go` (satu `NormalizeRole`), `pkg/gemini`, `pkg/bynara`, `pkg/webpush` (`SherClockHolmes/webpush-go`), dan `pkg/whatsapp`.
+- Test matriks role × RPC, injeksi identitas, cookie, cron, push, WA, AI (httptest), sync, dan seam route praktikum + siakad pada satu engine.
+
+#### Diubah
+- `config.Load()` mewajibkan `DATABASE_URL_SIAKAD`, `DATABASE_URL_ELEARNING`, dan `SIAKAD_JWT_SECRET`. Tanpa ketiganya, server gagal start.
+- Cron siakad sekarang wajib `CRON_SECRET`. Sebelumnya `check-shifts` terbuka dan `keep-alive` hanya mengecek header `x-vercel-cron`, yang bisa dipalsukan.
+- Error 500 yang bukan dari Postgres (misalnya gagal konek pgx) dibalas `Internal server error`, tidak lagi memuat user, host, atau nama database.
+
+#### Diketahui
+- SQL baru hanya diuji dengan sqlmock. Beberapa kolom belum dicocokkan dengan skema prod (`schedule_assignments.*`, `users.phone`, `users.nama/class_code/major`, `sso_handshakes.user_id`, `group_assistants.schedule_id`). Wajib diuji di preview sebelum cutover.
+- Satu `CRON_SECRET` dipakai bersama oleh cron praktikum (cron-job.org), cron siakad, dan bypass `send-push`/`send-wa` (`T-10`).
 ### Fase 2 — Backend praktikum (2026-11-17)
 
 #### Dipindahkan
