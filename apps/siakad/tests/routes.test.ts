@@ -1,3 +1,5 @@
+import { existsSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const api = vi.hoisted(() => ({
@@ -65,6 +67,21 @@ describe('ROUTE_ACCESS', () => {
   it('sama persis dengan tabel 05-siakad.md (19 route login)', () => {
     expect(ROUTE_ACCESS).toEqual(EXPECTED);
     expect(Object.keys(ROUTE_ACCESS)).toHaveLength(19);
+  });
+});
+
+describe('21 halaman tabel 05-siakad.md', () => {
+  // Lingkungan jsdom membuat import.meta.url bukan file:, jadi path diambil dari cwd paket.
+  const routesDir = resolve(process.cwd(), 'src/routes') + '/';
+
+  it('setiap route login punya +page.svelte di grup (app), ditambah / dan *', () => {
+    const pages = [
+      ...Object.keys(ROUTE_ACCESS).map((path) => `(app)${path}/+page.svelte`),
+      '+page.svelte',
+      '+error.svelte',
+    ];
+    expect(pages).toHaveLength(21);
+    expect(pages.filter((page) => !existsSync(`${routesDir}${page}`))).toEqual([]);
   });
 });
 

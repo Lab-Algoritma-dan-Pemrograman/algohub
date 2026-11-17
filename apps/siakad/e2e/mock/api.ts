@@ -6,7 +6,14 @@ const API = 'http://api.siakad.test';
 const APP_ORIGIN = 'http://localhost:5174';
 
 export type RpcParams = Record<string, unknown>;
-export type RpcReply = unknown | ((params: RpcParams) => unknown);
+export type RpcReply =
+  | ((params: RpcParams) => unknown)
+  | Record<string, unknown>
+  | unknown[]
+  | string
+  | number
+  | boolean
+  | null;
 
 export interface RpcCall {
   fn: string;

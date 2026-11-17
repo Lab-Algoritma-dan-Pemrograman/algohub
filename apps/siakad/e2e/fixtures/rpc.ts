@@ -1,7 +1,8 @@
+import type { RpcReply } from '../mock/api.ts';
 import { DIVISION_ACCESS, type Role } from './users.ts';
 
 // Respons bawaan per RPC; spec menimpa yang dibutuhkan. Bentuk baris dari types.ts siakad lama.
-export function defaultRpc(role: Role): Record<string, unknown> {
+export function defaultRpc(role: Role): Record<string, RpcReply> {
   return {
     get_public_settings: [{ active_shift: 'all', announcement: 'Selamat datang di uji e2e' }],
     get_division_access_secure: DIVISION_ACCESS[role].map((menu_key) => ({ menu_key })),
