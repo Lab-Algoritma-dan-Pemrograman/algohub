@@ -1,0 +1,322 @@
+@import '@algohub/config/tailwind.css';
+
+:root {
+  --background: hsl(0 0% 98%);
+  --foreground: hsl(0 0% 9%);
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(0 0% 9%);
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(0 0% 9%);
+  --primary: hsl(0 100% 25%);
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(210 40% 96%);
+  --secondary-foreground: hsl(222 47% 11%);
+  --muted: hsl(210 40% 96%);
+  --muted-foreground: hsl(215 16% 47%);
+  --accent: hsl(0 100% 97%);
+  --accent-foreground: hsl(0 100% 20%);
+  --success: hsl(142 71% 45%);
+  --success-foreground: hsl(0 0% 100%);
+  --warning: hsl(38 92% 50%);
+  --warning-foreground: hsl(48 96% 89%);
+  --destructive: hsl(0 84% 60%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --info: hsl(217 91% 60%);
+  --info-foreground: hsl(0 0% 100%);
+  --border: hsl(214 32% 91%);
+  --input: hsl(214 32% 91%);
+  --ring: hsl(0 100% 25%);
+  --radius: 0.625rem;
+  --sidebar-background: hsl(0 0% 100%);
+  --sidebar-foreground: hsl(229 19% 22%);
+  --sidebar-primary: hsl(342 74% 31%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent: hsl(342 74% 97%);
+  --sidebar-accent-foreground: hsl(342 74% 31%);
+  --sidebar-border: hsl(220 13% 95%);
+  --sidebar-ring: hsl(342 74% 31%);
+  --shadow-card-value: 0 2px 8px -2px rgb(0 0 0 / 0.08);
+  --shadow-md-value: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.06);
+}
+
+@theme inline {
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-sidebar: var(--sidebar-background);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --shadow-card: var(--shadow-card-value);
+  --shadow-elevated: var(--shadow-md-value);
+}
+
+@theme {
+  /* Markup halaman ditulis untuk skala Tailwind 3 (tailwind.config.ts lama); tanpa ini
+     shadow-sm, blur-sm, dan rounded tampil berbeda. */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --blur-sm: 4px;
+  --font-sans: Nunito, sans-serif;
+  --color-maroon: #8a1538;
+  --color-maroon-light: #b21f47;
+  --color-maroon-dark: #5c0e25;
+  --color-maroon-bg: #fdf2f4;
+  --color-fun-yellow: #ffc300;
+  --color-fun-blue: #48cae4;
+  --color-fun-green: #06d6a0;
+  --color-fun-purple: #9d4edd;
+  --color-fun-orange: #ff9f1c;
+  --color-fun-pink: #ffafcc;
+  --color-dark: #2d3142;
+  --shadow-soft: 0 10px 25px -5px rgba(138, 21, 56, 0.05), 0 8px 10px -6px rgba(138, 21, 56, 0.02);
+  --shadow-bubbly-maroon: 0 4px 0 #5c0e25;
+  --shadow-bubbly-dark: 0 4px 0 #111827;
+  --shadow-bubbly-red: 0 4px 0 #fee2e2;
+  --shadow-bubbly-blue: 0 4px 0 #dbeafe;
+  --shadow-bubbly-green: 0 4px 0 #d1fae5;
+  --shadow-bubbly-orange: 0 4px 0 #ffedd5;
+  --shadow-bubbly-purple: 0 4px 0 #f3e8ff;
+  --animate-fade-in: fade-in 0.3s ease-out;
+  --animate-slide-in-left: slide-in-left 0.3s ease-out;
+  --animate-pulse-soft: pulse-soft 2s ease-in-out infinite;
+  --animate-marquee: marquee 25s linear infinite;
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-float-delayed: float-delayed 8s ease-in-out infinite;
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes slide-in-left {
+    from {
+      opacity: 0;
+      transform: translateX(-16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  @keyframes pulse-soft {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.7;
+    }
+  }
+  @keyframes marquee {
+    0% {
+      transform: translateX(0%);
+    }
+    100% {
+      transform: translateX(-100%);
+    }
+  }
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0px) translateX(0px);
+    }
+    50% {
+      transform: translateY(-20px) translateX(10px);
+    }
+  }
+  @keyframes float-delayed {
+    0%,
+    100% {
+      transform: translateY(0px) translateX(0px);
+    }
+    50% {
+      transform: translateY(20px) translateX(-10px);
+    }
+  }
+}
+
+@utility container {
+  margin-inline: auto;
+  padding-inline: 2rem;
+  @media (width >= 1400px) {
+    max-width: 1400px;
+  }
+}
+
+@layer base {
+  body {
+    @apply text-foreground antialiased;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    background-color: #fdfbf7;
+    background-image:
+      radial-gradient(circle at 5% 5%, rgba(138, 21, 56, 0.03) 0%, transparent 20%),
+      radial-gradient(circle at 95% 95%, rgba(72, 202, 228, 0.04) 0%, transparent 20%);
+    background-attachment: fixed;
+  }
+}
+
+@layer components {
+  .card-elevated {
+    @apply bg-card shadow-card rounded-lg border transition-shadow duration-200;
+  }
+  .card-elevated:hover {
+    @apply shadow-elevated;
+  }
+  .badge-success {
+    @apply bg-success/10 text-success border-success/20;
+  }
+  .badge-warning {
+    @apply bg-warning/10 text-warning border-warning/20;
+  }
+  .badge-destructive {
+    @apply bg-destructive/10 text-destructive border-destructive/20;
+  }
+  .badge-info {
+    @apply bg-info/10 text-info border-info/20;
+  }
+  .form-label {
+    @apply text-foreground mb-1.5 block text-sm font-medium;
+  }
+  .form-input {
+    @apply border-input bg-background text-foreground placeholder:text-muted-foreground focus:ring-ring w-full rounded-lg border px-3 py-2.5 transition-all duration-200 focus:border-transparent focus:ring-2 focus:outline-none;
+  }
+  .upload-zone {
+    @apply border-muted-foreground/30 cursor-pointer rounded-lg border-2 border-dashed p-8 text-center transition-all duration-200;
+  }
+  .upload-zone:hover {
+    @apply border-primary/50 bg-primary/5;
+  }
+  .upload-zone-active {
+    @apply border-primary bg-primary/10;
+  }
+  .custom-checkbox-container {
+    @apply relative flex cursor-pointer items-center select-none;
+  }
+  .custom-checkbox-container input {
+    @apply sr-only;
+  }
+  .custom-checkbox-box {
+    @apply flex h-5 w-5 items-center justify-center rounded-md border-2 border-gray-300 bg-white transition-all duration-300;
+  }
+  .custom-checkbox-container input:checked ~ .custom-checkbox-box {
+    @apply bg-maroon border-maroon scale-110 shadow-sm;
+  }
+  .custom-checkbox-box::after {
+    content: '\f00c';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    @apply scale-0 text-xs text-white transition-transform duration-300;
+  }
+  .custom-checkbox-container input:checked ~ .custom-checkbox-box::after {
+    @apply scale-100;
+  }
+  .card-hover {
+    @apply border-2 border-transparent transition-all duration-300 ease-out;
+  }
+  .card-hover:hover {
+    @apply border-maroon/20 -translate-y-2 shadow-lg;
+  }
+  .card-bubbly {
+    transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+  .card-bubbly:hover {
+    transform: translateY(-4px) !important;
+  }
+  /* Kartu shadcn lama (rounded-lg border bg-card) diberi gaya bubbly secara global. */
+  [data-slot='card'] {
+    border-width: 2px;
+    border-radius: 1rem;
+    transition:
+      transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1),
+      box-shadow 0.2s,
+      border-color 0.2s;
+  }
+  [data-slot='card']:not([class*='border-fun-']):not([class*='border-maroon']):not(
+      [class*='border-red-']
+    ):not([class*='border-blue-']):not([class*='border-green-']):not([class*='border-orange-']):not(
+      [class*='border-purple-']
+    ):not([class*='border-teal-']):not([class*='border-destructive']) {
+    border-color: #f1f5f9;
+  }
+  [data-slot='card']:not([class*='shadow-bubbly-']):not([class*='shadow-inner']):not(
+      [class*='shadow-sm']
+    ):not([class*='shadow-md']):not([class*='shadow-lg']) {
+    box-shadow: 0 4px 0 #e2e8f0;
+  }
+  [data-slot='card']:hover {
+    transform: translateY(-4px);
+  }
+  [data-slot='card']:hover:not([class*='shadow-bubbly-']):not([class*='shadow-inner']) {
+    box-shadow: 0 8px 0 #cbd5e1;
+  }
+  input:not([type='checkbox']):not([type='radio']),
+  textarea,
+  select,
+  button[role='combobox'],
+  [class*='border-input'] {
+    border-radius: 0.75rem !important;
+    border-width: 2px !important;
+    border-color: #e2e8f0 !important;
+    transition: all 0.2s ease-in-out !important;
+  }
+  input:not([type='checkbox']):not([type='radio']):focus,
+  textarea:focus,
+  select:focus,
+  button[role='combobox']:focus,
+  [class*='border-input']:focus,
+  [class*='border-input'][data-state='open'] {
+    border-color: #8a1538 !important;
+    box-shadow: 0 0 0 2px rgba(138, 21, 56, 0.15) !important;
+    outline: none !important;
+  }
+  div[role='dialog'] {
+    border-width: 2px !important;
+    border-radius: 1.5rem !important;
+    border-color: #e2e8f0 !important;
+    box-shadow: 0 10px 0 #cbd5e1 !important;
+  }
+  .custom-scroll::-webkit-scrollbar {
+    width: 6px;
+  }
+  .custom-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scroll::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+  }
+  .custom-scroll::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+  .btn-bubbly-action:active {
+    transform: translateY(4px) !important;
+    box-shadow: 0 0px 0 transparent !important;
+  }
+  .mask-edges {
+    -webkit-mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+    mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+  }
+  @keyframes marquee-half {
+    0% {
+      transform: translateX(0%);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+  .animate-marquee-half {
+    animation: marquee-half 25s linear infinite;
+  }
+}

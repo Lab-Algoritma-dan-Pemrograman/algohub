@@ -1,0 +1,5 @@
+{
+  "extends": ["@algohub/config/tsconfig.json", "$app/tsconfig"],
+  "include": ["src", "tests", "e2e", "*.ts"],
+  "exclude": ["src/service-worker.ts"]
+}
