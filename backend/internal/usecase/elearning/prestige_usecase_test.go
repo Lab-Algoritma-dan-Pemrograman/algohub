@@ -16,7 +16,7 @@ import (
 	usecase "github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/usecase/elearning"
 )
 
-// Enam level masing-masing satu pelajaran yang semuanya selesai.
+// Syarat 6/6 level selesai sudah terpenuhi dengan satu pelajaran per level.
 func (f *learnFixture) eligibleWith(nim string, state *repository.PrestigeState, used int64, semesterStart time.Time) {
 	tree := make([]repository.LevelLessons, 6)
 	ids := make([]string, 6)

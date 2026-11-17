@@ -20,7 +20,6 @@ const (
 
 var imageTypes = []string{"image/jpeg", "image/png", "image/gif", "image/webp"}
 
-// Diimplementasikan pkg/supabase.Client untuk bucket lesson-images.
 type ImageUploader interface {
 	Upload(path string, content []byte, contentType string, upsert bool) (string, error)
 }

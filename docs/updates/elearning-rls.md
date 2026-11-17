@@ -609,9 +609,9 @@ Semua path di bawah `/api/elearning`. Kolom "Status" diisi FEAT-002..005: `belum
 | `gameService.ts:251` / `:294` | game_settings get / upsert | `GET /game/settings` / `PUT /game/settings` | selesai (`TestElearningLearningRoutesRequireToken`) |
 | `gameService.ts:314` | game_history count minggu ini | `GET /game/plays/me` (= `canPlayBugHunt`) | selesai (`TestElearningLearningRoutesRequireToken`) |
 | `services/leaderboardService.ts:82`, `:102`, `:109`, `:169`, `:176` | weekly | `GET /leaderboard/weekly?kelas&jurusan&shift&limit` | selesai (`TestElearningLearningRoutesRequireToken`) |
-| `leaderboardService.ts:266`, `:280`, `:288` | weekly_standings | kode mati | kode mati |
+| `leaderboardService.ts:266`, `:280`, `:288` | weekly_standings | kode mati (`saveWeeklySnapshot` dan `getWeeklyHistory` tanpa pemanggil di `src/`) | kode mati |
 | `leaderboardService.ts:306` / `:356` / `:384` | users | `GET /leaderboard` / `GET /leaderboard/rank?xp` / `GET /leaderboard/filters` | selesai (`TestElearningLearningRoutesRequireToken`) |
-| `services/monitoringService.ts:50`, `:65` | active_sessions | kode mati (operasi sama dengan `PUT /sessions/me` dan `GET /monitoring/sessions`) | kode mati |
+| `services/monitoringService.ts:50`, `:65` | active_sessions | kode mati (`updateHeartbeat` dan `subscribeActiveSessions` tanpa pemanggil di `src/`; operasinya sama dengan `PUT /sessions/me` dan `GET /monitoring/sessions`) | kode mati |
 | `monitoringService.ts:99` | active_sessions delete stale | `DELETE /monitoring/sessions/stale?thresholdMinutes=2` | selesai (`TestElearningLearningRoutesRequireToken`) |
 | `monitoringService.ts:132` | activity_logs insert | `POST /activity-logs` (juga dipakai internal oleh endpoint admin dan prestige) | selesai (`TestElearningLearningRoutesRequireToken`) |
 | `monitoringService.ts:143`, `:158` | activity_logs list | `GET /activity-logs?page&limit` | selesai (`TestElearningLearningRoutesRequireToken`) |
@@ -621,14 +621,14 @@ Semua path di bawah `/api/elearning`. Kolom "Status" diisi FEAT-002..005: `belum
 | `prestigeService.ts:207` | RPC `do_prestige_reset` | `POST /prestige/reset {nim}` (RPC dipanggil apa adanya) | selesai (`TestElearningLearningRoutesRequireToken`) |
 | `services/progressService.ts:57`, `:84`, `:102` | completeLesson | `POST /progress/lessons/:lessonId/complete {xpReward}` | selesai (`TestElearningLearningRoutesRequireToken`) |
 | `progressService.ts:162` | grantXp | `POST /progress/xp {amount}` | selesai (`TestElearningLearningRoutesRequireToken`) |
-| `progressService.ts:193` | syncProgress | kode mati (= `GET /progress/me/lessons`) | kode mati |
+| `progressService.ts:193` | syncProgress | kode mati (`syncProgress` tanpa pemanggil di `src/`; operasinya sama dengan `GET /progress/me/lessons`) | kode mati |
 | `progressService.ts:236`, `:244`, `:254` | resetUserProgress | `POST /admin/users/:nim/reset` | selesai (`TestElearningLearningRoutesRequireToken`) |
 | `progressService.ts:311`, `:322`, `:331`, `:340` | resetLevelProgress | `POST /admin/users/:nim/reset-level {levelId}` | selesai (`TestElearningLearningRoutesRequireToken`) |
 | `progressService.ts:395`, `:404`, `:413` | resetLessonProgress | `POST /admin/users/:nim/reset-lesson {lessonId,lessonTitle}` | selesai (`TestElearningLearningRoutesRequireToken`) |
 | `progressService.ts:465`, `:473` | adjustUserXp | `PUT /admin/users/:nim/xp {xp}` | selesai (`TestElearningLearningRoutesRequireToken`) |
 | `progressService.ts:538` | deleteUser | `DELETE /admin/users/:nim` | selesai (`TestElearningLearningRoutesRequireToken`) |
 | `services/storageService.ts:81`, `:98` | storage `lesson-images` | `POST /storage/lesson-images` (multipart `file`) | selesai (`TestElearningLearningRoutesRequireToken`) |
-| `services/streakService.ts:88` | users streak | kode mati (= `POST /streak`) | kode mati |
+| `services/streakService.ts:88` | users streak | kode mati (`syncUserStreak` tanpa pemanggil di `src/`; operasinya sama dengan `POST /streak`) | kode mati |
 | `api/validate-quiz.ts` | lessons.quiz | `POST /validate-quiz` | selesai (`TestElearningLegacyAPIRoutes`) |
 | `api/grade.ts` | users ×3, assessment_attempts ×2, assessment_grading_rules, assessment_questions | `POST /grade` | selesai (`TestElearningLegacyAPIRoutes`) |
 | `api/ai.ts` | users.role | `POST /ai` | selesai (`TestElearningLegacyAPIRoutes`) |
