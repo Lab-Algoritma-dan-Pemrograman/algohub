@@ -15,6 +15,15 @@ import (
 	"github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/pkg/supabase"
 )
 
+func fbScryptConfig(cfg *config.Config) hash.FbScryptConfig {
+	return hash.FbScryptConfig{
+		SignerKey:     cfg.FbScryptSignerKey,
+		SaltSeparator: cfg.FbScryptSaltSeparator,
+		Rounds:        cfg.FbScryptRounds,
+		MemCost:       cfg.FbScryptMemCost,
+	}
+}
+
 func newPraktikum(cfg *config.Config, db *gorm.DB) *deliveryhttp.Praktikum {
 	jm := jwt.NewManager(cfg.JWTSecret, cfg.JWTExpireHours)
 	sb := supabase.New(cfg.SupabaseURL, cfg.SupabaseServiceKey, cfg.SupabaseBucket)
@@ -44,12 +53,7 @@ func newPraktikum(cfg *config.Config, db *gorm.DB) *deliveryhttp.Praktikum {
 	gameRepo := repository.NewGameRepository(db)
 	laporanBesarRepo := repository.NewLaporanBesarRepository(db)
 
-	authUC := usecase.NewAuthUsecase(userRepo, kelasRepo, jm, cfg, hash.FbScryptConfig{
-		SignerKey:     cfg.FbScryptSignerKey,
-		SaltSeparator: cfg.FbScryptSaltSeparator,
-		Rounds:        cfg.FbScryptRounds,
-		MemCost:       cfg.FbScryptMemCost,
-	})
+	authUC := usecase.NewAuthUsecase(userRepo, kelasRepo, jm, cfg, fbScryptConfig(cfg))
 	profileUC := usecase.NewProfileUsecase(userRepo, cfg)
 	dashboardUC := usecase.NewDashboardUsecase(userRepo, aktivasiRepo, pengerjaanRepo)
 	sesiUC := usecase.NewSesiUsecase(sesiRepo, courseRepo)

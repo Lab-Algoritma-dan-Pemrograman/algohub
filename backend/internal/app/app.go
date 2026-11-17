@@ -26,5 +26,6 @@ func New() (http.Handler, error) {
 	}
 	deliveryhttp.RegisterPraktikum(r, newPraktikum(cfg, dbs.Praktikum))
 	registerSiakad(r, cfg, dbs)
+	registerElearning(r, cfg, dbs)
 	return r, nil
 }
