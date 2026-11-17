@@ -44,5 +44,7 @@ export default defineConfig(
       sourceType: 'script',
       globals: { ...globals.worker },
     },
+    // Aturan ini crash (scope.upper null) pada file sourceType script.
+    rules: { 'svelte/no-inner-declarations': 'off' },
   },
 );

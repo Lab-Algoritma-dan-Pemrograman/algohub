@@ -1,0 +1,7 @@
+{
+  "extends": "@algohub/config/tsconfig.json",
+  "compilerOptions": {
+    "types": ["node"]
+  },
+  "include": ["src", "vitest.config.ts"]
+}
