@@ -1,8 +1,9 @@
 <script lang="ts" generics="TData">
   import { createVirtualizer } from '@tanstack/svelte-virtual';
   import { getCoreRowModel, type ColumnDef, type Row } from '@tanstack/table-core';
-  import { untrack } from 'svelte';
+  import { untrack, type Snippet } from 'svelte';
   import { cn } from '../../utils.js';
+  import type {} from './column-meta.js';
   import { createSvelteTable, FlexRender } from '../ui/data-table/index.js';
   import * as Table from '../ui/table/index.js';
   import { shouldVirtualize, virtualPadding } from './virtual.js';
@@ -13,6 +14,13 @@
     estimateRowHeight = 48,
     maxHeight = '70vh',
     class: className,
+    tableClass,
+    headerRowClass,
+    bodyClass,
+    headClass,
+    cellClass,
+    rowClass,
+    empty,
   }: {
     data: TData[];
     // Tipe nilai tiap kolom berbeda; ColumnDef<TData, unknown> menolak kolom accessor bertipe.
@@ -22,6 +30,14 @@
     estimateRowHeight?: number;
     maxHeight?: string;
     class?: string;
+    tableClass?: string;
+    headerRowClass?: string;
+    bodyClass?: string;
+    headClass?: string;
+    cellClass?: string;
+    rowClass?: (row: TData) => string | undefined;
+    // Dirender di dalam <tbody> saat tidak ada baris; snippet bertanggung jawab atas <tr>-nya.
+    empty?: Snippet;
   } = $props();
   const table = createSvelteTable({
     get data() {
@@ -62,9 +78,12 @@
 {#snippet header()}
   <Table.Header>
     {#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
-      <Table.Row>
+      <Table.Row class={headerRowClass}>
         {#each headerGroup.headers as head (head.id)}
-          <Table.Head colspan={head.colSpan}>
+          <Table.Head
+            colspan={head.colSpan}
+            class={cn(headClass, head.column.columnDef.meta?.headClass)}
+          >
             {#if !head.isPlaceholder}
               <FlexRender content={head.column.columnDef.header} context={head.getContext()} />
             {/if}
@@ -75,9 +94,9 @@
   </Table.Header>
 {/snippet}
 {#snippet row(r: Row<TData>)}
-  <Table.Row>
+  <Table.Row class={rowClass?.(r.original)}>
     {#each r.getVisibleCells() as cell (cell.id)}
-      <Table.Cell>
+      <Table.Cell class={cn(cellClass, cell.column.columnDef.meta?.cellClass)}>
         <FlexRender content={cell.column.columnDef.cell} context={cell.getContext()} />
       </Table.Cell>
     {/each}
@@ -85,9 +104,9 @@
 {/snippet}
 {#if virtual}
   <div bind:this={scrollEl} class={cn('overflow-auto', className)} style:max-height={maxHeight}>
-    <Table.Root>
+    <Table.Root class={tableClass}>
       {@render header()}
-      <Table.Body>
+      <Table.Body class={bodyClass}>
         {#if padding.top > 0}
           <tr style:height="{padding.top}px"></tr>
         {/if}
@@ -106,11 +125,13 @@
   </div>
 {:else}
   <div class={className}>
-    <Table.Root>
+    <Table.Root class={tableClass}>
       {@render header()}
-      <Table.Body>
+      <Table.Body class={bodyClass}>
         {#each rows as r (r.id)}
           {@render row(r)}
+        {:else}
+          {@render empty?.()}
         {/each}
       </Table.Body>
     </Table.Root>

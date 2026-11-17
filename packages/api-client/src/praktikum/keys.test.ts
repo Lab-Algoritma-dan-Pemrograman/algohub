@@ -2,14 +2,15 @@ import { describe, expect, it } from 'vitest';
 import { praktikumKeys } from './keys';
 type Key = readonly unknown[];
 type Node = { [name: string]: Key | ((...args: never[]) => Key) | Node };
-function collect(node: Node, parent: Key, out: { key: Key; parent: Key }[]) {
+function collect(node: Node, parent: Key, out: { key: Key; parent: Key; args: unknown[] }[]) {
   const own = (node.all as Key | undefined) ?? parent;
   for (const [name, value] of Object.entries(node)) {
     if (typeof value === 'function') {
       const fn = value as (...args: unknown[]) => Key;
-      out.push({ key: fn(...Array.from({ length: fn.length }, (_, i) => i + 1)), parent: own });
+      const args = Array.from({ length: fn.length }, (_, i) => i + 1);
+      out.push({ key: fn(...args), parent: own, args });
     } else if (Array.isArray(value)) {
-      out.push({ key: value, parent: name === 'all' ? parent : own });
+      out.push({ key: value, parent: name === 'all' ? parent : own, args: [] });
     } else {
       collect(value as Node, own, out);
     }
@@ -29,6 +30,11 @@ describe('praktikumKeys', () => {
     for (const { key, parent } of keys) {
       expect(key.slice(0, parent.length)).toEqual(parent);
       expect(key.length).toBeGreaterThan(parent.length);
+    }
+  });
+  it('key berparameter diakhiri semua argumennya', () => {
+    for (const { key, args } of keys) {
+      if (args.length > 0) expect(key.slice(-args.length)).toEqual(args);
     }
   });
 });
