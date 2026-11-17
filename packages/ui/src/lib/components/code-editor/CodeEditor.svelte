@@ -21,16 +21,26 @@
   let editor: ReturnType<Monaco['editor']['create']> | null = $state(null);
   let loadError = $state('');
 
+  let destroyed = false;
+
   onMount(async () => {
-    const loader = (await import('@monaco-editor/loader')).default;
+    let loader: (typeof import('@monaco-editor/loader'))['default'];
+    try {
+      loader = (await import('@monaco-editor/loader')).default;
+    } catch {
+      if (!destroyed) loadError = 'Editor kode gagal dimuat. Coba muat ulang halaman.';
+      return;
+    }
     let monaco: Monaco;
     try {
       monaco = await loader.init();
     } catch {
-      loadError =
-        'Editor kode gagal dimuat (CDN terblokir di jaringan/ISP Anda). Coba muat ulang halaman atau gunakan koneksi lain.';
+      if (!destroyed)
+        loadError =
+          'Editor kode gagal dimuat (CDN terblokir di jaringan/ISP Anda). Coba muat ulang halaman atau gunakan koneksi lain.';
       return;
     }
+    if (destroyed) return;
     if (!monaco?.editor) {
       loadError = 'Editor kode gagal dimuat. Coba muat ulang halaman.';
       return;
@@ -78,6 +88,7 @@
   });
 
   onDestroy(() => {
+    destroyed = true;
     editor?.dispose();
   });
 </script>

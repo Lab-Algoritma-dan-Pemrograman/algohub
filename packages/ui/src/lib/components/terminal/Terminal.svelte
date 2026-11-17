@@ -23,7 +23,11 @@
 
   // xterm menggambar ke canvas yang tidak terbaca assistive tech, jadi output juga
   // ditulis ke live-region agar bisa dibaca dan diverifikasi.
+  // Dibatasi ekornya saja agar program yang mencetak tanpa henti tidak membuat
+  // teks ini tumbuh tanpa batas (xterm sendiri hanya menyimpan 5000 baris).
+  const MIRROR_LIMIT = 100_000;
   let outputText = $state('');
+  let destroyed = false;
 
   function stripAnsi(str: string): string {
     // eslint-disable-next-line no-control-regex
@@ -33,7 +37,7 @@
   export function write(str: string) {
     if (term) term.write(str);
     else pending += str;
-    outputText += stripAnsi(str);
+    outputText = (outputText + stripAnsi(str)).slice(-MIRROR_LIMIT);
   }
 
   export function writeln(str: string) {
@@ -61,6 +65,7 @@
         import('@xterm/addon-fit'),
         import('@xterm/xterm/css/xterm.css'),
       ]);
+      if (destroyed) return;
       const instance = new Terminal({
         theme: {
           background: '#18181b',
@@ -107,6 +112,7 @@
   });
 
   onDestroy(() => {
+    destroyed = true;
     resizeObserver?.disconnect();
     term?.dispose();
   });
