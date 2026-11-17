@@ -7,7 +7,6 @@ import (
 
 	dto "github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/dto/praktikum"
 	entity "github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/entity/praktikum"
-	"github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/middleware"
 	usecase "github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/usecase/praktikum"
 	"github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/pkg/response"
 
@@ -63,7 +62,7 @@ func (h *KonfigurasiHandler) Set(c *gin.Context) {
 		mapError(c, err)
 		return
 	}
-	_ = h.auditLog.LogAction(middleware.UserID(c), "", "SET_KONFIGURASI", fmt.Sprintf("Mengubah konfigurasi '%s' menjadi '%s'", req.Key, req.Value), middleware.ClientIP(c), c.Request.UserAgent())
+	logAudit(c, h.auditLog, "SET_KONFIGURASI", fmt.Sprintf("Mengubah konfigurasi '%s' menjadi '%s'", req.Key, req.Value))
 	response.OK(c, http.StatusOK, "Konfigurasi disimpan", nil)
 }
 
@@ -160,6 +159,6 @@ func (h *KonfigurasiHandler) SetRolePermissions(c *gin.Context) {
 		mapError(c, err)
 		return
 	}
-	_ = h.auditLog.LogAction(middleware.UserID(c), "", "SET_ROLE_PERMISSIONS", "Update role_permissions", middleware.ClientIP(c), c.Request.UserAgent())
+	logAudit(c, h.auditLog, "SET_ROLE_PERMISSIONS", "Update role_permissions")
 	response.OK(c, http.StatusOK, "Permissions disimpan", perms)
 }

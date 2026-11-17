@@ -54,7 +54,8 @@ func (uc *PraktikumUsecase) ListSesi(userID int) ([]dto.SesiUserItem, error) {
 	// gelombang user ikut menyaring (NULL gelombang → tidak match aktivasi ujian).
 	aktivasiBySesi := map[int]*entity.AktivasiSesi{}
 	if user.KelasID != nil && user.Shift != nil {
-		for _, s := range allSesi {
+		for i := range allSesi {
+			s := &allSesi[i]
 			var gel *int
 			if s.IsUjianPraktik {
 				gel = user.Gelombang
@@ -77,7 +78,8 @@ func (uc *PraktikumUsecase) ListSesi(userID int) ([]dto.SesiUserItem, error) {
 	}
 
 	items := make([]dto.SesiUserItem, 0, len(allSesi))
-	for _, s := range allSesi {
+	for i := range allSesi {
+		s := &allSesi[i]
 		item := dto.SesiUserItem{
 			SesiID:         s.ID,
 			Judul:          s.JudulSesi,

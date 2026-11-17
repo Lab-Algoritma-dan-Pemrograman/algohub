@@ -198,7 +198,7 @@ func (h *GameHandler) AdminCreateSoal(c *gin.Context) {
 		response.Fail(c, http.StatusBadRequest, "Input tidak valid", err.Error())
 		return
 	}
-	res, err := h.uc.AdminCreateSoal(req)
+	res, err := h.uc.AdminCreateSoal(&req)
 	if err != nil {
 		mapError(c, err)
 		return
@@ -227,7 +227,7 @@ func (h *GameHandler) AdminUpdateSoal(c *gin.Context) {
 		response.Fail(c, http.StatusBadRequest, "Input tidak valid", err.Error())
 		return
 	}
-	res, err := h.uc.AdminUpdateSoal(id, req)
+	res, err := h.uc.AdminUpdateSoal(id, &req)
 	if err != nil {
 		mapError(c, err)
 		return

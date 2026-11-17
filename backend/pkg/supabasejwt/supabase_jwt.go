@@ -50,7 +50,7 @@ type jwksDoc struct {
 }
 
 func (c *jwksCache) refresh(url string) error {
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequest("GET", url, http.NoBody)
 	if err != nil {
 		return err
 	}
@@ -68,7 +68,8 @@ func (c *jwksCache) refresh(url string) error {
 		return fmt.Errorf("JWKS tidak terbaca: %w", err)
 	}
 	keys := map[string]crypto.PublicKey{}
-	for _, k := range doc.Keys {
+	for i := range doc.Keys {
+		k := &doc.Keys[i]
 		pub, err := jwkToPublicKey(k)
 		if err != nil || pub == nil {
 			continue
@@ -109,7 +110,7 @@ func (c *jwksCache) keyFor(url, kid string) (crypto.PublicKey, error) {
 	return k, nil
 }
 
-func jwkToPublicKey(k jwkKey) (crypto.PublicKey, error) {
+func jwkToPublicKey(k *jwkKey) (crypto.PublicKey, error) {
 	switch k.Kty {
 	case "EC":
 		return jwkToECDSA(k)
@@ -120,7 +121,7 @@ func jwkToPublicKey(k jwkKey) (crypto.PublicKey, error) {
 	}
 }
 
-func jwkToECDSA(k jwkKey) (*ecdsa.PublicKey, error) {
+func jwkToECDSA(k *jwkKey) (*ecdsa.PublicKey, error) {
 	var curve elliptic.Curve
 	switch k.Crv {
 	case "P-256":
@@ -143,7 +144,7 @@ func jwkToECDSA(k jwkKey) (*ecdsa.PublicKey, error) {
 	return &ecdsa.PublicKey{Curve: curve, X: new(big.Int).SetBytes(xB), Y: new(big.Int).SetBytes(yB)}, nil
 }
 
-func jwkToRSA(k jwkKey) (*rsa.PublicKey, error) {
+func jwkToRSA(k *jwkKey) (*rsa.PublicKey, error) {
 	nBytes, err := base64.RawURLEncoding.DecodeString(k.N)
 	if err != nil {
 		return nil, err

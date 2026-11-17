@@ -5,13 +5,13 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/middleware"
 	usecase "github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/usecase/praktikum"
 	"github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/pkg/response"
 
 	"github.com/gin-gonic/gin"
 )
 
-// mapError menerjemahkan error domain usecase ke status HTTP + pesan.
 func mapError(c *gin.Context, err error) {
 	switch {
 	case errors.Is(err, usecase.ErrNotFound):
@@ -35,7 +35,6 @@ func mapError(c *gin.Context, err error) {
 	}
 }
 
-// idParam mengambil parameter path numerik.
 func idParam(c *gin.Context, name string) (int, bool) {
 	v, err := strconv.Atoi(c.Param(name))
 	if err != nil {
@@ -45,7 +44,6 @@ func idParam(c *gin.Context, name string) (int, bool) {
 	return v, true
 }
 
-// queryIntPtr mengambil query int opsional sebagai *int.
 func queryIntPtr(c *gin.Context, name string) *int {
 	s := c.Query(name)
 	if s == "" {
@@ -55,4 +53,40 @@ func queryIntPtr(c *gin.Context, name string) *int {
 		return &v
 	}
 	return nil
+}
+
+func bindJSON[T any](c *gin.Context) (*T, bool) {
+	var req T
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Fail(c, http.StatusBadRequest, "Input tidak valid", err.Error())
+		return nil, false
+	}
+	return &req, true
+}
+
+// Audit log bersifat best-effort: gagal mencatat tidak boleh menggagalkan aksi.
+func logAudit(c *gin.Context, a *usecase.AuditLogUsecase, action, desc string) {
+	_ = a.LogAction(middleware.UserID(c), "", action, desc, middleware.ClientIP(c), c.Request.UserAgent())
+}
+
+// ok=false berarti response error sudah dikirim.
+func bindCreate[T, R any](c *gin.Context, create func(*T) (R, error)) (req *T, res R, ok bool) {
+	if req, ok = bindJSON[T](c); !ok {
+		return req, res, false
+	}
+	res, err := create(req)
+	if err != nil {
+		mapError(c, err)
+		return req, res, false
+	}
+	return req, res, true
+}
+
+func bindUpdate[T, R any](c *gin.Context, param string, update func(int, *T) (R, error)) (res R, ok bool) {
+	id, ok := idParam(c, param)
+	if !ok {
+		return res, false
+	}
+	_, res, ok = bindCreate(c, func(req *T) (R, error) { return update(id, req) })
+	return res, ok
 }

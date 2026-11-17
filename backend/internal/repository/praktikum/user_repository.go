@@ -22,7 +22,7 @@ type UserRepository interface {
 	FindBySupabaseUserID(uid string) (*entity.User, error)
 	ClaimRoster(userID int, supabaseUID string, email *string, passwordHash string) error
 	UpdatePasswordByEmail(email, hash string) (int64, error)
-	List(role string, kelasID *int, shift *int) ([]entity.User, error)
+	List(role string, kelasID, shift *int) ([]entity.User, error)
 	BulkUpsert(users []entity.User) error
 	BulkUpdateAttrs(nims []string, attrs map[string]any) (int64, error)
 	ListAsisten() ([]entity.User, error)
@@ -119,7 +119,7 @@ func (r *userRepository) UpdatePasswordByEmail(email, hash string) (int64, error
 	return res.RowsAffected, res.Error
 }
 
-func (r *userRepository) List(role string, kelasID *int, shift *int) ([]entity.User, error) {
+func (r *userRepository) List(role string, kelasID, shift *int) ([]entity.User, error) {
 	var users []entity.User
 	q := r.db.Preload("Kelas").Order("nim asc")
 	if role != "" {

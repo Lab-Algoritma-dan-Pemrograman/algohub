@@ -40,7 +40,7 @@ func (uc *SesiUsecase) Create(req dto.SesiRequest) (*entity.SesiPraktikum, error
 	return s, nil
 }
 
-func (uc *SesiUsecase) Update(id int, req dto.SesiRequest) (*entity.SesiPraktikum, error) {
+func (uc *SesiUsecase) Update(id int, req *dto.SesiRequest) (*entity.SesiPraktikum, error) {
 	s, err := uc.sesi.FindByID(id)
 	if err != nil {
 		return nil, ErrNotFound
@@ -63,7 +63,7 @@ func (uc *SesiUsecase) ListCourse(sesiID int) ([]entity.Course, error) {
 	return uc.course.ListBySesi(sesiID)
 }
 
-func (uc *SesiUsecase) CreateCourse(sesiID int, req dto.CourseRequest) (*entity.Course, error) {
+func (uc *SesiUsecase) CreateCourse(sesiID int, req *dto.CourseRequest) (*entity.Course, error) {
 	if _, err := uc.sesi.FindByID(sesiID); err != nil {
 		return nil, ErrNotFound
 	}
@@ -83,7 +83,7 @@ func (uc *SesiUsecase) CreateCourse(sesiID int, req dto.CourseRequest) (*entity.
 	return c, nil
 }
 
-func (uc *SesiUsecase) UpdateCourse(id int, req dto.CourseRequest) (*entity.Course, error) {
+func (uc *SesiUsecase) UpdateCourse(id int, req *dto.CourseRequest) (*entity.Course, error) {
 	c, err := uc.course.FindByID(id)
 	if err != nil {
 		return nil, ErrNotFound

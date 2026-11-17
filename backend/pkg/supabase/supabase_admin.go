@@ -51,13 +51,13 @@ func (s *Admin) CreateAuthUser(email, password string, emailConfirm bool) (strin
 		return "", fmt.Errorf("email sudah terdaftar di Supabase Auth")
 	}
 	if resp.StatusCode >= 300 {
-		return "", fmt.Errorf("Supabase Admin API %d", resp.StatusCode)
+		return "", fmt.Errorf("Supabase Admin API %d", resp.StatusCode) //nolint:staticcheck // ST1005: pesan tampil ke pengguna, teks sama dengan prod
 	}
 	return out.ID, nil
 }
 
 func (s *Admin) DeleteAuthUser(uid string) error {
-	req, _ := http.NewRequest(http.MethodDelete, s.URL+"/auth/v1/admin/users/"+uid, nil)
+	req, _ := http.NewRequest(http.MethodDelete, s.URL+"/auth/v1/admin/users/"+uid, http.NoBody)
 	req.Header.Set("apikey", s.ServiceKey)
 	req.Header.Set("Authorization", "Bearer "+s.ServiceKey)
 	resp, err := s.HTTP.Do(req)
@@ -87,7 +87,7 @@ func (s *Admin) SendRecoveryOTP(email string) error {
 	defer resp.Body.Close()
 	if resp.StatusCode >= 300 {
 		body, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("Supabase recover %d: %s", resp.StatusCode, string(body))
+		return fmt.Errorf("Supabase recover %d: %s", resp.StatusCode, string(body)) //nolint:staticcheck // ST1005: pesan tampil ke pengguna, teks sama dengan prod
 	}
 	return nil
 }

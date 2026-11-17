@@ -173,7 +173,7 @@ func (uc *GameUsecase) SelesaiMain(userID int, req dto.SelesaiMainRequest) (*dto
 	}
 
 	// CR-M1: XP ditambah ATOMIK di DB (xp = xp + ?), bukan read-then-add di
-	// memori — dua submit paralel tidak lagi saling menimpa nilai XP.
+	// memori — dua submit bersamaan tidak lagi saling menimpa nilai XP.
 	profil, err := uc.belajar.TambahXP(userID, xp)
 	if err != nil {
 		return nil, err
@@ -191,7 +191,7 @@ func (uc *GameUsecase) AdminListSoal(bahasa string) ([]entity.GameSoal, error) {
 	return uc.repo.ListSoal(bahasa)
 }
 
-func (uc *GameUsecase) AdminCreateSoal(req dto.GameSoalRequest) (*entity.GameSoal, error) {
+func (uc *GameUsecase) AdminCreateSoal(req *dto.GameSoalRequest) (*entity.GameSoal, error) {
 	if req.Bahasa == "" || req.Judul == "" || req.Kode == "" {
 		return nil, ErrBadRequest
 	}
@@ -205,7 +205,7 @@ func (uc *GameUsecase) AdminCreateSoal(req dto.GameSoalRequest) (*entity.GameSoa
 	return s, nil
 }
 
-func (uc *GameUsecase) AdminUpdateSoal(id int, req dto.GameSoalRequest) (*entity.GameSoal, error) {
+func (uc *GameUsecase) AdminUpdateSoal(id int, req *dto.GameSoalRequest) (*entity.GameSoal, error) {
 	s, err := uc.repo.FindSoal(id)
 	if err != nil {
 		return nil, ErrNotFound

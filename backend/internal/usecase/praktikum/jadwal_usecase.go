@@ -22,7 +22,7 @@ func (uc *JadwalUsecase) ForKelasShift(kelasID, shift int) (*entity.Jadwal, erro
 	return j, nil
 }
 
-func (uc *JadwalUsecase) Create(req dto.JadwalRequest) (*entity.Jadwal, error) {
+func (uc *JadwalUsecase) Create(req *dto.JadwalRequest) (*entity.Jadwal, error) {
 	j := &entity.Jadwal{
 		KelasID:    req.KelasID,
 		Shift:      req.Shift,
@@ -37,7 +37,7 @@ func (uc *JadwalUsecase) Create(req dto.JadwalRequest) (*entity.Jadwal, error) {
 	return j, nil
 }
 
-func (uc *JadwalUsecase) Update(id int, req dto.JadwalRequest) (*entity.Jadwal, error) {
+func (uc *JadwalUsecase) Update(id int, req *dto.JadwalRequest) (*entity.Jadwal, error) {
 	j, err := uc.repo.FindByID(id)
 	if err != nil {
 		return nil, ErrNotFound

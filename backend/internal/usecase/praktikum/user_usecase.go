@@ -22,7 +22,7 @@ func (uc *UserUsecase) ListMahasiswa(kelasID, shift *int) ([]entity.User, error)
 	return uc.users.List(string(entity.RoleMahasiswa), kelasID, shift)
 }
 
-func (uc *UserUsecase) CreateMahasiswa(req dto.UserRequest) (*entity.User, error) {
+func (uc *UserUsecase) CreateMahasiswa(req *dto.UserRequest) (*entity.User, error) {
 	u := &entity.User{
 		Role:         entity.RoleMahasiswa,
 		NIM:          req.NIM,
@@ -40,7 +40,7 @@ func (uc *UserUsecase) CreateMahasiswa(req dto.UserRequest) (*entity.User, error
 }
 
 // BulkUpsertMahasiswa memproses array UserRequest dan melakukan upsert.
-func (uc *UserUsecase) BulkUpsertMahasiswa(req dto.UserBulkRequest) (*dto.BulkResponse, error) {
+func (uc *UserUsecase) BulkUpsertMahasiswa(req *dto.UserBulkRequest) (*dto.BulkResponse, error) {
 	if len(req.Users) == 0 {
 		return &dto.BulkResponse{}, nil
 	}
@@ -74,7 +74,7 @@ func (uc *UserUsecase) BulkUpsertMahasiswa(req dto.UserBulkRequest) (*dto.BulkRe
 }
 
 // BulkAttrsMahasiswa mengubah atribut massal (gelombang/shift/kelas/kelompok) by NIM.
-func (uc *UserUsecase) BulkAttrsMahasiswa(req dto.UserBulkAttrsRequest) (*dto.BulkResponse, error) {
+func (uc *UserUsecase) BulkAttrsMahasiswa(req *dto.UserBulkAttrsRequest) (*dto.BulkResponse, error) {
 	attrs := map[string]any{}
 	if req.Gelombang != nil {
 		attrs["gelombang"] = *req.Gelombang
@@ -102,7 +102,7 @@ func (uc *UserUsecase) BulkAttrsMahasiswa(req dto.UserBulkAttrsRequest) (*dto.Bu
 	return &dto.BulkResponse{TotalProcessed: int(n), TotalUpdated: int(n)}, nil
 }
 
-func (uc *UserUsecase) UpdateMahasiswa(id int, req dto.UserRequest) (*entity.User, error) {
+func (uc *UserUsecase) UpdateMahasiswa(id int, req *dto.UserRequest) (*entity.User, error) {
 	u, err := uc.users.FindByID(id)
 	if err != nil {
 		return nil, ErrNotFound
@@ -157,7 +157,7 @@ func (uc *UserUsecase) ResetPassword(id int) error {
 
 func (uc *UserUsecase) ListAsisten() ([]entity.User, error) { return uc.users.ListAsisten() }
 
-func (uc *UserUsecase) CreateAsisten(req dto.AsistenRequest) (*entity.User, error) {
+func (uc *UserUsecase) CreateAsisten(req *dto.AsistenRequest) (*entity.User, error) {
 	u := &entity.User{
 		Role:       entity.RoleAsisten,
 		NIM:        req.NIM,
@@ -180,7 +180,7 @@ func (uc *UserUsecase) CreateAsisten(req dto.AsistenRequest) (*entity.User, erro
 	return u, nil
 }
 
-func (uc *UserUsecase) UpdateAsisten(id int, req dto.AsistenRequest) (*entity.User, error) {
+func (uc *UserUsecase) UpdateAsisten(id int, req *dto.AsistenRequest) (*entity.User, error) {
 	u, err := uc.users.FindByID(id)
 	if err != nil {
 		return nil, ErrNotFound

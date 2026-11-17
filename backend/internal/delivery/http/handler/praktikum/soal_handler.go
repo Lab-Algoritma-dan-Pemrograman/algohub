@@ -6,7 +6,6 @@ import (
 
 	dto "github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/dto/praktikum"
 	_ "github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/entity/praktikum"
-	"github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/middleware"
 	usecase "github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/usecase/praktikum"
 	"github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/pkg/response"
 
@@ -63,7 +62,7 @@ func (h *SoalHandler) Create(c *gin.Context) {
 		response.Fail(c, http.StatusBadRequest, "Input tidak valid", err.Error())
 		return
 	}
-	res, err := h.uc.Create(req)
+	res, err := h.uc.Create(&req)
 	if err != nil {
 		mapError(c, err)
 		return
@@ -73,7 +72,7 @@ func (h *SoalHandler) Create(c *gin.Context) {
 	if len(teksRunes) > 30 {
 		shortTeks = string(teksRunes[:30]) + "..."
 	}
-	_ = h.auditLog.LogAction(middleware.UserID(c), "", "CREATE_SOAL", "Membuat soal baru: '"+shortTeks+"'", middleware.ClientIP(c), c.Request.UserAgent())
+	logAudit(c, h.auditLog, "CREATE_SOAL", "Membuat soal baru: '"+shortTeks+"'")
 	response.Created(c, "Soal dibuat", res)
 }
 
@@ -99,7 +98,7 @@ func (h *SoalHandler) Update(c *gin.Context) {
 		response.Fail(c, http.StatusBadRequest, "Input tidak valid", err.Error())
 		return
 	}
-	res, err := h.uc.Update(id, req)
+	res, err := h.uc.Update(id, &req)
 	if err != nil {
 		mapError(c, err)
 		return
@@ -109,7 +108,7 @@ func (h *SoalHandler) Update(c *gin.Context) {
 	if len(teksRunes) > 30 {
 		shortTeks = string(teksRunes[:30]) + "..."
 	}
-	_ = h.auditLog.LogAction(middleware.UserID(c), "", "UPDATE_SOAL", fmt.Sprintf("Memperbarui soal: '%s' (ID: %d)", shortTeks, res.ID), middleware.ClientIP(c), c.Request.UserAgent())
+	logAudit(c, h.auditLog, "UPDATE_SOAL", fmt.Sprintf("Memperbarui soal: '%s' (ID: %d)", shortTeks, res.ID))
 	response.OK(c, http.StatusOK, "Soal diperbarui", res)
 }
 
@@ -132,6 +131,6 @@ func (h *SoalHandler) Delete(c *gin.Context) {
 		mapError(c, err)
 		return
 	}
-	_ = h.auditLog.LogAction(middleware.UserID(c), "", "DELETE_SOAL", fmt.Sprintf("Menghapus soal dengan ID %d", id), middleware.ClientIP(c), c.Request.UserAgent())
+	logAudit(c, h.auditLog, "DELETE_SOAL", fmt.Sprintf("Menghapus soal dengan ID %d", id))
 	response.OK(c, http.StatusOK, "Soal dihapus", nil)
 }

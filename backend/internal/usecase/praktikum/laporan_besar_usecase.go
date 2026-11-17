@@ -433,12 +433,13 @@ func (uc *LaporanBesarUsecase) ListPengumpulan(laporanID int) ([]dto.Pengumpulan
 		return nil, err
 	}
 	byMhs := make(map[int]entity.PengumpulanLaporanBesar, len(rows))
-	for _, r := range rows {
-		byMhs[r.MahasiswaID] = r
+	for i := range rows {
+		byMhs[rows[i].MahasiswaID] = rows[i]
 	}
 
 	out := make([]dto.PengumpulanRow, 0, len(mhs))
-	for _, m := range mhs {
+	for i := range mhs {
+		m := &mhs[i]
 		row := dto.PengumpulanRow{
 			MahasiswaID: m.ID,
 			NIM:         m.NIM,
@@ -474,7 +475,7 @@ func (uc *LaporanBesarUsecase) ListPengumpulan(laporanID int) ([]dto.Pengumpulan
 }
 
 // Mark: centang manual oleh asisten (sumber=manual). Status 'terkumpul' mencatat jejak.
-func (uc *LaporanBesarUsecase) Mark(laporanID, mhsID, olehID int, req dto.MarkRequest) (*entity.PengumpulanLaporanBesar, error) {
+func (uc *LaporanBesarUsecase) Mark(laporanID, mhsID, olehID int, req *dto.MarkRequest) (*entity.PengumpulanLaporanBesar, error) {
 	if _, err := uc.repo.FindByID(laporanID); err != nil {
 		return nil, ErrNotFound
 	}
@@ -519,7 +520,7 @@ func (uc *LaporanBesarUsecase) Mark(laporanID, mhsID, olehID int, req dto.MarkRe
 }
 
 // SetOverride: buka blokir gerbang ujian (TIDAK mengubah status).
-func (uc *LaporanBesarUsecase) SetOverride(laporanID, mhsID, olehID int, req dto.OverrideRequest) (*entity.PengumpulanLaporanBesar, error) {
+func (uc *LaporanBesarUsecase) SetOverride(laporanID, mhsID, olehID int, req *dto.OverrideRequest) (*entity.PengumpulanLaporanBesar, error) {
 	if _, err := uc.repo.FindByID(laporanID); err != nil {
 		return nil, ErrNotFound
 	}
@@ -570,7 +571,7 @@ func (uc *LaporanBesarUsecase) RevokeOverride(laporanID, mhsID int) (*entity.Pen
 
 // SignedBerkas: validasi izin + kembalikan signed URL. mahasiswaID==0 (staf) = akses penuh.
 // Bila mahasiswaID != 0, mahasiswa hanya boleh mengakses berkasnya sendiri.
-func (uc *LaporanBesarUsecase) SignedBerkas(laporanID, mhsID, pemintaID int, jenis string, forDownload bool) (string, string, error) {
+func (uc *LaporanBesarUsecase) SignedBerkas(laporanID, mhsID, pemintaID int, jenis string, forDownload bool) (signedURL, filename string, err error) {
 	if pemintaID != 0 && pemintaID != mhsID {
 		return "", "", ErrForbidden
 	}
@@ -650,7 +651,7 @@ func (uc *LaporanBesarUsecase) DownloadBatch(laporanID int, req dto.DownloadBatc
 // CekGerbangLaporanBesar dipanggil Mulai (ujian praktik). Bila ada laporan besar
 // aktif untuk kelas mahasiswa, wajib status='terkumpul' ATAU ada override_pada.
 // Mengembalikan error bila gerbang tertutup.
-func (uc *LaporanBesarUsecase) CekGerbangLaporanBesar(userID int, kelasID *int, shift *int) error {
+func (uc *LaporanBesarUsecase) CekGerbangLaporanBesar(userID int, kelasID, shift *int) error {
 	if kelasID == nil {
 		return nil // tanpa kelas, tidak ada target → gerbang tidak berlaku
 	}
@@ -663,13 +664,13 @@ func (uc *LaporanBesarUsecase) CekGerbangLaporanBesar(userID int, kelasID *int, 
 	}
 	p, err := uc.repo.FindPengumpulan(l.ID, userID)
 	if err != nil {
-		return fmt.Errorf("%w: Laporan Besar belum dikumpulkan. Hubungi asisten.", ErrBadRequest)
+		return fmt.Errorf("%w: Laporan Besar belum dikumpulkan. Hubungi asisten.", ErrBadRequest) //nolint:staticcheck // ST1005: pesan tampil ke pengguna, teks sama dengan prod
 	}
 	if p.OverridePada != nil {
 		return nil
 	}
 	if p.Status != string(entity.LaporanTerkumpul) {
-		return fmt.Errorf("%w: Laporan Besar belum dikumpulkan. Hubungi asisten.", ErrBadRequest)
+		return fmt.Errorf("%w: Laporan Besar belum dikumpulkan. Hubungi asisten.", ErrBadRequest) //nolint:staticcheck // ST1005: pesan tampil ke pengguna, teks sama dengan prod
 	}
 	return nil
 }

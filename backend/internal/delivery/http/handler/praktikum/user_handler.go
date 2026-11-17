@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 
-	dto "github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/dto/praktikum"
 	_ "github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/entity/praktikum"
 	"github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/middleware"
 	usecase "github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/usecase/praktikum"
@@ -56,17 +55,11 @@ func (h *UserHandler) ListMahasiswa(c *gin.Context) {
 //	@Success		201		{object}	response.Envelope{data=entity.User}
 //	@Router			/praktikum/admin/users [post]
 func (h *UserHandler) CreateMahasiswa(c *gin.Context) {
-	var req dto.UserRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Fail(c, http.StatusBadRequest, "Input tidak valid", err.Error())
+	_, res, ok := bindCreate(c, h.uc.CreateMahasiswa)
+	if !ok {
 		return
 	}
-	res, err := h.uc.CreateMahasiswa(req)
-	if err != nil {
-		mapError(c, err)
-		return
-	}
-	_ = h.auditLog.LogAction(middleware.UserID(c), "", "CREATE_USER", "Membuat mahasiswa baru: "+res.Nama+" (NIM: "+res.NIM+")", middleware.ClientIP(c), c.Request.UserAgent())
+	logAudit(c, h.auditLog, "CREATE_USER", "Membuat mahasiswa baru: "+res.Nama+" (NIM: "+res.NIM+")")
 	response.Created(c, "Mahasiswa dibuat", res)
 }
 
@@ -82,17 +75,11 @@ func (h *UserHandler) CreateMahasiswa(c *gin.Context) {
 //	@Success		200		{object}	response.Envelope{data=dto.BulkResponse}
 //	@Router			/praktikum/admin/users/bulk [post]
 func (h *UserHandler) BulkUpsertMahasiswa(c *gin.Context) {
-	var req dto.UserBulkRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Fail(c, http.StatusBadRequest, "Input tidak valid", err.Error())
+	req, res, ok := bindCreate(c, h.uc.BulkUpsertMahasiswa)
+	if !ok {
 		return
 	}
-	res, err := h.uc.BulkUpsertMahasiswa(req)
-	if err != nil {
-		mapError(c, err)
-		return
-	}
-	_ = h.auditLog.LogAction(middleware.UserID(c), "", "IMPORT_USER", fmt.Sprintf("Mengimpor %d mahasiswa secara bulk", len(req.Users)), middleware.ClientIP(c), c.Request.UserAgent())
+	logAudit(c, h.auditLog, "IMPORT_USER", fmt.Sprintf("Mengimpor %d mahasiswa secara bulk", len(req.Users)))
 	response.OK(c, http.StatusOK, "Import mahasiswa berhasil diproses", res)
 }
 
@@ -108,17 +95,11 @@ func (h *UserHandler) BulkUpsertMahasiswa(c *gin.Context) {
 //	@Success		200		{object}	response.Envelope{data=dto.BulkResponse}
 //	@Router			/praktikum/admin/users/bulk-attrs [put]
 func (h *UserHandler) BulkAttrsMahasiswa(c *gin.Context) {
-	var req dto.UserBulkAttrsRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Fail(c, http.StatusBadRequest, "Input tidak valid", err.Error())
+	req, res, ok := bindCreate(c, h.uc.BulkAttrsMahasiswa)
+	if !ok {
 		return
 	}
-	res, err := h.uc.BulkAttrsMahasiswa(req)
-	if err != nil {
-		mapError(c, err)
-		return
-	}
-	_ = h.auditLog.LogAction(middleware.UserID(c), "", "BULK_ATTRS_USER", fmt.Sprintf("Mengubah atribut %d mahasiswa", len(req.NIMs)), middleware.ClientIP(c), c.Request.UserAgent())
+	logAudit(c, h.auditLog, "BULK_ATTRS_USER", fmt.Sprintf("Mengubah atribut %d mahasiswa", len(req.NIMs)))
 	response.OK(c, http.StatusOK, "Atribut mahasiswa berhasil diperbarui", res)
 }
 
@@ -135,21 +116,11 @@ func (h *UserHandler) BulkAttrsMahasiswa(c *gin.Context) {
 //	@Success		200		{object}	response.Envelope{data=entity.User}
 //	@Router			/praktikum/admin/users/{id} [put]
 func (h *UserHandler) UpdateMahasiswa(c *gin.Context) {
-	id, ok := idParam(c, "id")
+	res, ok := bindUpdate(c, "id", h.uc.UpdateMahasiswa)
 	if !ok {
 		return
 	}
-	var req dto.UserRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Fail(c, http.StatusBadRequest, "Input tidak valid", err.Error())
-		return
-	}
-	res, err := h.uc.UpdateMahasiswa(id, req)
-	if err != nil {
-		mapError(c, err)
-		return
-	}
-	_ = h.auditLog.LogAction(middleware.UserID(c), "", "UPDATE_USER", "Memperbarui data mahasiswa: "+res.Nama+" (NIM: "+res.NIM+")", middleware.ClientIP(c), c.Request.UserAgent())
+	logAudit(c, h.auditLog, "UPDATE_USER", "Memperbarui data mahasiswa: "+res.Nama+" (NIM: "+res.NIM+")")
 	response.OK(c, http.StatusOK, "Mahasiswa diperbarui", res)
 }
 
@@ -172,7 +143,7 @@ func (h *UserHandler) Delete(c *gin.Context) {
 		mapError(c, err)
 		return
 	}
-	_ = h.auditLog.LogAction(middleware.UserID(c), "", "DELETE_USER", fmt.Sprintf("Menghapus user dengan ID %d", id), middleware.ClientIP(c), c.Request.UserAgent())
+	logAudit(c, h.auditLog, "DELETE_USER", fmt.Sprintf("Menghapus user dengan ID %d", id))
 	response.OK(c, http.StatusOK, "User dihapus", nil)
 }
 
@@ -195,7 +166,7 @@ func (h *UserHandler) ResetPassword(c *gin.Context) {
 		mapError(c, err)
 		return
 	}
-	_ = h.auditLog.LogAction(middleware.UserID(c), "", "RESET_PASSWORD", fmt.Sprintf("Mereset password mahasiswa dengan ID %d", id), middleware.ClientIP(c), c.Request.UserAgent())
+	logAudit(c, h.auditLog, "RESET_PASSWORD", fmt.Sprintf("Mereset password mahasiswa dengan ID %d", id))
 	response.OK(c, http.StatusOK, "Password direset (mahasiswa harus register ulang)", nil)
 }
 
@@ -232,17 +203,11 @@ func (h *UserHandler) ListAsisten(c *gin.Context) {
 //	@Success		201		{object}	response.Envelope{data=entity.User}
 //	@Router			/praktikum/admin/asisten [post]
 func (h *UserHandler) CreateAsisten(c *gin.Context) {
-	var req dto.AsistenRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Fail(c, http.StatusBadRequest, "Input tidak valid", err.Error())
+	_, res, ok := bindCreate(c, h.uc.CreateAsisten)
+	if !ok {
 		return
 	}
-	res, err := h.uc.CreateAsisten(req)
-	if err != nil {
-		mapError(c, err)
-		return
-	}
-	_ = h.auditLog.LogAction(middleware.UserID(c), "", "CREATE_USER", "Membuat asisten baru: "+res.Nama+" (NIM: "+res.NIM+")", middleware.ClientIP(c), c.Request.UserAgent())
+	logAudit(c, h.auditLog, "CREATE_USER", "Membuat asisten baru: "+res.Nama+" (NIM: "+res.NIM+")")
 	response.Created(c, "Asisten dibuat", res)
 }
 
@@ -259,20 +224,10 @@ func (h *UserHandler) CreateAsisten(c *gin.Context) {
 //	@Success		200		{object}	response.Envelope{data=entity.User}
 //	@Router			/praktikum/admin/asisten/{id} [put]
 func (h *UserHandler) UpdateAsisten(c *gin.Context) {
-	id, ok := idParam(c, "id")
+	res, ok := bindUpdate(c, "id", h.uc.UpdateAsisten)
 	if !ok {
 		return
 	}
-	var req dto.AsistenRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Fail(c, http.StatusBadRequest, "Input tidak valid", err.Error())
-		return
-	}
-	res, err := h.uc.UpdateAsisten(id, req)
-	if err != nil {
-		mapError(c, err)
-		return
-	}
-	_ = h.auditLog.LogAction(middleware.UserID(c), "", "UPDATE_USER", "Memperbarui data asisten: "+res.Nama+" (NIM: "+res.NIM+")", middleware.ClientIP(c), c.Request.UserAgent())
+	logAudit(c, h.auditLog, "UPDATE_USER", "Memperbarui data asisten: "+res.Nama+" (NIM: "+res.NIM+")")
 	response.OK(c, http.StatusOK, "Asisten diperbarui", res)
 }

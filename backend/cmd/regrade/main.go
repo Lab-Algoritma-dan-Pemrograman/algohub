@@ -47,7 +47,7 @@ func main() {
 	doRecalc := flag.Bool("recalc", false, "recalc total_nilai semua pengerjaan (termasuk arsip)")
 	includeArsip := flag.Bool("arsip", true, "ikut grade jawaban arsip (shift=0)")
 	sesi := flag.Int("sesi", 0, "batasi ke 1 sesi_praktikum_id (0=semua)")
-	concurrency := flag.Int("concurrency", 2, "jumlah worker paralel (ollama.com rate-limit; >3 banyak gagal)")
+	concurrency := flag.Int("concurrency", 2, "jumlah worker paralel (ollama.com rate-limit; >3 banyak gagal)") //nolint:misspell // teks berbahasa Indonesia, bukan salah eja
 	limit := flag.Int("limit", 0, "batasi jumlah jawaban yang digrade (0=semua)")
 	flag.Parse()
 
@@ -162,7 +162,7 @@ func grade(db *gorm.DB, client *ollama.Client, includeArsip bool, sesi, concurre
 				var res *ollama.AIResult
 				var err error
 				for attempt := 1; attempt <= 3; attempt++ { // retry: ollama.com kadang rate-limit/timeout
-					res, err = client.GradeAnswer(context.Background(), ollama.GradeParams{
+					res, err = client.GradeAnswer(context.Background(), &ollama.GradeParams{
 						Soal: r.TeksSoal, Kunci: r.Kunci, Jawaban: r.JawabanTeks,
 						Poin: r.Poin, JenisSoal: r.JenisSoal, Difficulty: r.Difficulty, JenisCourse: r.CourseJenis,
 					})

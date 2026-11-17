@@ -10,7 +10,7 @@ const (
 	RoleKoordinator RoleType = "koordinator"
 )
 
-// AllowedEmailDomains: domain populer yang diizinkan untuk register.
+// AllowedEmailDomains: domain umum yang diizinkan untuk register.
 // itpln.ac.id bersifat template: hanya diizinkan bila config EmailAllowItpln = true.
 var AllowedEmailDomains = map[string]bool{
 	"gmail.com":   true,

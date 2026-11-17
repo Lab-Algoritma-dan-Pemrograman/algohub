@@ -14,7 +14,7 @@ func NewKelasUsecase(r repository.KelasRepository) *KelasUsecase { return &Kelas
 
 func (uc *KelasUsecase) List() ([]entity.Kelas, error) { return uc.repo.List() }
 
-func (uc *KelasUsecase) Create(req dto.KelasRequest) (*entity.Kelas, error) {
+func (uc *KelasUsecase) Create(req *dto.KelasRequest) (*entity.Kelas, error) {
 	k := &entity.Kelas{NamaKelas: req.NamaKelas}
 	if err := uc.repo.Create(k); err != nil {
 		return nil, err
@@ -22,7 +22,7 @@ func (uc *KelasUsecase) Create(req dto.KelasRequest) (*entity.Kelas, error) {
 	return k, nil
 }
 
-func (uc *KelasUsecase) Update(id int, req dto.KelasRequest) (*entity.Kelas, error) {
+func (uc *KelasUsecase) Update(id int, req *dto.KelasRequest) (*entity.Kelas, error) {
 	k, err := uc.repo.FindByID(id)
 	if err != nil {
 		return nil, ErrNotFound

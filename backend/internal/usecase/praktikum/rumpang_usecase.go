@@ -69,6 +69,7 @@ func instruksiBersih(teks string) string {
 	return t
 }
 
+//nolint:misspell // teks berbahasa Indonesia, bukan salah eja
 const promptRumpang = `Kamu menerima INSTRUKSI soal pemrograman C dan KUNCI (kode C lengkap yang benar).
 
 Tugas: buat versi RUMPANG dari kode kunci untuk mahasiswa kelas karyawan.
@@ -116,7 +117,7 @@ func (uc *RumpangUsecase) buatRumpang(ctx context.Context, instruksi, kunci stri
 // Sapu memproses soal coding keterampilan yang punya kunci tapi belum punya
 // kode_rumpang. Mengembalikan jumlah soal yang berhasil dibuatkan rumpang.
 // Idempoten: soal yang sudah punya kode_rumpang dilewati.
-func (uc *RumpangUsecase) Sapu(ctx context.Context) (int, []int, error) {
+func (uc *RumpangUsecase) Sapu(ctx context.Context) (berhasil int, gagalIDs []int, err error) {
 	courses, err := uc.course.ListByJenis(entity.CourseKeterampilan)
 	if err != nil {
 		return 0, nil, err
@@ -128,7 +129,8 @@ func (uc *RumpangUsecase) Sapu(ctx context.Context) (int, []int, error) {
 		if err != nil {
 			continue
 		}
-		for _, s := range pool {
+		for i := range pool {
+			s := &pool[i]
 			if s.JenisSoal != entity.SoalCoding {
 				continue
 			}
@@ -150,7 +152,7 @@ func (uc *RumpangUsecase) Sapu(ctx context.Context) (int, []int, error) {
 				continue
 			}
 			s.KodeRumpang = &rumpang
-			if err := uc.soal.Update(&s); err != nil {
+			if err := uc.soal.Update(s); err != nil {
 				gagal = append(gagal, s.ID)
 				continue
 			}

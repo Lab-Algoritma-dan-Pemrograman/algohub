@@ -10,7 +10,7 @@ type AuditLogRepository interface {
 	Create(log *entity.AuditLog) error
 	// hideSuperadmin menyembunyikan baris milik role superadmin (akun ninja) dari
 	// penonton non-superadmin. Baris tetap tersimpan, hanya tidak ditampilkan.
-	FindAll(search string, role string, action string, page int, limit int, hideSuperadmin bool) ([]entity.AuditLog, int64, error)
+	FindAll(search, role, action string, page, limit int, hideSuperadmin bool) ([]entity.AuditLog, int64, error)
 }
 
 type auditLogRepository struct {
@@ -25,7 +25,7 @@ func (r *auditLogRepository) Create(log *entity.AuditLog) error {
 	return r.db.Create(log).Error
 }
 
-func (r *auditLogRepository) FindAll(search string, role string, action string, page int, limit int, hideSuperadmin bool) ([]entity.AuditLog, int64, error) {
+func (r *auditLogRepository) FindAll(search, role, action string, page, limit int, hideSuperadmin bool) ([]entity.AuditLog, int64, error) {
 	var logs []entity.AuditLog
 	var total int64
 
@@ -48,12 +48,10 @@ func (r *auditLogRepository) FindAll(search string, role string, action string, 
 		query = query.Where("action = ?", action)
 	}
 
-	// Count total rows matching criteria
 	if err := query.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
-	// Apply pagination and sort by newest
 	offset := (page - 1) * limit
 	err := query.Order("created_at DESC").Offset(offset).Limit(limit).Find(&logs).Error
 	if err != nil {

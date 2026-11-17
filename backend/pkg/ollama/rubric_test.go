@@ -24,7 +24,7 @@ func TestRubrikSelection(t *testing.T) {
 }
 
 func TestPromptTidakNgawur(t *testing.T) {
-	pe := promptEssay("Apa itu variabel?", "Tempat menyimpan nilai", "wadah data", "easy", rubrikEssay("posttest", "easy"))
+	pe := promptEssay("Apa itu variabel?", "Tempat menyimpan nilai", "wadah data", "easy", rubrikEssay("posttest", "easy")) //nolint:misspell // teks berbahasa Indonesia, bukan salah eja
 	for _, must := range []string{"JAWABAN MAHASISWA", "RUBRIK PENILAIAN", "\"benar\": 20", "kategori", "JSON"} {
 		if !strings.Contains(pe, must) {
 			t.Fatalf("prompt esai tak memuat %q", must)

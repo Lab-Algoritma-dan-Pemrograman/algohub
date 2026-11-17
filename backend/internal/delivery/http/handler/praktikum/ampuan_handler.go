@@ -112,7 +112,8 @@ func (h *AmpuanHandler) PublicKelasMahasiswa(c *gin.Context) {
 
 	// Endpoint publik: kirim hanya field aman (tanpa PII mahasiswa).
 	safe := make([]dto.PublicMahasiswaItem, 0, len(mhs))
-	for _, m := range mhs {
+	for i := range mhs {
+		m := &mhs[i]
 		safe = append(safe, dto.PublicMahasiswaItem{
 			ID:       m.ID,
 			NIM:      m.NIM,

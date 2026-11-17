@@ -144,10 +144,10 @@ func (uc *AktivasiUsecase) Aktivasi(req dto.AktivasiRequest) (*entity.AktivasiSe
 		if err != nil {
 			return nil, err
 		}
-		for j, s := range picks {
+		for j := range picks {
 			terpilih = append(terpilih, entity.SoalTerpilih{
 				CourseID: course.ID,
-				SoalID:   s.ID,
+				SoalID:   picks[j].ID,
 				Urutan:   j + 1,
 			})
 		}

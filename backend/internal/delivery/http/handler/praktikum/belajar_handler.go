@@ -187,7 +187,7 @@ func (h *BelajarHandler) AdminCreateMateri(c *gin.Context) {
 		response.Fail(c, http.StatusBadRequest, "Input tidak valid", err.Error())
 		return
 	}
-	res, err := h.uc.CreateMateri(req)
+	res, err := h.uc.CreateMateri(&req)
 	if err != nil {
 		mapError(c, err)
 		return
@@ -212,7 +212,7 @@ func (h *BelajarHandler) AdminUpdateMateri(c *gin.Context) {
 		response.Fail(c, http.StatusBadRequest, "Input tidak valid", err.Error())
 		return
 	}
-	res, err := h.uc.UpdateMateri(c.Param("id"), req)
+	res, err := h.uc.UpdateMateri(c.Param("id"), &req)
 	if err != nil {
 		mapError(c, err)
 		return

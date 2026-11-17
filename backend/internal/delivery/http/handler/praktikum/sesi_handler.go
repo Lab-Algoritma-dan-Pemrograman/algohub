@@ -6,7 +6,6 @@ import (
 
 	dto "github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/dto/praktikum"
 	_ "github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/entity/praktikum"
-	"github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/middleware"
 	usecase "github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/usecase/praktikum"
 	"github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/pkg/response"
 
@@ -85,7 +84,7 @@ func (h *SesiHandler) Create(c *gin.Context) {
 		mapError(c, err)
 		return
 	}
-	_ = h.auditLog.LogAction(middleware.UserID(c), "", "CREATE_SESI", "Membuat sesi praktikum baru: '"+res.JudulSesi+"'", middleware.ClientIP(c), c.Request.UserAgent())
+	logAudit(c, h.auditLog, "CREATE_SESI", "Membuat sesi praktikum baru: '"+res.JudulSesi+"'")
 	response.Created(c, "Sesi dibuat", res)
 }
 
@@ -102,21 +101,11 @@ func (h *SesiHandler) Create(c *gin.Context) {
 //	@Success		200		{object}	response.Envelope{data=entity.SesiPraktikum}
 //	@Router			/praktikum/admin/sesi/{id} [put]
 func (h *SesiHandler) Update(c *gin.Context) {
-	id, ok := idParam(c, "id")
+	res, ok := bindUpdate(c, "id", h.uc.Update)
 	if !ok {
 		return
 	}
-	var req dto.SesiRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Fail(c, http.StatusBadRequest, "Input tidak valid", err.Error())
-		return
-	}
-	res, err := h.uc.Update(id, req)
-	if err != nil {
-		mapError(c, err)
-		return
-	}
-	_ = h.auditLog.LogAction(middleware.UserID(c), "", "UPDATE_SESI", fmt.Sprintf("Memperbarui sesi praktikum: '%s' (ID: %d)", res.JudulSesi, res.ID), middleware.ClientIP(c), c.Request.UserAgent())
+	logAudit(c, h.auditLog, "UPDATE_SESI", fmt.Sprintf("Memperbarui sesi praktikum: '%s' (ID: %d)", res.JudulSesi, res.ID))
 	response.OK(c, http.StatusOK, "Sesi diperbarui", res)
 }
 
@@ -139,7 +128,7 @@ func (h *SesiHandler) Delete(c *gin.Context) {
 		mapError(c, err)
 		return
 	}
-	_ = h.auditLog.LogAction(middleware.UserID(c), "", "DELETE_SESI", fmt.Sprintf("Menghapus sesi praktikum dengan ID %d", id), middleware.ClientIP(c), c.Request.UserAgent())
+	logAudit(c, h.auditLog, "DELETE_SESI", fmt.Sprintf("Menghapus sesi praktikum dengan ID %d", id))
 	response.OK(c, http.StatusOK, "Sesi dihapus", nil)
 }
 
@@ -190,12 +179,12 @@ func (h *SesiHandler) CreateCourse(c *gin.Context) {
 		response.Fail(c, http.StatusBadRequest, "Input tidak valid", err.Error())
 		return
 	}
-	res, err := h.uc.CreateCourse(id, req)
+	res, err := h.uc.CreateCourse(id, &req)
 	if err != nil {
 		mapError(c, err)
 		return
 	}
-	_ = h.auditLog.LogAction(middleware.UserID(c), "", "CREATE_COURSE", fmt.Sprintf("Membuat course baru '%s' untuk sesi ID %d", res.Judul, id), middleware.ClientIP(c), c.Request.UserAgent())
+	logAudit(c, h.auditLog, "CREATE_COURSE", fmt.Sprintf("Membuat course baru '%s' untuk sesi ID %d", res.Judul, id))
 	response.Created(c, "Course dibuat", res)
 }
 
@@ -212,21 +201,11 @@ func (h *SesiHandler) CreateCourse(c *gin.Context) {
 //	@Success		200			{object}	response.Envelope{data=entity.Course}
 //	@Router			/praktikum/admin/course/{courseId} [put]
 func (h *SesiHandler) UpdateCourse(c *gin.Context) {
-	cid, ok := idParam(c, "courseId")
+	res, ok := bindUpdate(c, "courseId", h.uc.UpdateCourse)
 	if !ok {
 		return
 	}
-	var req dto.CourseRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Fail(c, http.StatusBadRequest, "Input tidak valid", err.Error())
-		return
-	}
-	res, err := h.uc.UpdateCourse(cid, req)
-	if err != nil {
-		mapError(c, err)
-		return
-	}
-	_ = h.auditLog.LogAction(middleware.UserID(c), "", "UPDATE_COURSE", fmt.Sprintf("Memperbarui course: '%s' (ID: %d)", res.Judul, res.ID), middleware.ClientIP(c), c.Request.UserAgent())
+	logAudit(c, h.auditLog, "UPDATE_COURSE", fmt.Sprintf("Memperbarui course: '%s' (ID: %d)", res.Judul, res.ID))
 	response.OK(c, http.StatusOK, "Course diperbarui", res)
 }
 
@@ -249,6 +228,6 @@ func (h *SesiHandler) DeleteCourse(c *gin.Context) {
 		mapError(c, err)
 		return
 	}
-	_ = h.auditLog.LogAction(middleware.UserID(c), "", "DELETE_COURSE", fmt.Sprintf("Menghapus course dengan ID %d", cid), middleware.ClientIP(c), c.Request.UserAgent())
+	logAudit(c, h.auditLog, "DELETE_COURSE", fmt.Sprintf("Menghapus course dengan ID %d", cid))
 	response.OK(c, http.StatusOK, "Course dihapus", nil)
 }

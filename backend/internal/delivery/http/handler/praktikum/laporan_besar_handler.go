@@ -294,25 +294,7 @@ func (h *LaporanBesarHandler) ListPengumpulan(c *gin.Context) {
 //	@Success		200		{object}	response.Envelope
 //	@Router			/praktikum/admin/laporan-besar/{id}/pengumpulan/{mhsId}/mark [put]
 func (h *LaporanBesarHandler) Mark(c *gin.Context) {
-	id, ok := idParam(c, "id")
-	if !ok {
-		return
-	}
-	mhsID, ok := idParam(c, "mhsId")
-	if !ok {
-		return
-	}
-	var req dto.MarkRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Fail(c, http.StatusBadRequest, "Input tidak valid", err.Error())
-		return
-	}
-	res, err := h.uc.Mark(id, mhsID, middleware.UserID(c), req)
-	if err != nil {
-		mapError(c, err)
-		return
-	}
-	response.OK(c, http.StatusOK, "Pengumpulan diperbarui", res)
+	aksiPengumpulan(c, h.uc.Mark, "Pengumpulan diperbarui")
 }
 
 // SetOverride PUT /api/admin/laporan-besar/:id/pengumpulan/:mhsId/override
@@ -329,6 +311,10 @@ func (h *LaporanBesarHandler) Mark(c *gin.Context) {
 //	@Success		200		{object}	response.Envelope
 //	@Router			/praktikum/admin/laporan-besar/{id}/pengumpulan/{mhsId}/override [put]
 func (h *LaporanBesarHandler) SetOverride(c *gin.Context) {
+	aksiPengumpulan(c, h.uc.SetOverride, "Override disimpan")
+}
+
+func aksiPengumpulan[T, R any](c *gin.Context, aksi func(laporanID, mhsID, olehID int, req *T) (R, error), msg string) {
 	id, ok := idParam(c, "id")
 	if !ok {
 		return
@@ -337,17 +323,9 @@ func (h *LaporanBesarHandler) SetOverride(c *gin.Context) {
 	if !ok {
 		return
 	}
-	var req dto.OverrideRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Fail(c, http.StatusBadRequest, "Input tidak valid", err.Error())
-		return
+	if _, res, ok := bindCreate(c, func(req *T) (R, error) { return aksi(id, mhsID, middleware.UserID(c), req) }); ok {
+		response.OK(c, http.StatusOK, msg, res)
 	}
-	res, err := h.uc.SetOverride(id, mhsID, middleware.UserID(c), req)
-	if err != nil {
-		mapError(c, err)
-		return
-	}
-	response.OK(c, http.StatusOK, "Override disimpan", res)
 }
 
 // RevokeOverride DELETE /api/admin/laporan-besar/:id/pengumpulan/:mhsId/override

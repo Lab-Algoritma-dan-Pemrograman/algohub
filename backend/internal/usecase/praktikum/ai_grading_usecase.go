@@ -76,7 +76,7 @@ func (uc *aiGradingUsecase) GradeOne(jawabanID int) (*dto.AIGradeOneResponse, er
 		model = k.Value
 	}
 
-	res, err := uc.ollamaClient.GradeAnswer(context.Background(), ollama.GradeParams{
+	res, err := uc.ollamaClient.GradeAnswer(context.Background(), &ollama.GradeParams{
 		Soal:        j.SoalTerpilih.Soal.TeksSoal,
 		Kunci:       kunci,
 		Jawaban:     j.JawabanTeks,

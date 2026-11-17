@@ -52,7 +52,7 @@ func (uc *BelajarUsecase) GetMateri(id string) (*entity.Materi, error) {
 	return m, nil
 }
 
-func (uc *BelajarUsecase) CreateMateri(req dto.MateriRequest) (*entity.Materi, error) {
+func (uc *BelajarUsecase) CreateMateri(req *dto.MateriRequest) (*entity.Materi, error) {
 	if req.ID == "" || req.ModulID == "" || req.Judul == "" {
 		return nil, ErrBadRequest
 	}
@@ -77,7 +77,7 @@ func (uc *BelajarUsecase) CreateMateri(req dto.MateriRequest) (*entity.Materi, e
 	return m, nil
 }
 
-func (uc *BelajarUsecase) UpdateMateri(id string, req dto.MateriRequest) (*entity.Materi, error) {
+func (uc *BelajarUsecase) UpdateMateri(id string, req *dto.MateriRequest) (*entity.Materi, error) {
 	m, err := uc.repo.FindMateri(id)
 	if err != nil {
 		return nil, ErrNotFound
@@ -130,7 +130,7 @@ func (uc *BelajarUsecase) ProgresSaya(userID int) (*dto.ProgresSayaResponse, err
 
 // SelesaikanMateri menandai materi selesai dan menambah XP sesuai xp_hadiah.
 // CR-M1: klaim transisi belum->selesai + increment XP dilakukan ATOMIK di DB,
-// sehingga dua request paralel tidak bisa menambah XP dua kali (dulu read-then-add).
+// sehingga dua request bersamaan tidak bisa menambah XP dua kali (dulu read-then-add).
 func (uc *BelajarUsecase) SelesaikanMateri(userID int, materiID string) (*entity.ProfilBelajar, error) {
 	m, err := uc.repo.FindMateri(materiID)
 	if err != nil {
@@ -185,7 +185,7 @@ func (uc *BelajarUsecase) PencapaianSaya(userID int) (*dto.PencapaianSayaRespons
 		if sudah[p.ID] {
 			continue
 		}
-		if !uc.syaratTerpenuhi(p, profil, jumlahSelesai, levelTuntas) {
+		if !uc.syaratTerpenuhi(&p, profil, jumlahSelesai, levelTuntas) {
 			continue
 		}
 		if err := uc.repo.BukaPencapaian(userID, p.ID); err != nil {
@@ -205,7 +205,7 @@ func (uc *BelajarUsecase) PencapaianSaya(userID int) (*dto.PencapaianSayaRespons
 // syaratTerpenuhi mengevaluasi satu pencapaian. syarat_nilai bertipe text
 // karena sumbernya campur angka ("1000") dan id level ("c-level-1").
 func (uc *BelajarUsecase) syaratTerpenuhi(
-	p entity.Pencapaian, profil *entity.ProfilBelajar,
+	p *entity.Pencapaian, profil *entity.ProfilBelajar,
 	jumlahSelesai int64, levelTuntas map[string]bool,
 ) bool {
 	switch p.SyaratTipe {
@@ -254,9 +254,9 @@ func (uc *BelajarUsecase) levelTuntas(userID int) map[string]bool {
 			if err != nil {
 				continue
 			}
-			for _, mt := range materi {
+			for i := range materi {
 				total++
-				if selesai[mt.ID] {
+				if selesai[materi[i].ID] {
 					tuntas++
 				}
 			}
@@ -315,8 +315,8 @@ func (uc *BelajarUsecase) materiDiLevel(levelID string) ([]string, error) {
 		if err != nil {
 			return nil, err
 		}
-		for _, mt := range materi {
-			ids = append(ids, mt.ID)
+		for i := range materi {
+			ids = append(ids, materi[i].ID)
 		}
 	}
 	return ids, nil
@@ -383,7 +383,8 @@ func (uc *BelajarUsecase) ListUserBelajar() ([]dto.SesiBelajarResponse, error) {
 		return nil, err
 	}
 	out := make([]dto.SesiBelajarResponse, 0, len(rows))
-	for _, b := range rows {
+	for i := range rows {
+		b := &rows[i]
 		var akses interface{} = map[string]string{}
 		if len(b.AksesLevel) > 0 {
 			var tmp map[string]string
@@ -441,7 +442,8 @@ func (uc *BelajarUsecase) SimpanKurikulum(req dto.SimpanKurikulumRequest) error 
 			moduls = append(moduls, entity.Modul{
 				ID: m.ID, LevelID: l.ID, Judul: m.Judul, Urutan: mi,
 			})
-			for ti, t := range m.Materi {
+			for ti := range m.Materi {
+				t := &m.Materi[ti]
 				materi = append(materi, entity.Materi{
 					ID: t.ID, ModulID: m.ID, Judul: t.Judul,
 					Penjelasan: t.Penjelasan, ContohKode: t.ContohKode,

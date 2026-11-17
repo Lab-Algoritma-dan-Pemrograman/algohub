@@ -18,7 +18,7 @@ func NewPedomanUsecase(r repository.PedomanRepository) *PedomanUsecase {
 
 func (uc *PedomanUsecase) List() ([]entity.PedomanLaporan, error) { return uc.repo.List() }
 
-func (uc *PedomanUsecase) Create(req dto.PedomanRequest) (*entity.PedomanLaporan, error) {
+func (uc *PedomanUsecase) Create(req *dto.PedomanRequest) (*entity.PedomanLaporan, error) {
 	p := &entity.PedomanLaporan{
 		NamaDokumen:  req.NamaDokumen,
 		FileURL:      req.FileURL,
@@ -30,7 +30,7 @@ func (uc *PedomanUsecase) Create(req dto.PedomanRequest) (*entity.PedomanLaporan
 	return p, nil
 }
 
-func (uc *PedomanUsecase) Update(id int, req dto.PedomanRequest) (*entity.PedomanLaporan, error) {
+func (uc *PedomanUsecase) Update(id int, req *dto.PedomanRequest) (*entity.PedomanLaporan, error) {
 	p, err := uc.repo.FindByID(id)
 	if err != nil {
 		return nil, ErrNotFound

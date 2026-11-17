@@ -11,9 +11,6 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-func ptrTime(t time.Time) *time.Time { return &t }
-func ptrStr(s string) *string        { return &s }
-
 // TestFaseWindow memverifikasi aturan waktu server-authoritative.
 func TestFaseWindow(t *testing.T) {
 	deadline := time.Date(2026, 6, 1, 12, 0, 0, 0, time.UTC)

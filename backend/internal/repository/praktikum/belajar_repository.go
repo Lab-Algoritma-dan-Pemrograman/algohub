@@ -45,7 +45,7 @@ type BelajarRepository interface {
 	// CR-M1: klaim transisi belum->selesai secara atomik (true = transisi baru).
 	KlaimMateriSelesai(userID int, materiID string, pada *time.Time) (bool, error)
 	// TambahXP increment XP atomik (xp = xp + ?), return profil terbaru.
-	TambahXP(userID int, xp int) (*entity.ProfilBelajar, error)
+	TambahXP(userID, xp int) (*entity.ProfilBelajar, error)
 	FindProfil(userID int) (*entity.ProfilBelajar, error)
 	SimpanProfil(p *entity.ProfilBelajar) error
 }
@@ -302,7 +302,7 @@ func (r *belajarRepository) TandaiSelesai(p *entity.ProgresBelajar) error {
 // KlaimMateriSelesai menandai materi selesai secara ATOMIK, hanya bila transisi
 // belum-selesai -> selesai benar-benar terjadi. Return true = klaim transisi baru
 // didapat (XP boleh ditambah); false = sudah selesai sebelumnya (XP jangan ditambah).
-// Klausa WHERE pada DO UPDATE membuat dua request paralel tidak bisa dua-duanya menang.
+// Klausa WHERE pada DO UPDATE membuat dua request bersamaan tidak bisa dua-duanya menang.
 func (r *belajarRepository) KlaimMateriSelesai(userID int, materiID string, pada *time.Time) (bool, error) {
 	res := r.db.Exec(`
 		insert into progres_belajar (user_id, materi_id, selesai, selesai_pada)
@@ -317,9 +317,9 @@ func (r *belajarRepository) KlaimMateriSelesai(userID int, materiID string, pada
 	return res.RowsAffected > 0, nil
 }
 
-// TambahXP increment XP secara ATOMIK di DB (xp = xp + ?) — dua request paralel
+// TambahXP increment XP secara ATOMIK di DB (xp = xp + ?) — dua request bersamaan
 // tidak lagi saling menimpa (dulu read-then-add di memori, temuan CR-M1).
-func (r *belajarRepository) TambahXP(userID int, xp int) (*entity.ProfilBelajar, error) {
+func (r *belajarRepository) TambahXP(userID, xp int) (*entity.ProfilBelajar, error) {
 	if err := r.db.Exec(`
 		insert into profil_belajar (user_id, xp, level_angka, terakhir_aktif)
 		values (?, ?, 1, now())

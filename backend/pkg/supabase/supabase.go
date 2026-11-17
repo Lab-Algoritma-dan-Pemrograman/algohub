@@ -41,9 +41,9 @@ func (c *Client) Upload(path string, content []byte, contentType string, upsert 
 		return "", fmt.Errorf("supabase belum dikonfigurasi")
 	}
 	path = strings.TrimLeft(path, "/")
-	url := fmt.Sprintf("%s/storage/v1/object/%s/%s", c.baseURL, c.bucket, path)
+	endpoint := fmt.Sprintf("%s/storage/v1/object/%s/%s", c.baseURL, c.bucket, path)
 
-	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(content))
+	req, err := http.NewRequest(http.MethodPost, endpoint, bytes.NewReader(content))
 	if err != nil {
 		return "", err
 	}
@@ -81,7 +81,7 @@ func (c *Client) SignedUploadURL(path string, ttl time.Duration) (string, error)
 	path = strings.TrimLeft(path, "/")
 	endpoint := fmt.Sprintf("%s/storage/v1/object/upload/sign/%s/%s", c.baseURL, c.bucket, path)
 
-	req, err := http.NewRequest(http.MethodPost, endpoint, nil)
+	req, err := http.NewRequest(http.MethodPost, endpoint, http.NoBody)
 	if err != nil {
 		return "", err
 	}
@@ -165,8 +165,8 @@ func (c *Client) Delete(path string) error {
 		return fmt.Errorf("supabase belum dikonfigurasi")
 	}
 	path = strings.TrimLeft(path, "/")
-	url := fmt.Sprintf("%s/storage/v1/object/%s/%s", c.baseURL, c.bucket, path)
-	req, err := http.NewRequest(http.MethodDelete, url, nil)
+	endpoint := fmt.Sprintf("%s/storage/v1/object/%s/%s", c.baseURL, c.bucket, path)
+	req, err := http.NewRequest(http.MethodDelete, endpoint, http.NoBody)
 	if err != nil {
 		return err
 	}

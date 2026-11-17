@@ -105,7 +105,7 @@ func clamp(v, lo, hi float64) float64 {
 
 // GradeAnswer menilai satu jawaban memakai rubrik (default: ketentuan project lama).
 // Hasil di-skala ke poin soal agar adaptif terhadap bobot soal yang ditetapkan admin.
-func (c *Client) GradeAnswer(ctx context.Context, p GradeParams) (*AIResult, error) {
+func (c *Client) GradeAnswer(ctx context.Context, p *GradeParams) (*AIResult, error) {
 	// Soal & kunci berasal dari editor HTML (edra) -> bersihkan agar AI baca teks/kode bersih.
 	soal := stripHTML(p.Soal)
 	kunci := stripHTML(p.Kunci)
@@ -133,11 +133,11 @@ func (c *Client) GradeAnswer(ctx context.Context, p GradeParams) (*AIResult, err
 			return nil, fmt.Errorf("parse AI coding JSON '%s': %w", content, err)
 		}
 		sc := subForCourse(p.JenisCourse)
-		max := float64(sc.SesuaiPetunjukMax + sc.BteMax + sc.TwMax)
+		maxTotal := float64(sc.SesuaiPetunjukMax + sc.BteMax + sc.TwMax)
 		sp := clamp(r.SesuaiPetunjuk, 0, float64(sc.SesuaiPetunjukMax))
 		bte := clamp(r.BerjalanTanpaError, 0, float64(sc.BteMax))
 		tw := clamp(r.TepatWaktuSelesai, float64(sc.TwMin), float64(sc.TwMax))
-		res.Nilai = math.Round(clamp(p.Poin*(sp+bte+tw)/max, 0, p.Poin)) // nilai bulat (tanpa koma)
+		res.Nilai = math.Round(clamp(p.Poin*(sp+bte+tw)/maxTotal, 0, p.Poin)) // nilai bulat (tanpa koma)
 		res.Feedback = r.Feedback
 	} else {
 		var r essayResp

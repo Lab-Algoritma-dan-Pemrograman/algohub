@@ -24,7 +24,7 @@ func NewSoalUsecase(s repository.SoalRepository, c repository.CourseRepository, 
 
 // ---- CRUD pool ----
 
-func (uc *SoalUsecase) Create(req dto.SoalRequest) (*entity.Soal, error) {
+func (uc *SoalUsecase) Create(req *dto.SoalRequest) (*entity.Soal, error) {
 	if _, err := uc.course.FindByID(req.CourseID); err != nil {
 		return nil, ErrNotFound
 	}
@@ -61,7 +61,7 @@ func (uc *SoalUsecase) Create(req dto.SoalRequest) (*entity.Soal, error) {
 	return s, nil
 }
 
-func (uc *SoalUsecase) Update(id int, req dto.SoalRequest) (*entity.Soal, error) {
+func (uc *SoalUsecase) Update(id int, req *dto.SoalRequest) (*entity.Soal, error) {
 	s, err := uc.soal.FindByID(id)
 	if err != nil {
 		return nil, ErrNotFound
