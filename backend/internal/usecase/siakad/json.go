@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
+	"strconv"
+	"strings"
 )
 
 // JSON hanya di-encode ulang kalau ada key yang benar-benar dibuang, supaya urutan kolom
@@ -111,6 +113,34 @@ func truthy(v any) bool {
 		return x != 0 && !math.IsNaN(x)
 	}
 	return true
+}
+
+// Meniru Number(x) JavaScript untuk id dari body JSON: hanya bilangan bulat yang dipakai sebagai angka.
+func integerID(v any) (int64, bool) {
+	var f float64
+	switch x := v.(type) {
+	case float64:
+		f = x
+	case bool:
+		if x {
+			f = 1
+		}
+	case string:
+		s := strings.TrimSpace(x)
+		if s != "" {
+			n, err := strconv.ParseFloat(s, 64)
+			if err != nil {
+				return 0, false
+			}
+			f = n
+		}
+	default:
+		return 0, false
+	}
+	if f != math.Trunc(f) || math.Abs(f) > 1<<53 {
+		return 0, false
+	}
+	return int64(f), true
 }
 
 func claimFloat(v any) (float64, error) {

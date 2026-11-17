@@ -7,13 +7,16 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	cronhandler "github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/delivery/http/handler/cron"
 	handler "github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/delivery/http/handler/siakad"
 	"github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/middleware"
 )
 
 type SiakadHandlers struct {
-	Auth *handler.AuthHandler
-	RPC  *handler.RPCHandler
+	Auth   *handler.AuthHandler
+	RPC    *handler.RPCHandler
+	Notify *handler.NotifyHandler
+	Cron   *cronhandler.CronHandler
 }
 
 type Siakad struct {
@@ -41,6 +44,24 @@ func RegisterSiakad(r *gin.Engine, s *Siakad) {
 	allowOnly(g, "/auth/logout", []string{http.MethodPost}, h.Auth.Logout)
 	allowOnly(g, "/auth/verify", []string{http.MethodGet, http.MethodPost}, h.Auth.Verify)
 	allowOnly(g, "/rpc", []string{http.MethodPost}, rpcLimit, h.RPC.Call)
+	allowOnly(g, "/send-push", []string{http.MethodPost, http.MethodOptions}, okOnOptions(h.Notify.SendPush))
+	allowOnly(g, "/send-wa", []string{http.MethodPost, http.MethodOptions}, okOnOptions(h.Notify.SendWA))
+
+	cron := r.Group("/api/cron")
+	allowOnly(cron, "/siakad/check-shifts", []string{http.MethodGet}, h.Cron.CheckShifts)
+	allowOnly(cron, "/keep-alive", []string{http.MethodGet}, h.Cron.KeepAlive)
+}
+
+// Endpoint notifikasi lama membalas OPTIONS non-preflight dengan 200 kosong; preflight sudah
+// dijawab middleware CORS sebelum sampai ke sini.
+func okOnOptions(next gin.HandlerFunc) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if c.Request.Method == http.MethodOptions {
+			c.Status(http.StatusOK)
+			return
+		}
+		next(c)
+	}
 }
 
 // Gin membalas 404 untuk method yang tidak terdaftar, sedangkan endpoint lama membalas 405.
