@@ -577,30 +577,30 @@ Semua path di bawah `/api/elearning`. Kolom "Status" diisi FEAT-002..005: `belum
 | Sumber lama | Tabel/RPC | Endpoint baru | Status |
 |---|---|---|---|
 | `components/Layout.tsx:70` | active_sessions delete own | `DELETE /sessions/me` | belum |
-| `Layout.tsx:143`, `:152`, raw `PATCH /rest/v1/users` `:181` | users study_time | `POST /progress/study-time {seconds}` (increment dalam satu UPDATE) | belum |
+| `Layout.tsx:143`, `:152`, raw `PATCH /rest/v1/users` `:181` | users study_time | `POST /progress/study-time {seconds}` (increment dalam satu UPDATE) | selesai (`TestElearningLearningRoutesRequireToken`) |
 | `Layout.tsx:198`, `:237` | active_sessions upsert | `PUT /sessions/me {currentActivity,nama?,kelas?,attemptId?,touchStreak?,studySeconds?}` | belum |
-| `Layout.tsx:218` | users last_active/streak | `POST /streak` (atau `touchStreak` di `PUT /sessions/me`) | belum |
-| `components/SupabaseProvider.tsx:91`, `:126`, `:212` | users select/insert/update | `POST /profile/sync` | belum |
-| `SupabaseProvider.tsx:298`, `:321` | student_progress own completed | `GET /progress/me/lessons` | belum |
-| `SupabaseProvider.tsx:370`, `:379` | levels | `GET /curriculum/levels` | belum |
-| `SupabaseProvider.tsx:397` | modules | `GET /curriculum/modules` | belum |
-| `SupabaseProvider.tsx:405` | lessons / student_lessons | `GET /curriculum/lessons` (staf: lessons penuh; lainnya: aturan view) | belum |
-| `pages/AdminDashboard.tsx:1196` | users level_access_overrides | `PATCH /admin/users/:nim/level-access` | belum |
-| `AdminDashboard.tsx:1219` | users list | `GET /admin/users?page&limit&q` | belum |
-| `AdminDashboard.tsx:1266` | student_progress by nim | `GET /admin/users/:nim/progress` | belum |
-| `AdminDashboard.tsx:1328` | users role/elearning_role | `PATCH /admin/users/:nim/role` | belum |
-| `pages/Dashboard.tsx:81` | student_progress recent | `GET /progress/me/recent?limit=5` | belum |
-| `pages/Profile.tsx:27` | unlocked_achievements own | `GET /achievements/me` | belum |
+| `Layout.tsx:218` | users last_active/streak | `POST /streak` (atau `touchStreak` di `PUT /sessions/me`) | sebagian: `POST /streak` selesai (`TestElearningLearningRoutesRequireToken`); `touchStreak` di `PUT /sessions/me` belum |
+| `components/SupabaseProvider.tsx:91`, `:126`, `:212` | users select/insert/update | `POST /profile/sync` | selesai (`TestElearningLearningRoutesRequireToken`) |
+| `SupabaseProvider.tsx:298`, `:321` | student_progress own completed | `GET /progress/me/lessons` | selesai (`TestElearningLearningRoutesRequireToken`) |
+| `SupabaseProvider.tsx:370`, `:379` | levels | `GET /curriculum/levels` | selesai (`TestElearningLearningRoutesRequireToken`) |
+| `SupabaseProvider.tsx:397` | modules | `GET /curriculum/modules` | selesai (`TestElearningLearningRoutesRequireToken`) |
+| `SupabaseProvider.tsx:405` | lessons / student_lessons | `GET /curriculum/lessons` (staf: lessons penuh; lainnya: aturan view) | selesai (`TestElearningLearningRoutesRequireToken`) |
+| `pages/AdminDashboard.tsx:1196` | users level_access_overrides | `PATCH /admin/users/:nim/level-access` | selesai (`TestElearningLearningRoutesRequireToken`) |
+| `AdminDashboard.tsx:1219` | users list | `GET /admin/users?page&limit&q` | selesai (`TestElearningLearningRoutesRequireToken`) |
+| `AdminDashboard.tsx:1266` | student_progress by nim | `GET /admin/users/:nim/progress` | selesai (`TestElearningLearningRoutesRequireToken`) |
+| `AdminDashboard.tsx:1328` | users role/elearning_role | `PATCH /admin/users/:nim/role` | selesai (`TestElearningLearningRoutesRequireToken`) |
+| `pages/Dashboard.tsx:81` | student_progress recent | `GET /progress/me/recent?limit=5` | selesai (`TestElearningLearningRoutesRequireToken`) |
+| `pages/Profile.tsx:27` | unlocked_achievements own | `GET /achievements/me` | selesai (`TestElearningLearningRoutesRequireToken`) |
 | `pages/StudentMonitoring.tsx:62`, `:156` | active_sessions + users(role) | `GET /monitoring/sessions` | belum |
 | `StudentMonitoring.tsx:81` | users mahasiswa | `GET /monitoring/students?page&limit` | belum |
 | `StudentMonitoring.tsx:111` | student_progress semua (paging 1000) | `GET /monitoring/progress?page&limit` (dikelompokkan per nim, `array_agg`) | belum |
-| `services/achievementService.ts:32`, `:55`, `:91` | achievements, unlocked select/insert | `POST /achievements/check` | belum |
-| `achievementService.ts:116` | achievements | `GET /achievements?requirementType=` | belum |
-| `achievementService.ts:145`, `:162`, `:176` | achievements xp, unlocked | `POST /achievements/check-xp {xp}` | belum |
-| `services/curriculumService.ts:12`, `:22` / `:38` / `:43` | levels / modules / lessons | `GET /curriculum/levels` / `modules` / `lessons` | belum |
-| `curriculumService.ts:160`, `:162`, `:164`, `:179`, `:187`, `:195`, `:251`, `:255`, `:259` | saveFullCurriculum | `PUT /curriculum` (satu transaksi) | belum |
+| `services/achievementService.ts:32`, `:55`, `:91` | achievements, unlocked select/insert | `POST /achievements/check` | selesai (`TestElearningLearningRoutesRequireToken`) |
+| `achievementService.ts:116` | achievements | `GET /achievements?requirementType=` | selesai (`TestElearningLearningRoutesRequireToken`) |
+| `achievementService.ts:145`, `:162`, `:176` | achievements xp, unlocked | `POST /achievements/check-xp {xp}` | selesai (`TestElearningLearningRoutesRequireToken`) |
+| `services/curriculumService.ts:12`, `:22` / `:38` / `:43` | levels / modules / lessons | `GET /curriculum/levels` / `modules` / `lessons` | selesai (`TestElearningLearningRoutesRequireToken`) |
+| `curriculumService.ts:160`, `:162`, `:164`, `:179`, `:187`, `:195`, `:251`, `:255`, `:259` | saveFullCurriculum | `PUT /curriculum` (satu transaksi) | selesai (`TestElearningLearningRoutesRequireToken`) |
 | `curriculumService.ts:271` | levels update | kode mati (`updateLevel` tanpa pemanggil) | kode mati |
-| `curriculumService.ts:290`, `:293` | clearCurriculum | `DELETE /curriculum` | belum |
+| `curriculumService.ts:290`, `:293` | clearCurriculum | `DELETE /curriculum` | selesai (`TestElearningLearningRoutesRequireToken`) |
 | `services/gameService.ts:27` | game_questions by language | `GET /game/questions?language&limit` (acak, maks 100) | belum |
 | `gameService.ts:83`, `:105` | game_history insert + users | `POST /game/history` | belum |
 | `gameService.ts:143`, `:160` | seed bila kosong | `POST /game/questions/seed` | belum |
@@ -613,20 +613,20 @@ Semua path di bawah `/api/elearning`. Kolom "Status" diisi FEAT-002..005: `belum
 | `leaderboardService.ts:306` / `:356` / `:384` | users | `GET /leaderboard` / `GET /leaderboard/rank?xp` / `GET /leaderboard/filters` | belum |
 | `services/monitoringService.ts:50`, `:65` | active_sessions | kode mati (operasi sama dengan `PUT /sessions/me` dan `GET /monitoring/sessions`) | kode mati |
 | `monitoringService.ts:99` | active_sessions delete stale | `DELETE /monitoring/sessions/stale?thresholdMinutes=2` | belum |
-| `monitoringService.ts:132` | activity_logs insert | `POST /activity-logs` (juga dipakai internal oleh endpoint admin dan prestige) | belum |
+| `monitoringService.ts:132` | activity_logs insert | `POST /activity-logs` (juga dipakai internal oleh endpoint admin dan prestige) | sebagian: `POST /activity-logs` dan log internal `/admin/users/*` selesai (`TestElearningLearningRoutesRequireToken`); log `POST /prestige/reset` belum |
 | `monitoringService.ts:143`, `:158` | activity_logs list | `GET /activity-logs?page&limit` | belum |
 | `monitoringService.ts:190` | activity_logs delete | `DELETE /activity-logs/:id` | belum |
 | `services/playgroundService.ts:15` / `:43` / `:67` / `:76` | playground_examples | `GET` / `POST /playground/examples`, `PATCH` / `DELETE /playground/examples/:id` | belum |
 | `services/prestigeService.ts:55`, `:57`, `:58`, `:118`, `:132`, `:139` | eligibility | `GET /prestige/eligibility?nim=` | belum |
 | `prestigeService.ts:207` | RPC `do_prestige_reset` | `POST /prestige/reset {nim}` (RPC dipanggil apa adanya) | belum |
-| `services/progressService.ts:57`, `:84`, `:102` | completeLesson | `POST /progress/lessons/:lessonId/complete {xpReward}` | belum |
-| `progressService.ts:162` | grantXp | `POST /progress/xp {amount}` | belum |
+| `services/progressService.ts:57`, `:84`, `:102` | completeLesson | `POST /progress/lessons/:lessonId/complete {xpReward}` | selesai (`TestElearningLearningRoutesRequireToken`) |
+| `progressService.ts:162` | grantXp | `POST /progress/xp {amount}` | selesai (`TestElearningLearningRoutesRequireToken`) |
 | `progressService.ts:193` | syncProgress | kode mati (= `GET /progress/me/lessons`) | kode mati |
-| `progressService.ts:236`, `:244`, `:254` | resetUserProgress | `POST /admin/users/:nim/reset` | belum |
-| `progressService.ts:311`, `:322`, `:331`, `:340` | resetLevelProgress | `POST /admin/users/:nim/reset-level {levelId}` | belum |
-| `progressService.ts:395`, `:404`, `:413` | resetLessonProgress | `POST /admin/users/:nim/reset-lesson {lessonId,lessonTitle}` | belum |
-| `progressService.ts:465`, `:473` | adjustUserXp | `PUT /admin/users/:nim/xp {xp}` | belum |
-| `progressService.ts:538` | deleteUser | `DELETE /admin/users/:nim` | belum |
+| `progressService.ts:236`, `:244`, `:254` | resetUserProgress | `POST /admin/users/:nim/reset` | selesai (`TestElearningLearningRoutesRequireToken`) |
+| `progressService.ts:311`, `:322`, `:331`, `:340` | resetLevelProgress | `POST /admin/users/:nim/reset-level {levelId}` | selesai (`TestElearningLearningRoutesRequireToken`) |
+| `progressService.ts:395`, `:404`, `:413` | resetLessonProgress | `POST /admin/users/:nim/reset-lesson {lessonId,lessonTitle}` | selesai (`TestElearningLearningRoutesRequireToken`) |
+| `progressService.ts:465`, `:473` | adjustUserXp | `PUT /admin/users/:nim/xp {xp}` | selesai (`TestElearningLearningRoutesRequireToken`) |
+| `progressService.ts:538` | deleteUser | `DELETE /admin/users/:nim` | selesai (`TestElearningLearningRoutesRequireToken`) |
 | `services/storageService.ts:81`, `:98` | storage `lesson-images` | `POST /storage/lesson-images` (multipart `file`) | belum |
 | `services/streakService.ts:88` | users streak | kode mati (= `POST /streak`) | kode mati |
 | `api/validate-quiz.ts` | lessons.quiz | `POST /validate-quiz` | selesai (`TestElearningLegacyAPIRoutes`) |

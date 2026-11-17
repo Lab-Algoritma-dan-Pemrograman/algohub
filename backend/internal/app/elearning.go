@@ -36,6 +36,10 @@ func newElearning(cfg *config.Config, dbs *database.DBs) *deliveryhttp.Elearning
 	db := dbs.Elearning
 	users := elrepo.NewUserRepository(db)
 	curriculum := elrepo.NewCurriculumRepository(db)
+	progress := elrepo.NewProgressRepository(db)
+	unlocked := elrepo.NewAchievementRepository(db)
+	logs := elusecase.NewActivityLogUsecase(elrepo.NewActivityLogRepository(db), time.Now)
+	achievements := elusecase.NewAchievementUsecase(unlocked, users, progress, time.Now)
 	ai := elusecase.AIClients{Gemini: gemini.NewClient(""), GeminiKeys: ecfg.GeminiAPIKeys}
 	if ecfg.OllamaURL != "" {
 		ai.Ollama = ollama.NewClient(ollama.Config{URL: ecfg.OllamaURL, Model: ecfg.OllamaModel, APIKey: ecfg.OllamaAPIKey})
@@ -44,11 +48,16 @@ func newElearning(cfg *config.Config, dbs *database.DBs) *deliveryhttp.Elearning
 	return &deliveryhttp.Elearning{
 		Auth: authUC,
 		Handlers: deliveryhttp.ElearningHandlers{
-			Auth:   elhandler.NewAuthHandler(authUC, ecfg.AppURL),
-			AI:     elhandler.NewAIHandler(elusecase.NewAIUsecase(authUC, users, ai)),
-			Grade:  elhandler.NewGradeHandler(elusecase.NewGradeUsecase(authUC, users, elrepo.NewAssessmentRepository(db), ai, time.Now)),
-			Report: elhandler.NewReportHandler(elusecase.NewReportUsecase(authUC, curriculum, elrepo.NewProgressRepository(db), elrepo.NewReportRepository(db), time.Now)),
-			Quiz:   elhandler.NewQuizHandler(elusecase.NewQuizUsecase(authUC, curriculum)),
+			Auth:        elhandler.NewAuthHandler(authUC, ecfg.AppURL),
+			AI:          elhandler.NewAIHandler(elusecase.NewAIUsecase(authUC, users, ai)),
+			Grade:       elhandler.NewGradeHandler(elusecase.NewGradeUsecase(authUC, users, elrepo.NewAssessmentRepository(db), ai, time.Now)),
+			Report:      elhandler.NewReportHandler(elusecase.NewReportUsecase(authUC, curriculum, progress, elrepo.NewReportRepository(db), time.Now)),
+			Quiz:        elhandler.NewQuizHandler(elusecase.NewQuizUsecase(authUC, curriculum)),
+			Curriculum:  elhandler.NewCurriculumHandler(elusecase.NewCurriculumUsecase(curriculum)),
+			Progress:    elhandler.NewProgressHandler(elusecase.NewProgressUsecase(users, progress, curriculum, achievements, time.Now)),
+			Profile:     elhandler.NewProfileHandler(elusecase.NewProfileUsecase(users, achievements, time.Now), logs),
+			Achievement: elhandler.NewAchievementHandler(achievements),
+			AdminUser:   elhandler.NewAdminUserHandler(elusecase.NewAdminUserUsecase(users, progress, curriculum, unlocked, achievements, logs)),
 		},
 	}
 }

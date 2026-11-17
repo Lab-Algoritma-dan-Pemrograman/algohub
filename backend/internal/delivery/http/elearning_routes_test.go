@@ -13,9 +13,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/stretchr/testify/mock"
 
 	"github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/config"
 	elhandler "github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/delivery/http/handler/elearning"
+	entity "github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/entity/elearning"
 	elmocks "github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/repository/elearning/mocks"
 	elusecase "github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/usecase/elearning"
 )
@@ -32,24 +34,124 @@ func (failingLogin) Login(context.Context, string, string, string, string) (*elu
 	return nil, errors.New("akun tidak ada")
 }
 
+type elRepos struct {
+	users        *elmocks.UserRepository
+	curriculum   *elmocks.CurriculumRepository
+	progress     *elmocks.ProgressRepository
+	achievements *elmocks.AchievementRepository
+}
+
 func newElearningRouter(t *testing.T) *gin.Engine {
+	t.Helper()
+	r, _ := newElearningRouterRepos(t)
+	return r
+}
+
+func newElearningRouterRepos(t *testing.T) (*gin.Engine, *elRepos) {
 	t.Helper()
 	r := newTestRouter(t)
 	uc := elusecase.NewAuthUsecase(&config.ElearningConfig{SupabaseJWTSecret: elSupabaseKey, SiakadJWTSecret: elSiakadSecret}, failingLogin{}, time.Now)
-	users := elmocks.NewUserRepository(t)
-	curriculum := elmocks.NewCurriculumRepository(t)
+	m := &elRepos{
+		users:        elmocks.NewUserRepository(t),
+		curriculum:   elmocks.NewCurriculumRepository(t),
+		progress:     elmocks.NewProgressRepository(t),
+		achievements: elmocks.NewAchievementRepository(t),
+	}
 	ai := elusecase.AIClients{}
+	logs := elusecase.NewActivityLogUsecase(elmocks.NewActivityLogRepository(t), time.Now)
+	achievements := elusecase.NewAchievementUsecase(m.achievements, m.users, m.progress, time.Now)
 	RegisterElearning(r, &Elearning{
 		Auth: uc,
 		Handlers: ElearningHandlers{
-			Auth:   elhandler.NewAuthHandler(uc, elAppURL),
-			AI:     elhandler.NewAIHandler(elusecase.NewAIUsecase(uc, users, ai)),
-			Grade:  elhandler.NewGradeHandler(elusecase.NewGradeUsecase(uc, users, elmocks.NewAssessmentRepository(t), ai, time.Now)),
-			Report: elhandler.NewReportHandler(elusecase.NewReportUsecase(uc, curriculum, elmocks.NewProgressRepository(t), elmocks.NewReportRepository(t), time.Now)),
-			Quiz:   elhandler.NewQuizHandler(elusecase.NewQuizUsecase(uc, curriculum)),
+			Auth:        elhandler.NewAuthHandler(uc, elAppURL),
+			AI:          elhandler.NewAIHandler(elusecase.NewAIUsecase(uc, m.users, ai)),
+			Grade:       elhandler.NewGradeHandler(elusecase.NewGradeUsecase(uc, m.users, elmocks.NewAssessmentRepository(t), ai, time.Now)),
+			Report:      elhandler.NewReportHandler(elusecase.NewReportUsecase(uc, m.curriculum, m.progress, elmocks.NewReportRepository(t), time.Now)),
+			Quiz:        elhandler.NewQuizHandler(elusecase.NewQuizUsecase(uc, m.curriculum)),
+			Curriculum:  elhandler.NewCurriculumHandler(elusecase.NewCurriculumUsecase(m.curriculum)),
+			Progress:    elhandler.NewProgressHandler(elusecase.NewProgressUsecase(m.users, m.progress, m.curriculum, achievements, time.Now)),
+			Profile:     elhandler.NewProfileHandler(elusecase.NewProfileUsecase(m.users, achievements, time.Now), logs),
+			Achievement: elhandler.NewAchievementHandler(achievements),
+			AdminUser:   elhandler.NewAdminUserHandler(elusecase.NewAdminUserUsecase(m.users, m.progress, m.curriculum, m.achievements, achievements, logs)),
 		},
 	})
-	return r
+	return r, m
+}
+
+var learningRoutes = []struct{ method, path string }{
+	{http.MethodGet, "/api/elearning/curriculum/levels"},
+	{http.MethodGet, "/api/elearning/curriculum/modules"},
+	{http.MethodGet, "/api/elearning/curriculum/lessons"},
+	{http.MethodPut, "/api/elearning/curriculum"},
+	{http.MethodDelete, "/api/elearning/curriculum"},
+	{http.MethodGet, "/api/elearning/progress/me/lessons"},
+	{http.MethodGet, "/api/elearning/progress/me/recent"},
+	{http.MethodPost, "/api/elearning/progress/lessons/l1/complete"},
+	{http.MethodPost, "/api/elearning/progress/xp"},
+	{http.MethodPost, "/api/elearning/progress/study-time"},
+	{http.MethodPost, "/api/elearning/streak"},
+	{http.MethodPost, "/api/elearning/profile/sync"},
+	{http.MethodGet, "/api/elearning/achievements"},
+	{http.MethodGet, "/api/elearning/achievements/me"},
+	{http.MethodPost, "/api/elearning/achievements/check"},
+	{http.MethodPost, "/api/elearning/achievements/check-xp"},
+	{http.MethodGet, "/api/elearning/admin/users"},
+	{http.MethodGet, "/api/elearning/admin/users/202711002/progress"},
+	{http.MethodPatch, "/api/elearning/admin/users/202711002/level-access"},
+	{http.MethodPatch, "/api/elearning/admin/users/202711002/role"},
+	{http.MethodPost, "/api/elearning/admin/users/202711002/reset"},
+	{http.MethodPost, "/api/elearning/admin/users/202711002/reset-level"},
+	{http.MethodPost, "/api/elearning/admin/users/202711002/reset-lesson"},
+	{http.MethodPut, "/api/elearning/admin/users/202711002/xp"},
+	{http.MethodDelete, "/api/elearning/admin/users/202711002"},
+	{http.MethodPost, "/api/elearning/activity-logs"},
+}
+
+func TestElearningLearningRoutesRequireToken(t *testing.T) {
+	r := newElearningRouter(t)
+	for _, rt := range learningRoutes {
+		rec := serve(r, rt.method, rt.path, "", nil)
+		msg, _ := envelope(t, rec)
+		if rec.Code != http.StatusUnauthorized || msg != "Unauthorized: Missing token" {
+			t.Errorf("%s %s = %d %q, want 401", rt.method, rt.path, rec.Code, msg)
+		}
+		if got := rec.Header().Get("Cache-Control"); got != "private, no-store" {
+			t.Errorf("%s %s Cache-Control = %q", rt.method, rt.path, got)
+		}
+	}
+}
+
+func TestElearningLearningRoutesWithToken(t *testing.T) {
+	r, m := newElearningRouterRepos(t)
+	bearer := map[string]string{"Authorization": "Bearer " + elToken(t, elSupabaseKey, jwt.MapClaims{"nim": "202711001", "nama": "Budi", "user_role": "praktikan"})}
+
+	m.curriculum.On("ListLevels", mock.Anything, 2, 100).Return([]entity.Level{{ID: "level-1"}}, int64(101), nil)
+	rec := serve(r, http.MethodGet, "/api/elearning/curriculum/levels?page=2&limit=500", "", bearer)
+	_, data := envelope(t, rec)
+	if rec.Code != http.StatusOK || data["total"] != float64(101) || data["limit"] != float64(100) || rec.Header().Get("Cache-Control") != "private, no-store" {
+		t.Errorf("levels = %d %v %q", rec.Code, data, rec.Header().Get("Cache-Control"))
+	}
+
+	rec = sendJSON(r, http.MethodPut, "/api/elearning/curriculum", `{"levels":[{"id":"a"}]}`, bearer)
+	if msg, _ := envelope(t, rec); rec.Code != http.StatusForbidden || msg != `new row violates row-level security policy for table "levels"` {
+		t.Errorf("PUT curriculum praktikan = %d %q", rec.Code, msg)
+	}
+
+	rec = sendJSON(r, http.MethodPut, "/api/elearning/curriculum", `{bukan json`, bearer)
+	if msg, _ := envelope(t, rec); rec.Code != http.StatusBadRequest || msg != "Input tidak valid" {
+		t.Errorf("PUT curriculum body rusak = %d %q", rec.Code, msg)
+	}
+}
+
+func sendJSON(r http.Handler, method, path, body string, header map[string]string) *httptest.ResponseRecorder {
+	req := httptest.NewRequest(method, path, strings.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	for k, v := range header {
+		req.Header.Set(k, v)
+	}
+	rec := httptest.NewRecorder()
+	r.ServeHTTP(rec, req)
+	return rec
 }
 
 func TestElearningLegacyAPIRoutes(t *testing.T) {

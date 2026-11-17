@@ -17,11 +17,16 @@ type ElearningAuthenticator interface {
 }
 
 type ElearningHandlers struct {
-	Auth   *elhandler.AuthHandler
-	AI     *elhandler.AIHandler
-	Grade  *elhandler.GradeHandler
-	Report *elhandler.ReportHandler
-	Quiz   *elhandler.QuizHandler
+	Auth        *elhandler.AuthHandler
+	AI          *elhandler.AIHandler
+	Grade       *elhandler.GradeHandler
+	Report      *elhandler.ReportHandler
+	Quiz        *elhandler.QuizHandler
+	Curriculum  *elhandler.CurriculumHandler
+	Progress    *elhandler.ProgressHandler
+	Profile     *elhandler.ProfileHandler
+	Achievement *elhandler.AchievementHandler
+	AdminUser   *elhandler.AdminUserHandler
 }
 
 type Elearning struct {
@@ -46,8 +51,44 @@ func RegisterElearning(r *gin.Engine, e *Elearning) {
 	g.POST("/report", h.Report.Sync)
 	g.POST("/validate-quiz", h.Quiz.Validate)
 
-	authed := g.Group("", authmw)
+	authed := g.Group("", noStore, authmw)
 	authed.POST("/auth/supabase-token", h.Auth.SupabaseToken)
+
+	authed.GET("/curriculum/levels", h.Curriculum.Levels)
+	authed.GET("/curriculum/modules", h.Curriculum.Modules)
+	authed.GET("/curriculum/lessons", h.Curriculum.Lessons)
+	authed.PUT("/curriculum", h.Curriculum.Save)
+	authed.DELETE("/curriculum", h.Curriculum.Clear)
+
+	authed.GET("/progress/me/lessons", h.Progress.MyLessons)
+	authed.GET("/progress/me/recent", h.Progress.Recent)
+	authed.POST("/progress/lessons/:lessonId/complete", h.Progress.Complete)
+	authed.POST("/progress/xp", h.Progress.GrantXP)
+	authed.POST("/progress/study-time", h.Progress.StudyTime)
+	authed.POST("/streak", h.Progress.Streak)
+	authed.POST("/profile/sync", h.Profile.Sync)
+	authed.POST("/activity-logs", h.Profile.LogActivity)
+
+	authed.GET("/achievements", h.Achievement.List)
+	authed.GET("/achievements/me", h.Achievement.Mine)
+	authed.POST("/achievements/check", h.Achievement.Check)
+	authed.POST("/achievements/check-xp", h.Achievement.CheckXP)
+
+	authed.GET("/admin/users", h.AdminUser.List)
+	authed.GET("/admin/users/:nim/progress", h.AdminUser.Progress)
+	authed.PATCH("/admin/users/:nim/level-access", h.AdminUser.LevelAccess)
+	authed.PATCH("/admin/users/:nim/role", h.AdminUser.Role)
+	authed.POST("/admin/users/:nim/reset", h.AdminUser.Reset)
+	authed.POST("/admin/users/:nim/reset-level", h.AdminUser.ResetLevel)
+	authed.POST("/admin/users/:nim/reset-lesson", h.AdminUser.ResetLesson)
+	authed.PUT("/admin/users/:nim/xp", h.AdminUser.AdjustXP)
+	authed.DELETE("/admin/users/:nim", h.AdminUser.Delete)
+}
+
+// Respons elearning ber-token bergantung pada pengguna dan perannya, jadi tidak boleh disimpan CDN Vercel atau cache bersama.
+func noStore(c *gin.Context) {
+	c.Header("Cache-Control", "private, no-store")
+	c.Next()
 }
 
 // Tanpa DATABASE_URL_ELEARNING semua path elearning dijawab 503 supaya praktikum tetap bisa jalan.
