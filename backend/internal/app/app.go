@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/config"
+	"github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/database"
 	deliveryhttp "github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/delivery/http"
 )
 
@@ -12,5 +13,14 @@ func New() (http.Handler, error) {
 	if err != nil {
 		return nil, err
 	}
-	return deliveryhttp.NewRouter(cfg)
+	dbs, err := database.Open(cfg.DB, cfg.AppEnv == "development")
+	if err != nil {
+		return nil, err
+	}
+	r, err := deliveryhttp.NewRouter(cfg)
+	if err != nil {
+		return nil, err
+	}
+	deliveryhttp.RegisterPraktikum(r, newPraktikum(cfg, dbs.Praktikum))
+	return r, nil
 }
