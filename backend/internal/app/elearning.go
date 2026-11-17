@@ -12,10 +12,13 @@ import (
 	deliveryhttp "github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/delivery/http"
 	elhandler "github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/delivery/http/handler/elearning"
 	prakdto "github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/dto/praktikum"
+	elrepo "github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/repository/elearning"
 	prakrepo "github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/repository/praktikum"
 	elusecase "github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/usecase/elearning"
 	prakusecase "github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/usecase/praktikum"
+	"github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/pkg/gemini"
 	"github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/pkg/jwt"
+	"github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/pkg/ollama"
 )
 
 func registerElearning(r *gin.Engine, cfg *config.Config, dbs *database.DBs) {
@@ -29,10 +32,23 @@ func registerElearning(r *gin.Engine, cfg *config.Config, dbs *database.DBs) {
 func newElearning(cfg *config.Config, dbs *database.DBs) *deliveryhttp.Elearning {
 	ecfg := config.LoadElearning()
 	authUC := elusecase.NewAuthUsecase(&ecfg, newPraktikumLogin(cfg, dbs.Praktikum), time.Now)
+
+	db := dbs.Elearning
+	users := elrepo.NewUserRepository(db)
+	curriculum := elrepo.NewCurriculumRepository(db)
+	ai := elusecase.AIClients{Gemini: gemini.NewClient(""), GeminiKeys: ecfg.GeminiAPIKeys}
+	if ecfg.OllamaURL != "" {
+		ai.Ollama = ollama.NewClient(ollama.Config{URL: ecfg.OllamaURL, Model: ecfg.OllamaModel, APIKey: ecfg.OllamaAPIKey})
+	}
+
 	return &deliveryhttp.Elearning{
 		Auth: authUC,
 		Handlers: deliveryhttp.ElearningHandlers{
-			Auth: elhandler.NewAuthHandler(authUC, ecfg.AppURL),
+			Auth:   elhandler.NewAuthHandler(authUC, ecfg.AppURL),
+			AI:     elhandler.NewAIHandler(elusecase.NewAIUsecase(authUC, users, ai)),
+			Grade:  elhandler.NewGradeHandler(elusecase.NewGradeUsecase(authUC, users, elrepo.NewAssessmentRepository(db), ai, time.Now)),
+			Report: elhandler.NewReportHandler(elusecase.NewReportUsecase(authUC, curriculum, elrepo.NewProgressRepository(db), elrepo.NewReportRepository(db), time.Now)),
+			Quiz:   elhandler.NewQuizHandler(elusecase.NewQuizUsecase(authUC, curriculum)),
 		},
 	}
 }

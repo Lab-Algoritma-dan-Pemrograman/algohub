@@ -16,6 +16,7 @@ import (
 
 	"github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/config"
 	elhandler "github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/delivery/http/handler/elearning"
+	elmocks "github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/repository/elearning/mocks"
 	elusecase "github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/usecase/elearning"
 )
 
@@ -35,11 +36,45 @@ func newElearningRouter(t *testing.T) *gin.Engine {
 	t.Helper()
 	r := newTestRouter(t)
 	uc := elusecase.NewAuthUsecase(&config.ElearningConfig{SupabaseJWTSecret: elSupabaseKey, SiakadJWTSecret: elSiakadSecret}, failingLogin{}, time.Now)
+	users := elmocks.NewUserRepository(t)
+	curriculum := elmocks.NewCurriculumRepository(t)
+	ai := elusecase.AIClients{}
 	RegisterElearning(r, &Elearning{
-		Auth:     uc,
-		Handlers: ElearningHandlers{Auth: elhandler.NewAuthHandler(uc, elAppURL)},
+		Auth: uc,
+		Handlers: ElearningHandlers{
+			Auth:   elhandler.NewAuthHandler(uc, elAppURL),
+			AI:     elhandler.NewAIHandler(elusecase.NewAIUsecase(uc, users, ai)),
+			Grade:  elhandler.NewGradeHandler(elusecase.NewGradeUsecase(uc, users, elmocks.NewAssessmentRepository(t), ai, time.Now)),
+			Report: elhandler.NewReportHandler(elusecase.NewReportUsecase(uc, curriculum, elmocks.NewProgressRepository(t), elmocks.NewReportRepository(t), time.Now)),
+			Quiz:   elhandler.NewQuizHandler(elusecase.NewQuizUsecase(uc, curriculum)),
+		},
 	})
 	return r
+}
+
+func TestElearningLegacyAPIRoutes(t *testing.T) {
+	r := newElearningRouter(t)
+	student := elToken(t, elSupabaseKey, jwt.MapClaims{"nim": "202711001", "nama": "Budi"})
+	cases := []struct {
+		name, path, body string
+		header           map[string]string
+		status           int
+		message          string
+	}{
+		{"ai tanpa kunci", "/api/elearning/ai", `{"token":"x","prompt":"p"}`, nil, http.StatusInternalServerError, "AI Keys not configured on server"},
+		{"grade tanpa token", "/api/elearning/grade", `{"attemptIds":["a1"]}`, nil, http.StatusUnauthorized, "Unauthorized: Missing token"},
+		{"grade bearer rusak", "/api/elearning/grade", `{"token":"` + student + `"}`, map[string]string{"Authorization": "Bearer rusak"}, http.StatusUnauthorized, "Unauthorized: Invalid token"},
+		{"report kosong", "/api/elearning/report", `{}`, nil, http.StatusBadRequest, "Missing token or nim"},
+		{"report identitas beda", "/api/elearning/report", `{"token":"` + student + `","nim":"202711002"}`, nil, http.StatusForbidden, "Identity mismatch"},
+		{"validate-quiz tanpa bearer", "/api/elearning/validate-quiz", `{"token":"` + student + `","lessonId":"l1","selectedOption":1}`, nil, http.StatusUnauthorized, "Unauthorized: Missing token"},
+		{"validate-quiz field kurang", "/api/elearning/validate-quiz", `{"lessonId":"l1"}`, map[string]string{"Authorization": "Bearer " + student}, http.StatusBadRequest, "Missing required fields (lessonId, selectedOption)"},
+	}
+	for _, tc := range cases {
+		rec := postBody(r, tc.path, "application/json", tc.body, tc.header)
+		if msg, _ := envelope(t, rec); rec.Code != tc.status || msg != tc.message {
+			t.Errorf("%s: %d %q, want %d %q", tc.name, rec.Code, msg, tc.status, tc.message)
+		}
+	}
 }
 
 func postBody(r http.Handler, path, contentType, body string, header map[string]string) *httptest.ResponseRecorder {

@@ -17,7 +17,11 @@ type ElearningAuthenticator interface {
 }
 
 type ElearningHandlers struct {
-	Auth *elhandler.AuthHandler
+	Auth   *elhandler.AuthHandler
+	AI     *elhandler.AIHandler
+	Grade  *elhandler.GradeHandler
+	Report *elhandler.ReportHandler
+	Quiz   *elhandler.QuizHandler
 }
 
 type Elearning struct {
@@ -36,6 +40,11 @@ func RegisterElearning(r *gin.Engine, e *Elearning) {
 	g.POST("/receive-token", h.Auth.ReceiveToken)
 	g.POST("/login", loginLimit, h.Auth.Login)
 	g.POST("/verify", h.Auth.Verify)
+	// Auth di dalam usecase supaya urutan cek dan pesan sama dengan api/*.ts (misal ai cek kunci Gemini sebelum token).
+	g.POST("/ai", h.AI.Generate)
+	g.POST("/grade", h.Grade.Grade)
+	g.POST("/report", h.Report.Sync)
+	g.POST("/validate-quiz", h.Quiz.Validate)
 
 	authed := g.Group("", authmw)
 	authed.POST("/auth/supabase-token", h.Auth.SupabaseToken)

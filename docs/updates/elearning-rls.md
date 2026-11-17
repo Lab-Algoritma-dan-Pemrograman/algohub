@@ -629,10 +629,10 @@ Semua path di bawah `/api/elearning`. Kolom "Status" diisi FEAT-002..005: `belum
 | `progressService.ts:538` | deleteUser | `DELETE /admin/users/:nim` | belum |
 | `services/storageService.ts:81`, `:98` | storage `lesson-images` | `POST /storage/lesson-images` (multipart `file`) | belum |
 | `services/streakService.ts:88` | users streak | kode mati (= `POST /streak`) | kode mati |
-| `api/validate-quiz.ts` | lessons.quiz | `POST /validate-quiz` | belum |
-| `api/grade.ts` | users ×3, assessment_attempts ×2, assessment_grading_rules, assessment_questions | `POST /grade` | belum |
-| `api/ai.ts` | users.role | `POST /ai` | belum |
-| `api/report.ts` | lessons, student_progress ×2, levels(modules(lessons)), elearning_progress | `POST /report` | belum |
-| `api/index.ts` / `receive-token.ts` / `login.ts` / `verify.ts` / `auth.ts` | — | `POST /sso` / `POST /receive-token` / `POST /login` / `POST /verify` / `POST /auth/supabase-token` | belum |
+| `api/validate-quiz.ts` | lessons.quiz | `POST /validate-quiz` | selesai (`TestElearningLegacyAPIRoutes`) |
+| `api/grade.ts` | users ×3, assessment_attempts ×2, assessment_grading_rules, assessment_questions | `POST /grade` | selesai (`TestElearningLegacyAPIRoutes`) |
+| `api/ai.ts` | users.role | `POST /ai` | selesai (`TestElearningLegacyAPIRoutes`) |
+| `api/report.ts` | lessons, student_progress ×2, levels(modules(lessons)), elearning_progress | `POST /report` | selesai (`TestElearningLegacyAPIRoutes`) |
+| `api/index.ts` / `receive-token.ts` / `login.ts` / `verify.ts` / `auth.ts` | — | `POST /sso` / `POST /receive-token` / `POST /login` / `POST /verify` / `POST /auth/supabase-token` | selesai (`TestElearningSSOFormToCodeExchange`, `TestElearningSSORedirects`, `TestElearningAuthEndpoints`, `TestElearningLoginRateLimit`) |
 
 Baris 06-elearning "`assessment_*` → `/api/elearning/assessment/*`": di `src/` tidak ada query langsung ke tabel assessment. Baris ini dipenuhi oleh `POST /grade` dan `POST /validate-quiz`, dan dicatat sebagai penyimpangan.
