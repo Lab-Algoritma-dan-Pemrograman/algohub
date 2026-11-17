@@ -14,6 +14,7 @@ export const praktikumKeys = {
     asisten: [...info, 'asisten'] as const,
     jadwal: [...info, 'jadwal'] as const,
     jadwalConfig: [...info, 'jadwalConfig'] as const,
+    kelasMahasiswa: (kelasId: number) => [...info, 'kelasMahasiswa', kelasId] as const,
     laporan: [...info, 'laporan'] as const,
     modul: [...info, 'modul'] as const,
     announcements: [...info, 'announcements'] as const,

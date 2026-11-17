@@ -123,3 +123,46 @@ export interface RuangCourse {
   require_token: boolean;
   soal: SoalTampil[];
 }
+
+export interface JadwalConfig {
+  mode: string;
+  gdrive_url: string;
+}
+
+export interface KelasMahasiswaInfo {
+  mahasiswa: User[];
+  ampuan: AmpuanKelompok[];
+}
+
+export interface Pedoman {
+  id: number;
+  nama_dokumen: string;
+  file_url: string;
+}
+
+export interface ModulInfo {
+  file_url: string;
+}
+
+export interface AnnouncementsResponse {
+  reschedules?: string;
+  recruit?: string;
+  susulan?: string;
+  plagiarism?: string;
+}
+
+export interface RunResponse {
+  stdout: string;
+  stderr: string;
+  error: string;
+}
+
+export interface ForgotPasswordResponse {
+  sent: boolean;
+  reason?: string;
+}
+
+export interface LayananLoginResponse {
+  token: string;
+  user: { full_name?: string; username?: string };
+}

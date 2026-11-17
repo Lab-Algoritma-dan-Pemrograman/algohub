@@ -2,9 +2,11 @@
 @plugin '@tailwindcss/typography';
 
 @theme {
-  /* Markup halaman ditulis untuk skala Tailwind 3; tanpa ini shadow-sm dan blur-sm tampil lebih tebal. */
+  /* Markup halaman ditulis untuk skala Tailwind 3 (tailwind.config.ts lama: rounded = 0.5rem);
+     tanpa ini shadow-sm, blur-sm, dan rounded tampil berbeda. */
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --blur-sm: 4px;
+  --radius: 0.5rem;
 
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --ease-smooth-out: cubic-bezier(0.16, 1, 0.3, 1);
