@@ -34,5 +34,5 @@ Semua perubahan penting dicatat di file ini. Format mengikuti [Keep a Changelog]
 
 #### Temuan
 - Prod memakai **2 project Supabase**: siakad `huddecanbapwjairmaef`, sedangkan elearning dan praktikum `oidwvfcxlxfyojkyurmm`. Backend memakai `DATABASE_URL_SIAKAD` terpisah dari `DATABASE_URL_PRAKTIKUM`/`DATABASE_URL_ELEARNING`.
-- `siakad.algohub.web.id` dan `elearning.algohub.web.id` dilayani project Vercel di team yang tidak bisa diakses akun `lordbgsdts-afk`.
+- Semua domain prod ada di team `lab-algoritma-pemrograman`: `algohub.web.id`/`www` → `labap-frontend`, `api` → `labap-backend`, `siakad` → `labap-siakad`, `elearning` → `labap-elearning`.
 - Auto-submit praktikum dipicu cron-job.org setiap 1 menit (menurut dokumentasi lama, belum diverifikasi).

@@ -5,17 +5,17 @@ Rencana lengkap: `docs/updates/` (salinan `_update/2026-11-17-monorepo-sveltekit
 ## Hasil Fase 0 (2026-11-17)
 
 ### Project Vercel yang melayani domain produksi sekarang
-Dicek dengan `curl -I` ke setiap domain dan `vercel project ls` di akun `lordbgsdts-afk`.
+Semua ada di team `lab-algoritma-pemrograman` (Hobby), akun `lordbgsdts-afk`. Sumber: `vercel alias ls`.
 
-| Domain | Status | Project Vercel | Team |
-|---|---|---|---|
-| `algohub.web.id`, `www.algohub.web.id` | 200 | `labap-frontend` | `lab-algoritma-pemrograman` |
-| `api.algohub.web.id` | `/` 404, `/api/info/*` mengembalikan data | `labap-backend` | `lab-algoritma-pemrograman` |
-| `siakad.algohub.web.id` | 200 | **tidak diketahui** | team lain, tidak bisa diakses akun ini |
-| `elearning.algohub.web.id` | 200 | **tidak diketahui** | team lain, tidak bisa diakses akun ini |
-| `praktikum.algohub.web.id` | 404 (belum dipakai) | — | — |
+| Domain | Project Vercel | Deployment |
+|---|---|---|
+| `algohub.web.id`, `www.algohub.web.id` | `labap-frontend` | `labap-frontend-859rlu8ta-…` |
+| `api.algohub.web.id` | `labap-backend` | `labap-backend-jusv7yhfo-…` |
+| `siakad.algohub.web.id` | `labap-siakad` | `labap-siakad-f39nbz45m-…` |
+| `elearning.algohub.web.id` | `labap-elearning` | `labap-elearning-gknsdm2fm-…` |
+| `praktikum.algohub.web.id` | — (belum dipakai, 404) | — |
 
-Project `labap-siakad` dan `labap-elearning` ada di team `lab-algoritma-pemrograman`, tapi hanya punya URL `*.vercel.app` dan **tidak** melayani `siakad.algohub.web.id` atau `elearning.algohub.web.id`. Domain kedua subdomain itu (`vercel domains inspect`) tidak bisa diakses dari team ini.
+DNS di Cloudflare (`CNAME cname.vercel-dns.com`). `vercel domains ls` menampilkan 0 domain, karena domain dikelola di luar Vercel. Itu sebabnya `vercel domains inspect` menolak, padahal alias-nya ada di team ini.
 
 ### Project Supabase per app
 Hanya project ref yang dicatat. Sumber: bundle JS produksi yang publik, response publik `/api/info/*`, dan file `.env` lokal (hanya ref yang dibaca).
@@ -33,19 +33,19 @@ Dampak ke backend (sudah sesuai desain `02-backend.md`):
 - `DATABASE_URL_PRAKTIKUM` = `DATABASE_URL_ELEARNING` → project `oidwvfcxlxfyojkyurmm`
 - keep-alive cron harus mem-ping kedua project
 
-Belum terverifikasi: nilai prod `ELEARNING_SUPABASE_URL` milik siakad (`sync-elearning`), karena env project siakad ada di team yang tidak bisa diakses.
+Belum terverifikasi: nilai prod `ELEARNING_SUPABASE_URL` milik siakad (`sync-elearning`), karena nilai env tidak dibaca (rahasia). Cek di dashboard `labap-siakad` → Settings → Environment Variables, cukup bagian project ref.
 
 ### Scheduler eksternal
 Menurut `praktikum/updateAndPRDERD/deploy.md` dan `update5.md`: **cron-job.org** mengirim `POST /api/cron/auto-submit` setiap 1 menit dengan header `X-Cron-Secret`. Status aktifnya belum terverifikasi karena butuh login cron-job.org.
 
 ### Pemakaian Vercel 30 hari terakhir
-Tidak bisa dibaca lewat CLI. `vercel usage` di team Hobby mengembalikan "Billing cost data is unavailable". Pemilik perlu mencatatnya dari dashboard (Usage), untuk team `lab-algoritma-pemrograman` dan team yang memegang siakad/elearning.
+Tidak bisa dibaca lewat CLI. `vercel usage` di team Hobby mengembalikan "Billing cost data is unavailable". Pemilik perlu mencatatnya dari dashboard (Usage) team `lab-algoritma-pemrograman`.
 
-| Metrik | lab-algoritma-pemrograman | team siakad/elearning |
-|---|---|---|
-| Function Invocations | ? | ? |
-| Fluid Active CPU | ? | ? |
-| Fluid Provisioned Memory | ? | ? |
-| Fast Origin Transfer | ? | ? |
-| Fast Data Transfer | ? | ? |
-| CDN Requests | ? | ? |
+| Metrik | 30 hari terakhir |
+|---|---|
+| Function Invocations | ? |
+| Fluid Active CPU | ? |
+| Fluid Provisioned Memory | ? |
+| Fast Origin Transfer | ? |
+| Fast Data Transfer | ? |
+| CDN Requests | ? |
