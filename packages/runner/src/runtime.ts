@@ -50,6 +50,7 @@ export class Runtime {
   #worker: Worker | null = null;
   #ready: Promise<boolean> | null = null;
   #current: ActiveRun | null = null;
+  #busy = false;
   #nextId = 0;
   constructor(options: RuntimeOptions) {
     this.#options = options;
@@ -67,8 +68,12 @@ export class Runtime {
     return this.#ready;
   }
   async run(code: string, { stdin, onOutput }: RunOptions = {}): Promise<RunResult> {
-    if (this.#current) throw new Error('Program lain masih berjalan.');
+    // Slot dipesan sebelum await: dua panggilan di tick yang sama (klik ganda,
+    // Ctrl+Enter + tombol) tidak boleh sama-sama lolos selama compiler dimuat.
+    if (this.#busy) throw new Error('Program lain masih berjalan.');
+    this.#busy = true;
     if (!(await this.ensure()) || !this.#worker) {
+      this.#busy = false;
       return { ...emptyResult('unavailable'), error: this.#options.unavailableMessage };
     }
     const worker = this.#worker;
@@ -186,6 +191,7 @@ export class Runtime {
     this.#timer?.clear();
     this.#queue?.clear();
     this.#current = null;
+    this.#busy = false;
     this.#emit({ type: 'finish' });
     run?.resolve(result);
   }
@@ -208,7 +214,10 @@ export class Runtime {
     this.#worker?.terminate();
     this.#worker = null;
     this.#ready = null;
-    this.#current = null;
+    if (this.#current) {
+      this.#current = null;
+      this.#busy = false;
+    }
     this.#timer?.clear();
     this.#queue?.clear();
     this.#channel?.reset();

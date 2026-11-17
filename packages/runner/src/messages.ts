@@ -8,7 +8,6 @@ export const messages = {
   unavailablePython:
     'Interpreter Python gagal dimuat atau sedang bermasalah. Pastikan koneksi internet stabil dan muat ulang halaman.',
   stopped: 'Eksekusi dihentikan oleh pengguna.',
-  cancelled: 'Program dibatalkan.',
   done: 'Program selesai!',
   noInteractive: 'Mode input interaktif tidak tersedia (SAB mati).',
   idle: 'Klik RUN untuk menguji kode Anda...',
