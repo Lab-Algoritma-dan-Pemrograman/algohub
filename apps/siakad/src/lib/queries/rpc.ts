@@ -41,6 +41,11 @@ export function rpcQueryOptions<T>(fn: string, params?: object, extra?: RpcQuery
   });
 }
 
+// Sama dengan .maybeSingle() Proxy lama: array kosong tetap dikembalikan apa adanya.
+export function maybeSingle<T>(data: T[] | T | null | undefined): T | T[] | null {
+  return Array.isArray(data) && data.length > 0 ? data[0] : data || null;
+}
+
 // Pembacaan sekali jalan di tengah alur tulis (misal cek username sebelum daftar) selalu segar.
 export function fetchRpc<T>(fn: string, params?: object): Promise<T> {
   return queryClient.fetchQuery({ ...rpcQueryOptions<T>(fn, params), staleTime: 0 });
