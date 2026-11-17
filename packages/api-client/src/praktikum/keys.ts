@@ -3,8 +3,10 @@ const all = ['praktikum'] as const;
 const info = [...all, 'info'] as const;
 const mahasiswa = [...all, 'mahasiswa'] as const;
 const admin = [...all, 'admin'] as const;
+const sesi = [...admin, 'sesi'] as const;
 const aktivasi = [...admin, 'aktivasi'] as const;
 const penilaian = [...admin, 'penilaian'] as const;
+const rekap = [...admin, 'rekap'] as const;
 const laporanBesar = [...admin, 'laporanBesar'] as const;
 const superadmin = [...all, 'superadmin'] as const;
 export const praktikumKeys = {
@@ -39,8 +41,12 @@ export const praktikumKeys = {
     konfigurasi: [...admin, 'konfigurasi'] as const,
     aiModel: [...admin, 'aiModel'] as const,
     pedoman: [...admin, 'pedoman'] as const,
-    sesi: [...admin, 'sesi'] as const,
-    soal: (params: QueryParams) => [...admin, 'soal', params] as const,
+    sesi: {
+      all: sesi,
+      list: [...sesi, 'list'] as const,
+      courses: (sesiId: number) => [...sesi, 'courses', sesiId] as const,
+    },
+    soal: (courseId: number) => [...admin, 'soal', courseId] as const,
     aktivasi: {
       all: aktivasi,
       list: [...aktivasi, 'list'] as const,
@@ -55,14 +61,18 @@ export const praktikumKeys = {
       aiTargets: (aktivasiSesiId: number, courseId: number) =>
         [...penilaian, 'aiTargets', aktivasiSesiId, courseId] as const,
     },
-    rekapJawaban: (params: QueryParams) => [...admin, 'rekapJawaban', params] as const,
-    rekapKelas: (kelasId: number) => [...admin, 'rekapKelas', kelasId] as const,
+    rekap: {
+      all: rekap,
+      kelas: (kelasId: number) => [...rekap, 'kelas', kelasId] as const,
+      jawaban: (params: QueryParams) => [...rekap, 'jawaban', params] as const,
+    },
     auditLogs: (params: QueryParams) => [...admin, 'auditLogs', params] as const,
     laporanBesar: {
       all: laporanBesar,
-      list: [...laporanBesar, 'list'] as const,
-      detail: (id: number) => [...laporanBesar, 'detail', id] as const,
+      current: [...laporanBesar, 'current'] as const,
       pengumpulan: (id: number) => [...laporanBesar, 'pengumpulan', id] as const,
+      berkas: (id: number, mahasiswaId: number, aksi: string, jenis: string) =>
+        [...laporanBesar, 'berkas', id, mahasiswaId, aksi, jenis] as const,
     },
   },
   superadmin: {

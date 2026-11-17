@@ -1,6 +1,11 @@
 import { createAppQueryClient, createIdbPersister, type AppPersister } from '@algohub/query';
+import type { QueryKey } from '@tanstack/svelte-query';
 
 export const queryClient = createAppQueryClient();
+
+export function invalidate(...queryKeys: QueryKey[]): Promise<unknown> {
+  return Promise.all(queryKeys.map((queryKey) => queryClient.invalidateQueries({ queryKey })));
+}
 
 let current: { userId: number; persister: AppPersister } | null = null;
 
