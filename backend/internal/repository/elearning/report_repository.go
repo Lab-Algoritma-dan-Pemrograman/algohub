@@ -16,7 +16,7 @@ type reportRepository struct{ db *gorm.DB }
 
 func NewReportRepository(db *gorm.DB) ReportRepository { return &reportRepository{db: db} }
 
-// Kolom ditulis eksplisit karena skema elearning_progress di prod belum pasti (T-11); kolom lain tidak disentuh.
+// Kolom ditulis eksplisit karena skema elearning_progress di prod belum pasti (T-24); kolom lain tidak disentuh.
 func (r *reportRepository) Upsert(ctx context.Context, p *entity.ElearningProgress) error {
 	return r.db.WithContext(ctx).Exec(`INSERT INTO elearning_progress
 (nim, student_name, lessons_completed, total_lessons, completion_percentage, is_completed, completed_levels, current_level, last_accessed_at)

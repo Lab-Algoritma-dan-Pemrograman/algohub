@@ -142,7 +142,7 @@ func (uc *AdminUserUsecase) Role(ctx context.Context, p *dto.Principal, nim stri
 }
 
 // Disalin dari resetUserProgress. Delete student_progress dan unlocked_achievements terbuka bagi staf token,
-// sedangkan update users baris orang lain hanya admin/kordas, jadi asisten mereset progres tanpa menyentuh XP (T-16).
+// sedangkan update users baris orang lain hanya admin/kordas, jadi asisten mereset progres tanpa menyentuh XP (T-29).
 func (uc *AdminUserUsecase) Reset(ctx context.Context, p *dto.Principal, nim string) error {
 	if err := uc.require(ctx, p, IsStaff, msgResetStaff); err != nil {
 		return err

@@ -33,7 +33,7 @@ func TestProfileSyncCreatesMissingProfile(t *testing.T) {
 	assert.Empty(t, res.NewlyUnlocked)
 }
 
-// Shift berbeda membuat update ikut menulis shift; column grant menolak seluruh statement dan error ditelan (T-13).
+// Shift berbeda membuat update ikut menulis shift; column grant menolak seluruh statement dan error ditelan (T-26).
 func TestProfileSyncShiftChangeSwallowedByGrant(t *testing.T) {
 	f := newLearn(t)
 	p := who(usecase.RolePraktikan)

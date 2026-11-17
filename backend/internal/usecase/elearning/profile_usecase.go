@@ -28,7 +28,7 @@ func NewProfileUsecase(users repository.UserRepository, achievements *Achievemen
 }
 
 // Disalin dari initialize di SupabaseProvider.tsx:84-260. Error baca, insert, dan update ditelan seperti kode lama
-// (contoh nyata: update yang ikut menulis shift ditolak column grant, T-13), jadi sinkron tidak pernah gagal.
+// (contoh nyata: update yang ikut menulis shift ditolak column grant, T-26), jadi sinkron tidak pernah gagal.
 func (uc *ProfileUsecase) Sync(ctx context.Context, p *dto.Principal) (*dto.ProfileSyncResponse, error) {
 	if err := requirePrincipal(p); err != nil {
 		return nil, err

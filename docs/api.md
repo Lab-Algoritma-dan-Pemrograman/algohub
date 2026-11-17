@@ -236,10 +236,10 @@ Semua route di bawah `/api/elearning`. Pengganti `api/*.ts` lama dan query Supab
 | POST | `/api/elearning/receive-token` | publik | `api/receive-token.ts` | — | `{token}` atau `{code}` dari `/sso` |
 | POST | `/api/elearning/login` | publik, 10/menit/IP | `api/login.ts` | — | lewat usecase login praktikum + audit `LOGIN`/`LOGIN_FAILED`; gagal → `401 "NIM/email atau password salah."` |
 | POST | `/api/elearning/verify` | publik | `api/verify.ts` | — | |
-| POST | `/api/elearning/ai` | Bearer atau `token` body; `users.role` admin/kordas | `api/ai.ts` | — | Gemini (rotasi `GEMINI_API_KEY`) atau Ollama `ELEARNING_OLLAMA_*`; role mentah (T-14) |
+| POST | `/api/elearning/ai` | Bearer atau `token` body; `users.role` admin/kordas | `api/ai.ts` | — | Gemini (rotasi `GEMINI_API_KEY`) atau Ollama `ELEARNING_OLLAMA_*`; role mentah (T-27) |
 | POST | `/api/elearning/grade` | Bearer atau `token` body; `users.role` admin/kordas/asisten | `api/grade.ts` | — | maks 3 attempt dinilai bersamaan |
 | POST | `/api/elearning/report` | `token` + `nim` body (atau Bearer) | `api/report.ts` | — | upsert `elearning_progress` |
-| POST | `/api/elearning/validate-quiz` | Bearer | `api/validate-quiz.ts` | — | token rusak → `500` seperti lama (T-12) |
+| POST | `/api/elearning/validate-quiz` | Bearer | `api/validate-quiz.ts` | — | token rusak → `500` seperti lama (T-25) |
 | POST | `/api/elearning/auth/supabase-token` | Bearer | `api/auth.ts` | — | token re-sign Supabase |
 | GET | `/api/elearning/curriculum/levels` | Bearer | `curriculumService.ts:12`, `SupabaseProvider.tsx:370` | ya | |
 | GET | `/api/elearning/curriculum/modules` | Bearer | `curriculumService.ts:38`, `SupabaseProvider.tsx:397` | ya | |
@@ -249,7 +249,7 @@ Semua route di bawah `/api/elearning`. Pengganti `api/*.ts` lama dan query Supab
 | GET | `/api/elearning/progress/me/lessons` | Bearer | `SupabaseProvider.tsx:298` | ya | |
 | GET | `/api/elearning/progress/me/recent` | Bearer | `Dashboard.tsx:81` | `?limit` (default 5, maks 100) | |
 | POST | `/api/elearning/progress/lessons/:lessonId/complete` | Bearer | `progressService.completeLesson` | — | `{xpReward}` |
-| POST | `/api/elearning/progress/xp` | Bearer | `progressService.grantXp` | — | `{amount}` (T-15) |
+| POST | `/api/elearning/progress/xp` | Bearer | `progressService.grantXp` | — | `{amount}` (T-28) |
 | POST | `/api/elearning/progress/study-time` | Bearer | `Layout.tsx:143` | — | `{seconds}`, increment dalam satu UPDATE |
 | POST | `/api/elearning/streak` | Bearer | `Layout.tsx:218` | — | |
 | POST | `/api/elearning/profile/sync` | Bearer | `SupabaseProvider.tsx:91` | — | |
@@ -282,7 +282,7 @@ Semua route di bawah `/api/elearning`. Pengganti `api/*.ts` lama dan query Supab
 | GET | `/api/elearning/leaderboard` | Bearer | `leaderboardService.getLeaderboard` | ya (default 10, `limit=0` → 100) | `?kelas&jurusan&shift`, role `mahasiswa`, urut xp desc |
 | GET | `/api/elearning/leaderboard/rank` | Bearer | `leaderboardService.getUserRank` | — | `?xp&kelas&jurusan&shift`; xp 0 → `rank: null` |
 | GET | `/api/elearning/leaderboard/filters` | Bearer | `leaderboardService.getLeaderboardFilters` | — | |
-| GET | `/api/elearning/leaderboard/weekly` | Bearer | `leaderboardService.getWeeklyLeaderboard` | ya (default 10, `limit=0` → 100) | P hanya melihat XP mingguan miliknya, reward lesson 60 (T-19) |
+| GET | `/api/elearning/leaderboard/weekly` | Bearer | `leaderboardService.getWeeklyLeaderboard` | ya (default 10, `limit=0` → 100) | P hanya melihat XP mingguan miliknya, reward lesson 60 (T-32) |
 | GET | `/api/elearning/prestige/eligibility` | Bearer | `prestigeService.checkPrestigeEligibility` | — | `?nim=` (default diri sendiri) |
 | POST | `/api/elearning/prestige/reset` | diri sendiri atau peran UI A/K/S | `prestigeService.doVoluntaryPrestigeReset` | — | `{nim?}`; RPC `do_prestige_reset` apa adanya; lainnya `403 "Akses ditolak."` |
 | GET | `/api/elearning/playground/examples` | Bearer | `playgroundService.getPlaygroundExamples` | ya | `?language=`, urut `sort_order` |
