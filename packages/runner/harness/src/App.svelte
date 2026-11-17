@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { Button, CodeEditor, Terminal } from '@algohub/ui';
-  import { getRunner, messages, type Language, type RunResult } from '../../src';
+  import { formatResult, getRunner, messages, type Language } from '../../src';
   import { samples } from './samples';
   const runner = getRunner({
     compilerBaseUrl: import.meta.env.PUBLIC_COMPILER_BASE_URL ?? '/compiler/v1/',
@@ -24,33 +24,6 @@
     const sample = samples.find((s) => s.language === lang);
     if (sample) selectSample(sample.id);
   }
-  function report(result: RunResult) {
-    const t = terminal;
-    if (!t) return;
-    switch (result.status) {
-      case 'compile-error':
-        t.writeln('❌ \x1b[1;31mCompilation Error:\x1b[0m');
-        t.write(`\x1b[31m${result.output || result.error || messages.compileFailed}\x1b[0m\r\n`);
-        break;
-      case 'ok':
-        if (result.images.length)
-          t.writeln(`\x1b[2m[${result.images.length} grafik dirender]\x1b[0m`);
-        t.writeln(`\r\n\x1b[1;32m✓ ${messages.done}\x1b[0m`);
-        break;
-      case 'error':
-        t.write(`\r\n\x1b[33m⚠ ${result.error}\x1b[0m\r\n`);
-        break;
-      case 'timeout':
-        t.writeln(`\r\n\x1b[1;31m❌ ${messages.timeout}\x1b[0m`);
-        break;
-      case 'stopped':
-        t.writeln(`\r\n\x1b[1;31m⚠ ${messages.stopped}\x1b[0m`);
-        break;
-      case 'unavailable':
-        t.writeln(`\x1b[33m⚠ ${result.error}\x1b[0m`);
-        break;
-    }
-  }
   async function run() {
     if (running) return;
     running = true;
@@ -62,12 +35,11 @@
       );
     terminal?.focus();
     try {
-      report(
-        await runner.run(lang, code, {
-          stdin: stdin || undefined,
-          onOutput: (data) => terminal?.write(data),
-        }),
-      );
+      const result = await runner.run(lang, code, {
+        stdin: stdin || undefined,
+        onOutput: (data) => terminal?.write(data),
+      });
+      terminal?.write(formatResult(result));
     } finally {
       running = false;
     }
