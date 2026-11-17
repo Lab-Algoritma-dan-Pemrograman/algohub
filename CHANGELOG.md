@@ -4,6 +4,27 @@ Semua perubahan penting dicatat di file ini. Format mengikuti [Keep a Changelog]
 
 ## [Belum dirilis]
 
+### Fase 4 — apps/praktikum (2026-11-18)
+
+#### Ditambahkan
+- `apps/praktikum`: SvelteKit 3 SPA (`adapter-static`, fallback `index.html`, `ssr = false`) dengan 39 route lama. Isinya: info, layanan, playground, auth, mahasiswa, ruang pengerjaan pretest/posttest/keterampilan/ujian, 15 halaman admin, dan superadmin/pengaturan. Guard token dan role ada di `+layout.ts`.
+- Semua data lewat TanStack Query. Persist IndexedDB per user (`algohub-praktikum-<id>`) hanya untuk whitelist (`info.*`, `admin.kelas`, `profile`). Logout mengosongkan cache memori dan IndexedDB.
+- Package `@algohub/api-client` (modul praktikum + query key factory), `@algohub/query` (QueryClient + persister IndexedDB), dan `@algohub/auth` (sesi, `requireRole`, logout). `@algohub/ui` mendapat DataTable, VirtualList, dan RichTextEditor. `@algohub/runner` mendapat `compilerDir()` dan `formatResult()`.
+- `apps/praktikum/vercel.json`: header keamanan, CSP, COOP/COEP di semua path, cache `/runner` dan `/_app/immutable`, dan rewrite SPA.
+- `scripts/fetch-compiler.ts`: unduh Release `compiler-v1` dan cocokkan dengan `SHA256SUMS`. Script root `dev:praktikum`, `fetch-compiler`, dan `test:e2e`.
+- E2E Playwright `tests/e2e/praktikum` (mock API same-origin, compiler asli): auth per role, compiler C/Python interaktif, sesi sampai submit dan timer habis, rekap nilai 1.200 baris dengan Virtual, admin, dan persist. Hasilnya 30 lulus.
+
+#### Diubah
+- Halaman memanggil API di `/api/praktikum/*`. Token disimpan di origin baru, jadi pengguna perlu login ulang saat cutover.
+- Worker compiler hanya dibuat di halaman yang punya editor, dan dashboard mem-prefetch file compiler.
+- Cache Query: `staleTime` default 30 detik. `/info` dan `/info/jadwal` 5 menit (pengganti `setHeaders` 300 detik). Dashboard, sesi, dan ruang `0`.
+- Root `tsconfig.json` memakai `types: ['bun']`. Root `package.json` mendapat `@types/bun` dan `@playwright/test`.
+
+#### Diketahui
+- E2E belum masuk CI.
+- Galeri `/info` (`src/lib/galeri`, 39 file, ±17,9 MB) dibawa apa adanya, dan berpengaruh pada Fast Data Transfer. Kandidat kompresi di update berikutnya.
+- Belum diuji dengan backend nyata: login hash Firebase, upload/download laporan besar (Storage), AI grading, cron auto-submit, dan rate limit `/run`.
+- Temuan T-43..T-71.
 ### Fase 7 — Backend elearning (2026-11-18)
 
 #### Ditambahkan

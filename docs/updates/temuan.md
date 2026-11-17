@@ -46,3 +46,32 @@ Bug dan kejanggalan dari kode lama yang **sengaja tidak diperbaiki** selama port
 | T-40 | elearning `prestigeService.checkPrestigeEligibility` | Pesan kuota "Reset lagi semester depan (...)" memakai `semesterLabelJakarta()` semester berjalan, bukan semester berikutnya. Endpoint Go meniru | pesan menyesatkan | tampilkan label semester berikutnya |
 | T-41 | backend siakad (desain Fase 5) | Satu `CRON_SECRET` membuka cron praktikum, cron siakad, dan bypass `send-push`/`send-wa` | kalau secret cron-job.org bocor, pelaku bisa broadcast ke semua user siakad | pisahkan secret untuk bypass notifikasi |
 | T-42 | backend siakad gateway RPC | Cache metadata `pg_proc` per instance tidak pernah diinvalidasi | perubahan signature fungsi baru terlihat setelah instance didaur ulang | TTL cache |
+| T-43 | praktikum `/layanan/login` | Mengirim `username`/`full_name`/role `praktikan|penyewa` yang tidak dikenal backend praktikum, menyimpan `lab_jwt_token`, lalu pindah ke `/layanan/beranda` yang tidak ada | halaman tidak berguna | putuskan: hapus atau arahkan ke siakad |
+| T-44 | praktikum rekap nilai | Kelas `text-brand-blue` tidak ada di tema | warna tidak tampil | tambah ke tema atau ganti kelas |
+| T-45 | praktikum `public/flowchart/*.png` | File tidak pernah disajikan dan tidak dipakai | aset mati | hapus |
+| T-46 | praktikum `/info`, `admin/pengaturan` | Pengumuman jatuh ke `localStorage ann_*` saat API gagal | data hanya terlihat di browser admin yang menyimpannya | tampilkan error |
+| T-47 | praktikum `saveAnnouncements` | Error API ditelan, lalu UI tetap menampilkan "tersimpan" | sukses palsu | tampilkan error |
+| T-48 | praktikum `/praktikum/superadmin/*` | Asisten dialihkan ke dashboard mahasiswa | redirect membingungkan | arahkan ke `/praktikum/admin` |
+| T-49 | praktikum RichTextEditor | Prop `placeholder` tidak pernah diteruskan | placeholder tidak tampil | teruskan prop |
+| T-50 | edra (vendor) | Memakai `==` dan assignment yang tidak terpakai | kualitas kode | perbaiki saat edra diperbarui |
+| T-51 | praktikum sesi | `localStorage.user` yang rusak membuat `JSON.parse` melempar tanpa try | sesi crash | try/catch + logout |
+| T-52 | praktikum `/playground-c` | Kode awal gagal compile (`\n` asli di dalam string printf) | contoh tidak jalan | perbaiki contoh |
+| T-53 | praktikum navigasi | `goto()` tanpa `await` menghasilkan unhandled rejection di Kit 3 bila route tidak ada | error di konsol | `await` + tangani |
+| T-54 | praktikum `/info` | 6 peringatan a11y di markup | aksesibilitas | perbaiki markup |
+| T-55 | runner harness | Import `../src/vite` tanpa ekstensi memicu peringatan configLoader | peringatan build | tambah ekstensi |
+| T-56 | praktikum `/layanan/login` | State dan ikon mati | kode mati | hapus bersama T-43 |
+| T-57 | praktikum `/praktikum/laporan-besar` | Deskripsi di-render dengan `{@html}` tanpa sanitasi | XSS oleh pembuat laporan | sanitasi DOMPurify |
+| T-58 | praktikum `/praktikum/profil` | Hanya `asisten` yang dianggap admin, dan upload foto butuh izin `sesi:write` | koordinator diperlakukan seperti mahasiswa | samakan aturan role |
+| T-59 | praktikum dashboard | Link "Kerjakan" bisa berisi `aktivasi=null` | link rusak | sembunyikan bila null |
+| T-60 | praktikum dashboard, Ruang | Ada kelas CSS yang tidak terdefinisi, dan `dt/dd` tanpa `dl` | tampilan/a11y | rapikan markup |
+| T-61 | praktikum Ruang essay | Blur selalu mengirim `/autosave` walau isinya tidak berubah | invocation API berlebih | kirim hanya bila berubah |
+| T-62 | praktikum rekap nilai CSV | Kutip tidak di-escape, dan header tidak dikutip | CSV rusak untuk nama berkutip | escape sesuai RFC 4180 |
+| T-63 | praktikum admin laporan-besar | `colspan=5` untuk 6 kolom, dan deskripsi `{@html}` tanpa sanitasi | tampilan, XSS | perbaiki colspan, sanitasi |
+| T-64 | praktikum AI grading | Tidak menunggu request sebelumnya, dan nama yang gagal lintas sesi selalu `?` | hasil membingungkan | antre request |
+| T-65 | praktikum rekap-jawaban | Status loading bulk action tidak konsisten, dan ada kelas CSS yang tidak terdefinisi | UX | rapikan state |
+| T-66 | praktikum users | Hapus akun asisten memakai `DELETE /admin/users/:id`, dan bulk users menelan pesan error per item | gagal tanpa tanda | tampilkan error per item |
+| T-67 | praktikum admin/pengaturan | 24 label tanpa kontrol, toggle superadmin tanpa label, dan tombol di dalam label | aksesibilitas | perbaiki markup |
+| T-68 | praktikum admin/sesi | Placeholder `kode_rumpang` berisi `\n` literal | tampilan | ganti newline asli |
+| T-69 | praktikum admin kelas/jadwal | Menghapus kelas yang sedang diedit tidak me-reset form, dan menyimpan jadwal menimpa isian mode yang belum disimpan | data bisa tertimpa | reset form, pisahkan state |
+| T-70 | praktikum Ruang | Saat timer habis dan ada jawaban yang belum tersimpan, pesan "Waktu habis…" langsung ditimpa "Tersimpan otomatis <jam>" oleh flush autosave | pesan membingungkan | prioritaskan pesan waktu habis |
+| T-71 | praktikum Ruang | Setelah timer habis, `load()` mengisi ulang jawaban dari server, lalu blur saat navigasi mengirim `/autosave` sekali lagi (turunan T-61) | request berlebih | sama dengan T-61 |
