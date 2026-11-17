@@ -13,10 +13,11 @@ import (
 )
 
 type SiakadHandlers struct {
-	Auth   *handler.AuthHandler
-	RPC    *handler.RPCHandler
-	Notify *handler.NotifyHandler
-	Cron   *cronhandler.CronHandler
+	Auth        *handler.AuthHandler
+	RPC         *handler.RPCHandler
+	Notify      *handler.NotifyHandler
+	Integration *handler.IntegrationHandler
+	Cron        *cronhandler.CronHandler
 }
 
 type Siakad struct {
@@ -46,6 +47,9 @@ func RegisterSiakad(r *gin.Engine, s *Siakad) {
 	allowOnly(g, "/rpc", []string{http.MethodPost}, rpcLimit, h.RPC.Call)
 	allowOnly(g, "/send-push", []string{http.MethodPost, http.MethodOptions}, okOnOptions(h.Notify.SendPush))
 	allowOnly(g, "/send-wa", []string{http.MethodPost, http.MethodOptions}, okOnOptions(h.Notify.SendWA))
+	allowOnly(g, "/analyze-schedule", []string{http.MethodPost}, h.Integration.AnalyzeSchedule)
+	allowOnly(g, "/generate-jwt", []string{http.MethodPost}, h.Integration.GenerateJWT)
+	allowOnly(g, "/sync-elearning", []string{http.MethodPost}, h.Integration.SyncElearning)
 
 	cron := r.Group("/api/cron")
 	allowOnly(cron, "/siakad/check-shifts", []string{http.MethodGet}, h.Cron.CheckShifts)

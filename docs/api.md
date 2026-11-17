@@ -194,3 +194,26 @@ Base URL produksi: `https://api.algohub.web.id`. Semua route di bawah `/api`.
 | Method | Path | Keterangan |
 |---|---|---|
 | POST | `/api/praktikum/compile-c` | Compile C pindah ke browser |
+
+## Siakad
+
+- Endpoint siakad lama (Vercel function di `siakad.algohub.web.id/api/*`) pindah ke `api.algohub.web.id/api/siakad/*`, dan cron-nya ke `/api/cron/*`. Path lama tidak punya alias di backend ini.
+- Body response sama dengan kode lama: JSON mentah (`{"error": "..."}` untuk error, data RPC apa adanya), bukan envelope praktikum.
+- Token sesi dikirim lewat cookie `siakad_token` yang ditulis login: `Domain=.algohub.web.id; Path=/; Max-Age=3600; HttpOnly; Secure; SameSite=Lax`. Logout dan verify yang gagal menghapusnya (`Max-Age=0`). Kalau cookie tidak ada, header `Authorization: Bearer <token>` dipakai (token juga dikirim di body login). `analyze-schedule` dan `sync-elearning` hanya membaca header Bearer, seperti kode lama.
+- Rate limit 5/menit/IP, kunci IP sama dengan praktikum: login, dan rpc khusus `fn=login_user`/`register_user`. Kuota keduanya terpisah. Ditolak `429 {"error": ...}`.
+- Method di luar kolom Method dibalas `405 {"error":"Method not allowed"}`. `send-push` dan `send-wa` membalas `OPTIONS` non-preflight dengan 200 kosong.
+- Cron memakai `Authorization: Bearer <CRON_SECRET>` (dikirim Vercel Cron) atau `X-Cron-Secret: <CRON_SECRET>`. Kalau `CRON_SECRET` kosong, semua request ditolak `401 {"error":"Unauthorized: Access restricted to Vercel Cron only"}`. Jadwal ada di `backend/vercel.json`: check-shifts `0 7 * * *`, keep-alive `0 0 * * *`.
+
+| Method | Lama (`siakad.algohub.web.id`) | Baru (`api.algohub.web.id`) | Auth | Catatan |
+|---|---|---|---|---|
+| POST | `/api/auth/login` | `/api/siakad/auth/login` | publik | 5/menit/IP; set cookie `siakad_token` |
+| POST | `/api/auth/logout` | `/api/siakad/auth/logout` | cookie/Bearer opsional | 204; mencabut token (`revoke_token`) dan menghapus cookie |
+| POST | `/api/auth/verify` | `GET`/`POST /api/siakad/auth/verify` | cookie `siakad_token` atau Bearer | token dicabut atau invalid → 401 dan cookie dihapus |
+| POST | `/api/rpc?fn=` | `/api/siakad/rpc?fn=` | cookie/Bearer, kecuali `PUBLIC_RPCS` | whitelist RPC per role; `login_user` → 403; `p_*_id` diisi dari token |
+| POST | `/api/generate-jwt` | `/api/siakad/generate-jwt` | `handshake_code` di body | token SSO elearning berlaku 2 jam |
+| POST | `/api/analyze-schedule` | `/api/siakad/analyze-schedule` | Bearer, role asisten/koordinator | Gemini (default) atau Bynara `stepfun-3.7-flash` (hanya gambar) |
+| POST | `/api/send-push` | `/api/siakad/send-push` | `X-Cron-Secret` atau token staf | Web Push; subscription 404/410 dihapus |
+| POST | `/api/send-wa` | `/api/siakad/send-wa` | `X-Cron-Secret` atau token staf | gateway dari `system_settings` |
+| POST | `/api/sync-elearning` | `/api/siakad/sync-elearning` | Bearer | baca DB elearning, tulis `elearning_progress` di DB siakad |
+| GET | `/api/cron-check-shifts` | `/api/cron/siakad/check-shifts` | `CRON_SECRET` | push pengingat shift jaga hari ini |
+| GET | `/api/keep-alive` | `/api/cron/keep-alive` | `CRON_SECRET` | ping DB siakad dan elearning |

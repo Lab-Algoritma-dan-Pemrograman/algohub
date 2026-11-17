@@ -37,7 +37,7 @@ func (h *NotifyHandler) fromCron(c *gin.Context) bool {
 	return middleware.SecretMatches(c.GetHeader("X-Cron-Secret"), h.cronSecret)
 }
 
-func writeResult(c *gin.Context, body map[string]any, f *usecase.Failure) {
+func writeResult(c *gin.Context, body any, f *usecase.Failure) {
 	if f != nil {
 		c.JSON(f.Status, f.Body)
 		return

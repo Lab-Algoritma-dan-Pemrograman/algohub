@@ -14,8 +14,16 @@ func sessionToken(c *gin.Context) string {
 	if ck, err := c.Request.Cookie(sessionCookie); err == nil && ck.Value != "" {
 		return ck.Value
 	}
-	if h := c.GetHeader("Authorization"); strings.HasPrefix(h, "Bearer ") {
-		return strings.Split(h, " ")[1]
+	token, _ := bearerToken(c)
+	return token
+}
+
+// present membedakan header tanpa skema Bearer (401 "Missing") dari token kosong/rusak (401 "Invalid")
+// pada endpoint lama yang hanya membaca header.
+func bearerToken(c *gin.Context) (token string, present bool) {
+	h := c.GetHeader("Authorization")
+	if !strings.HasPrefix(h, "Bearer ") {
+		return "", false
 	}
-	return ""
+	return strings.Split(h, " ")[1], true
 }
