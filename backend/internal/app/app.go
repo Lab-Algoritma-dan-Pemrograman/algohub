@@ -13,6 +13,9 @@ func New() (http.Handler, error) {
 	if err != nil {
 		return nil, err
 	}
+	if err := cfg.Siakad.Validate(cfg.DB); err != nil {
+		return nil, err
+	}
 	dbs, err := database.Open(cfg.DB, cfg.AppEnv == "development")
 	if err != nil {
 		return nil, err
@@ -22,5 +25,6 @@ func New() (http.Handler, error) {
 		return nil, err
 	}
 	deliveryhttp.RegisterPraktikum(r, newPraktikum(cfg, dbs.Praktikum))
+	registerSiakad(r, cfg, dbs)
 	return r, nil
 }

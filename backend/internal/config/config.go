@@ -37,6 +37,8 @@ type Config struct {
 
 	DB DBConfig
 
+	Siakad SiakadConfig
+
 	JWTSecret      string
 	JWTExpireHours int
 
@@ -107,6 +109,7 @@ func Load() (*Config, error) {
 		FbScryptSaltSeparator: getEnv("FB_SCRYPT_SALT_SEPARATOR", ""),
 		FbScryptRounds:        getEnvInt("FB_SCRYPT_ROUNDS", 8),
 		FbScryptMemCost:       getEnvInt("FB_SCRYPT_MEM_COST", 14),
+		Siakad:                loadSiakad(),
 	}
 
 	patterns, err := compilePatterns(splitList(os.Getenv("CORS_ORIGIN_PATTERNS")))
