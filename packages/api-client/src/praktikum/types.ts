@@ -166,3 +166,60 @@ export interface LayananLoginResponse {
   token: string;
   user: { full_name?: string; username?: string };
 }
+
+export interface JadwalInfo {
+  hari: string;
+  jam_mulai: string;
+  jam_selesai: string;
+  keterangan: string;
+}
+
+export interface NilaiCourseItem {
+  sesi_judul: string;
+  jenis: string;
+  status: string;
+  total_nilai?: number | null;
+}
+
+export interface DashboardResponse {
+  profil: User;
+  jadwal?: JadwalInfo | null;
+  sesi_aktif: SesiUserItem[];
+  riwayat_nilai: NilaiCourseItem[];
+}
+
+export interface Profile extends User {
+  email?: string | null;
+}
+
+export interface UploadResponse {
+  url: string;
+}
+
+export interface LaporanBesarStatus {
+  laporan_besar_id: number;
+  judul: string;
+  deskripsi: string;
+  butuh_laporan: boolean;
+  butuh_analisa: boolean;
+  kelas_id: number | null;
+  buka_at: string | null;
+  deadline_at: string | null;
+  late_until: string | null;
+  fase: 'belum_dibuka' | 'dibuka' | 'telat' | 'ditutup';
+  terlambat: boolean;
+  sisa_detik: number;
+  bisa_kumpul: boolean;
+  status: 'belum' | 'terkumpul';
+  sumber: string | null;
+  laporan_path: string | null;
+  analisa_path: string | null;
+  submitted_at: string | null;
+  override_pada: string | null;
+  override_alasan: string | null;
+}
+
+export interface UploadUrlResponse {
+  upload_url: string;
+  path: string;
+}
