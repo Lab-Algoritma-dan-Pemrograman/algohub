@@ -9,6 +9,10 @@
   ];
 </script>
 
+<svelte:head>
+  <title>Lab Algoritma & Pemrograman</title>
+</svelte:head>
+
 <section
   class="relative flex flex-1 items-center justify-center overflow-hidden bg-[url('/bg_login.jpg')] bg-cover bg-center px-4 py-16"
 >

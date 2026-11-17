@@ -8,6 +8,8 @@ export default defineConfig({
     tailwindcss(),
     sveltekit({
       adapter: adapter({ pages: 'build', assets: 'build', precompress: false }),
+      // Vercel menyajikan 404.html di URL yang diminta; path relatif rusak di path bersarang.
+      paths: { relative: false },
     }),
   ],
   test: {
