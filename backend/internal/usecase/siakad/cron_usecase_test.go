@@ -131,7 +131,7 @@ func TestShiftCronEmpty(t *testing.T) {
 
 	uc, shifts, _ := newShiftCron(nil, nil, &fakeSender{}, now)
 	shifts.err = errors.New("relation does not exist")
-	if _, f := uc.Run(context.Background()); f == nil || f.Status != 500 || f.Body["error"] != "relation does not exist" {
+	if _, f := uc.Run(context.Background()); f == nil || f.Status != 500 || f.Body["error"] != "Internal server error" {
 		t.Fatalf("error query: %+v", f)
 	}
 }
@@ -178,7 +178,7 @@ func TestKeepAlive(t *testing.T) {
 
 	siakad.err = errors.New("siakad paused")
 	_, f = uc.Run(context.Background())
-	if f == nil || f.Status != 500 || f.Body["error"] != "siakad paused" || elearning.calls != 2 {
+	if f == nil || f.Status != 500 || f.Body["error"] != "Internal server error" || elearning.calls != 2 {
 		t.Fatalf("error ping: %+v, elearning dipanggil %d kali", f, elearning.calls)
 	}
 }

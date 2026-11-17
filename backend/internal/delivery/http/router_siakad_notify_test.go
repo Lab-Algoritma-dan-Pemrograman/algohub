@@ -192,7 +192,7 @@ func TestSiakadKeepAlive(t *testing.T) {
 
 	rig.elearning.err = errors.New("project paused")
 	rec = send(rig.r, http.MethodGet, "/api/cron/keep-alive", "", bearer)
-	if rec.Code != http.StatusInternalServerError || rec.Body.String() != `{"error":"project paused"}` {
+	if rec.Code != http.StatusInternalServerError || rec.Body.String() != `{"error":"Internal server error"}` {
 		t.Fatalf("error ping: %d %s", rec.Code, rec.Body)
 	}
 

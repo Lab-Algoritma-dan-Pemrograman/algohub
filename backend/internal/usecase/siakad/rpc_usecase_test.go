@@ -186,6 +186,22 @@ func TestGatewayRoleMatrix(t *testing.T) {
 	}
 }
 
+func TestGatewayNonStringRoleIsUnauthorized(t *testing.T) {
+	for _, role := range []any{5, true, []any{"asisten"}} {
+		uc, rpc, _ := newGateway()
+		_, f := uc.Execute(context.Background(), "get_user_profile", sign(t, map[string]any{"id": 1, "role": role}), nil)
+		if f == nil || f.Status != http.StatusUnauthorized || f.Body["error"] != "Unauthorized: Invalid or expired token" || len(rpc.calls) != 0 {
+			t.Errorf("role %v: %+v", role, f)
+		}
+	}
+}
+
+func TestErrTextHidesConnectionDetails(t *testing.T) {
+	err := errors.New("failed to connect to `user=postgres.abc database=postgres`: db.example.com:6543")
+	if got := errText(err); got != "Internal server error" {
+		t.Fatalf("errText = %q", got)
+	}
+}
 func TestGatewayInvalidRole(t *testing.T) {
 	for _, role := range []string{"superadmin", "", "dosen"} {
 		uc, rpc, _ := newGateway()

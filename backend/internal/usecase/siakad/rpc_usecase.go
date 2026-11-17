@@ -74,7 +74,11 @@ func (u *RPCUsecase) authorize(ctx context.Context, token string) (claims map[st
 	if isRevoked(ctx, u.auth, claims) {
 		return nil, "", fail(http.StatusUnauthorized, "Unauthorized: Session telah berakhir. Silakan login kembali.")
 	}
-	rawRole, _ := claims["role"].(string)
+	// rpc.ts memanggil toLowerCase() di dalam try: role non-string melempar dan berakhir 401, role kosong lanjut ke 403.
+	rawRole, isString := claims["role"].(string)
+	if !isString && claims["role"] != nil {
+		return nil, "", fail(http.StatusUnauthorized, "Unauthorized: Invalid or expired token")
+	}
 	role = jwt.NormalizeRole(rawRole)
 	if _, ok := rolePermissions[role]; !ok {
 		return nil, "", fail(http.StatusForbidden, "Forbidden: Peran pengguna tidak valid")

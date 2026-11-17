@@ -6,7 +6,7 @@ import (
 )
 
 // Port siakad/src/lib/quotes.ts: 31 kutipan dasar dipakai apa adanya, hari ke-32 dst. digabung
-// dengan penguat supaya tiap hari dalam setahun mendapat kutipan berbeda.
+// dengan penguat. Kombinasinya hanya 279 kutipan unik, jadi mulai hari ke-280 kutipan berulang.
 var asistenBaseQuotes = []string{
 	"Semangat bertugas! Bimbinganmu di laboratorium hari ini membuka jalan sukses bagi banyak orang.",
 	"Setiap modul yang kamu dampingi hari ini adalah investasi pengetahuan berharga untuk masa depan.",

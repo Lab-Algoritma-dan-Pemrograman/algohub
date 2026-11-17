@@ -48,11 +48,12 @@ func isExpired(err error) bool {
 	return errors.As(err, &se) && (se.Code == http.StatusNotFound || se.Code == http.StatusGone)
 }
 
+// Error non-Postgres (mis. gagal konek pgx) memuat user, host, dan database; jangan dikirim ke klien.
 func errText(err error) string {
 	if msg, ok := dbErrorMessage(err); ok {
 		return msg
 	}
-	return err.Error()
+	return "Internal server error"
 }
 
 // Format Date.prototype.toISOString JavaScript.
