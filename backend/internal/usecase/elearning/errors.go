@@ -3,6 +3,7 @@ package usecase
 import (
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/jackc/pgx/v5/pgconn"
@@ -47,7 +48,9 @@ func dbMessage(err error) string {
 	case errors.Is(err, gorm.ErrRecordNotFound):
 		return msgNotSingle
 	}
-	return err.Error()
+	// Error non-Postgres (mis. gagal konek pgx) memuat host dan user DSN, sedangkan supabase-js lama tidak pernah membocorkannya.
+	log.Printf("elearning db: %v", err)
+	return "Internal server error"
 }
 
 // RAISE EXCEPTION dari trigger/RPC (SQLSTATE P0001) dulu sampai ke klien sebagai 400 dengan pesan apa adanya.

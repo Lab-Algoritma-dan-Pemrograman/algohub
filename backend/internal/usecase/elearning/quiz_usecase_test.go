@@ -69,12 +69,12 @@ func TestValidateQuizLessonLookup(t *testing.T) {
 		detail := assertUCError(t, err, http.StatusInternalServerError, "Server tidak dapat membaca bank soal. Periksa konfigurasi Supabase di server.")
 		assert.Equal(t, map[string]any{"code": "42P01"}, detail)
 	})
-	t.Run("error lain -> 500 dengan teks", func(t *testing.T) {
+	t.Run("error lain -> 500 tanpa teks koneksi", func(t *testing.T) {
 		uc, repo := newQuiz(t)
-		repo.On("LessonQuiz", mock.Anything, "7").Return(nil, errors.New("dial tcp: timeout"))
+		repo.On("LessonQuiz", mock.Anything, "7").Return(nil, errors.New("failed to connect to `user=postgres.ref database=postgres`: dial tcp: timeout"))
 		_, err := uc.Validate(ctx, quizBearer(t), quizReq(`7`, `1`))
 		detail := assertUCError(t, err, http.StatusInternalServerError, "Server tidak dapat membaca bank soal. Periksa konfigurasi Supabase di server.")
-		assert.Equal(t, map[string]any{"code": "dial tcp: timeout"}, detail)
+		assert.Equal(t, map[string]any{"code": ""}, detail)
 	})
 }
 

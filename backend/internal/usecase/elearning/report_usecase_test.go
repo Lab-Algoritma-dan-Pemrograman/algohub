@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -95,7 +96,11 @@ func TestReportDefaultsAndEmptyCurriculum(t *testing.T) {
 
 func TestReportDBError(t *testing.T) {
 	f := newReport(t)
-	f.curriculum.On("CountLessons", mock.Anything).Return(int64(0), errors.New("koneksi putus"))
+	f.curriculum.On("CountLessons", mock.Anything).Return(int64(0), errors.New("failed to connect to `user=postgres.ref database=postgres`: dial tcp: timeout")).Once()
 	_, err := f.uc.Sync(context.Background(), supabaseToken(t, jwt.MapClaims{"nim": "1"}), "1")
-	assertUCError(t, err, http.StatusInternalServerError, "koneksi putus")
+	assertUCError(t, err, http.StatusInternalServerError, "Internal server error")
+
+	f.curriculum.On("CountLessons", mock.Anything).Return(int64(0), &pgconn.PgError{Code: "42P01", Message: `relation "lessons" does not exist`}).Once()
+	_, err = f.uc.Sync(context.Background(), supabaseToken(t, jwt.MapClaims{"nim": "1"}), "1")
+	assertUCError(t, err, http.StatusInternalServerError, `relation "lessons" does not exist`)
 }

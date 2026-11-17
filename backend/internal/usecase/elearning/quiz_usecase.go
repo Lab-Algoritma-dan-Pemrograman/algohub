@@ -32,7 +32,7 @@ func (uc *QuizUsecase) Validate(ctx context.Context, authHeader string, req *dto
 	}
 	claims, err := uc.auth.verifyToken(token)
 	if err != nil {
-		// Di validate-quiz.ts verifyToken yang gagal jatuh ke catch umum, jadi token rusak dijawab 500 (T-12).
+		// Di validate-quiz.ts verifyToken yang gagal jatuh ke catch umum, jadi token rusak dijawab 500 (T-25).
 		log.Printf("elearning validate-quiz: %v", err)
 		return nil, newError(http.StatusInternalServerError, "Internal server error")
 	}
@@ -100,5 +100,6 @@ func dbErrorCode(err error) string {
 	if errors.As(err, &pg) {
 		return pg.Code
 	}
-	return err.Error()
+	// Sama dengan error.code supabase-js untuk kegagalan jaringan (kosong); teks error pgx memuat detail DSN.
+	return ""
 }
