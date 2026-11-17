@@ -4,6 +4,25 @@ Semua perubahan penting dicatat di file ini. Format mengikuti [Keep a Changelog]
 
 ## [Belum dirilis]
 
+### Fase 3 — Runner dan UI dasar (2026-11-17)
+
+#### Ditambahkan
+- `@algohub/runner`: C (clang WASM) dan Python (Pyodide v0.27.0, tiga mirror jsDelivr, retry init 2×) di Web Worker. Input interaktif lewat SharedArrayBuffer untuk kedua bahasa, dan baris yang diketik sebelum diminta masuk antrean. Mode batch `run(code, { stdin })` juga tersedia.
+- Timeout C 40 detik dimulai setelah compile, dijeda saat menunggu input, dan dimulai ulang setelah input. Saat habis, worker di-terminate lalu dibuat ulang.
+- File compiler (`clang`, `lld`, `memfs`, `sysroot.tar`) diunduh sekali per halaman. Base URL diatur lewat `PUBLIC_COMPILER_BASE_URL`. Biner tidak disimpan di repo.
+- Plugin Vite `@algohub/runner/vite` (`runnerWorkers()`) yang melayani dan meng-emit worker same-origin di `/runner/`.
+- `@algohub/ui`: Button, Card, Dialog, Toaster/toast (shadcn-svelte + bits-ui 2), AppLayout, CodeEditor (Monaco dari CDN lewat `@monaco-editor/loader`), Terminal (xterm 6 dengan penyunting baris).
+- `@algohub/config`: dukungan Svelte (eslint-plugin-svelte, prettier-plugin-svelte) dan `tailwind.css` (Tailwind 4) dengan tema warna praktikum.
+- Harness dev `packages/runner/harness` (tidak dideploy) dan 10 uji Playwright Chromium: crossOriginIsolated, C dua `scanf`, error compile, Python `input()` di dalam `def`, reset setelah timeout, batch C/Python, Stop C/Python, dan Monaco dari CDN. Ditambah 92 test Vitest runner dan 4 test UI.
+- `prettier-plugin-svelte` sebagai devDependency root.
+
+#### Diubah
+- Perilaku runner disatukan dari praktikum dan elearning: COEP `credentialless`, injeksi `setbuf` versi praktikum (tambah `#include <stdio.h>`), dan Stop C memakai terminate + re-init. Python `input()` memakai SAB + `pyodide.setStdin`, menggantikan regex lama yang rusak untuk `input()` di dalam `def`. Grafik matplotlib dikirim sebagai `images[]`.
+- `.prettierignore`: `packages/runner/static/vendor/` (wasm-clang `shared.js`, Apache-2.0).
+
+#### Diketahui
+- Stop Python pada program CPU-bound (`while True: pass`) tidak menghentikan program, sama dengan kedua app lama.
+- `Runner.stop()` dan `Runner.sendInput()` belum dibedakan per bahasa.
 ### Fase 1 — Kerangka monorepo (2026-11-17)
 
 #### Ditambahkan
