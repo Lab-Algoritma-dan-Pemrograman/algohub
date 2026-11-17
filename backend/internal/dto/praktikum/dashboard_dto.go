@@ -2,7 +2,6 @@ package dto
 
 import repository "github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/repository/praktikum"
 
-// StatistikResponse: ringkasan dashboard admin.
 type StatistikResponse struct {
 	TotalMahasiswa int64                        `json:"total_mahasiswa"`
 	TotalAsisten   int64                        `json:"total_asisten"`
@@ -12,7 +11,6 @@ type StatistikResponse struct {
 	SesiAktif      []SesiAktifInfo              `json:"sesi_aktif"`
 }
 
-// SesiAktifInfo: info aktivasi yang sedang aktif + progress per course.
 type SesiAktifInfo struct {
 	AktivasiSesiID int                  `json:"aktivasi_sesi_id"`
 	JudulSesi      string               `json:"judul_sesi"`
@@ -21,7 +19,6 @@ type SesiAktifInfo struct {
 	Courses        []CourseProgressInfo `json:"courses"`
 }
 
-// CourseProgressInfo: progress satu course dalam aktivasi.
 type CourseProgressInfo struct {
 	CourseID int    `json:"course_id"`
 	Jenis    string `json:"jenis"`

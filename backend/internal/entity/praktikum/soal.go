@@ -2,7 +2,6 @@ package entity
 
 import "time"
 
-// Soal: pool soal milik sebuah course (per modul).
 type Soal struct {
 	ID            int            `gorm:"primaryKey;autoIncrement" json:"id"`
 	CourseID      int            `gorm:"not null;index" json:"course_id"`

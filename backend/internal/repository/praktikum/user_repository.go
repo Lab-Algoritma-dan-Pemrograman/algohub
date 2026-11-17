@@ -31,7 +31,6 @@ type UserRepository interface {
 	CountPerKelasShift() ([]KelasShiftCount, error)
 }
 
-// KelasShiftCount: hasil agregasi jumlah mahasiswa per kelas + shift.
 type KelasShiftCount struct {
 	KelasID   int    `json:"kelas_id"`
 	NamaKelas string `json:"nama_kelas"`
@@ -58,7 +57,6 @@ func (r *userRepository) BulkUpsert(users []entity.User) error {
 	}).CreateInBatches(users, 100).Error
 }
 
-// BulkUpdateAttrs mengubah atribut (gelombang/shift/kelas_id/kelompok) massal by NIM.
 // attrs hanya berisi kolom yang mau diubah; pakai gorm expr agar NULL pun bisa diset.
 func (r *userRepository) BulkUpdateAttrs(nims []string, attrs map[string]any) (int64, error) {
 	if len(nims) == 0 || len(attrs) == 0 {

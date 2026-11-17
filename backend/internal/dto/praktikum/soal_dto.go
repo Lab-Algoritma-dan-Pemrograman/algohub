@@ -1,6 +1,5 @@
 package dto
 
-// SoalRequest: buat/ubah soal dalam pool course.
 type SoalRequest struct {
 	CourseID      int     `json:"course_id" binding:"required"`
 	JenisSoal     string  `json:"jenis_soal" binding:"required,oneof=essay coding"`

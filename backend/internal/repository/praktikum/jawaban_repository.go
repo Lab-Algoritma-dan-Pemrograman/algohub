@@ -12,7 +12,6 @@ type JawabanRepository interface {
 	Update(j *entity.JawabanMahasiswa) error
 	FindByMahasiswaSoal(mahasiswaID, soalTerpilihID int) (*entity.JawabanMahasiswa, error)
 	FindByID(id int) (*entity.JawabanMahasiswa, error)
-	// ListByMahasiswaCourse: seluruh jawaban mahasiswa untuk satu aktivasi+course.
 	ListByMahasiswaCourse(mahasiswaID, aktivasiSesiID, courseID int) ([]entity.JawabanMahasiswa, error)
 	// MarkSubmittedForCourse: tandai submitted semua jawaban belum-submit pada aktivasi+course
 	// (auto-submit massal saat course ditutup). Mengembalikan jumlah baris terdampak.
@@ -26,15 +25,10 @@ type JawabanRepository interface {
 	// UnmarkSubmittedForMahasiswaCourse: lepas status submit jawaban SATU mahasiswa
 	// (buka kunci per peserta). Isi jawaban_teks dibiarkan.
 	UnmarkSubmittedForMahasiswaCourse(mahasiswaID, aktivasiSesiID, courseID int) (int64, error)
-	// SumNilai: total nilai mahasiswa untuk satu aktivasi+course.
 	SumNilai(mahasiswaID, aktivasiSesiID, courseID int) (float64, error)
-	// ListRekap: rekap jawaban untuk satu aktivasi+course (semua mahasiswa).
 	ListRekap(aktivasiSesiID, courseID int) ([]entity.JawabanMahasiswa, error)
-	// GetAllJawabanFlat: rekap global untuk halaman admin
 	GetAllJawabanFlat(kelasID, sesiID int, search, jenis string, limit int) ([]entity.JawabanMahasiswa, error)
-	// BulkResetNilai: reset nilai ke null untuk daftar jawaban_id
 	BulkResetNilai(jawabanIDs []int) error
-	// BulkDelete: hapus jawaban berdasarkan daftar jawaban_id
 	BulkDelete(jawabanIDs []int) error
 }
 
@@ -101,7 +95,6 @@ func (r *jawabanRepository) MarkSubmittedForCourse(aktivasiSesiID, courseID int)
 	return res.RowsAffected, res.Error
 }
 
-// UnmarkSubmittedForCourse melepas status submit seluruh jawaban satu course (buka ulang ujian).
 func (r *jawabanRepository) UnmarkSubmittedForCourse(aktivasiSesiID, courseID int) (int64, error) {
 	ids, err := r.soalTerpilihIDsForCourse(aktivasiSesiID, courseID)
 	if err != nil {

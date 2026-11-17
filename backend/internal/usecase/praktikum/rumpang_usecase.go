@@ -61,7 +61,6 @@ func kodeBersih(kunci string) string {
 	return strings.TrimSpace(best)
 }
 
-// instruksiBersih mengubah teks soal HTML menjadi teks instruksi polos.
 func instruksiBersih(teks string) string {
 	t := tagRe.ReplaceAllString(teks, " ")
 	t = html.UnescapeString(t)
@@ -95,7 +94,6 @@ INSTRUKSI:
 KUNCI:
 %s`
 
-// buatRumpang meminta LLM membuat kode rumpang dari instruksi + kunci.
 func (uc *RumpangUsecase) buatRumpang(ctx context.Context, instruksi, kunci string) (string, error) {
 	if uc.llm == nil {
 		return "", ErrBadRequest

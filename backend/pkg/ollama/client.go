@@ -19,13 +19,11 @@ type Config struct {
 	APIKey string
 }
 
-// Client mengatur koneksi ke API Ollama.
 type Client struct {
 	cfg        Config
 	httpClient *http.Client
 }
 
-// NewClient membuat instance Ollama client baru.
 func NewClient(cfg Config) *Client {
 	return &Client{
 		cfg: cfg,
@@ -37,7 +35,6 @@ func NewClient(cfg Config) *Client {
 	}
 }
 
-// ChatMessage merepresentasikan pesan dalam percakapan chat.
 type ChatMessage struct {
 	Role    string `json:"role"`
 	Content string `json:"content"`
@@ -56,14 +53,12 @@ type ChatRequest struct {
 	Stream         bool            `json:"stream"`
 }
 
-// ChatResponse adalah response dari /v1/chat/completions (OpenAI-compatible).
 type ChatResponse struct {
 	Choices []struct {
 		Message ChatMessage `json:"message"`
 	} `json:"choices"`
 }
 
-// AIResult adalah struktur yang diharapkan dari balasan JSON AI.
 type AIResult struct {
 	Nilai    float64 `json:"nilai"`
 	Feedback string  `json:"feedback"`
@@ -202,7 +197,6 @@ func (c *Client) RawChat(ctx context.Context, prompt string) (string, error) {
 	return strings.TrimSpace(chatResp.Choices[0].Message.Content), nil
 }
 
-// chat memanggil Ollama /api/chat dengan satu prompt dan mengembalikan isi balasan.
 func (c *Client) chat(ctx context.Context, prompt, model string) (string, error) {
 	reqPayload := ChatRequest{
 		Model:          model,

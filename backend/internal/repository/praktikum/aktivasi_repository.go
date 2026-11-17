@@ -9,9 +9,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// AktivasiRepository mengelola aktivasi_sesi + aktivasi_course + peserta_susulan.
 type AktivasiRepository interface {
-	// aktivasi_sesi
 	CreateSesi(a *entity.AktivasiSesi) error
 	UpdateSesi(a *entity.AktivasiSesi) error
 	FindSesiByID(id int) (*entity.AktivasiSesi, error)
@@ -20,7 +18,6 @@ type AktivasiRepository interface {
 	ListActiveSesi() ([]entity.AktivasiSesi, error)
 	DeleteSesi(id int) error
 
-	// aktivasi_course
 	CreateCourse(ac *entity.AktivasiCourse) error
 	UpdateCourse(ac *entity.AktivasiCourse) error
 	FindCourseByID(id int) (*entity.AktivasiCourse, error)
@@ -30,7 +27,6 @@ type AktivasiRepository interface {
 	// (atomic: peserta pertama menang). No-op bila started_at sudah terisi.
 	SetCourseStartedAtIfNull(aktivasiCourseID int, t time.Time) error
 
-	// peserta_susulan
 	AddSusulan(p *entity.PesertaSusulan) error
 	RemoveSusulan(aktivasiSesiID, mahasiswaID int) error
 	ListSusulan(aktivasiSesiID int) ([]entity.PesertaSusulan, error)

@@ -2,7 +2,6 @@ package entity
 
 import "time"
 
-// PengerjaanCourse: tracking status pengerjaan mahasiswa per course per aktivasi.
 type PengerjaanCourse struct {
 	ID             int              `gorm:"primaryKey;autoIncrement" json:"id"`
 	MahasiswaID    int              `gorm:"not null;uniqueIndex:idx_pengerjaan" json:"mahasiswa_id"`

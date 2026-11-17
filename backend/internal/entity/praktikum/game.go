@@ -2,7 +2,6 @@ package entity
 
 import "time"
 
-// GameSoal satu soal bug-hunt.
 type GameSoal struct {
 	ID         int    `gorm:"primaryKey;autoIncrement" json:"id"`
 	Bahasa     string `gorm:"type:varchar(20);not null" json:"bahasa"`
@@ -25,7 +24,6 @@ type GameSoalMahasiswa struct {
 	Kode      string `json:"kode"`
 }
 
-// GameRiwayat satu kali main.
 type GameRiwayat struct {
 	ID        int       `gorm:"primaryKey;autoIncrement" json:"id"`
 	UserID    int       `gorm:"not null" json:"user_id"`

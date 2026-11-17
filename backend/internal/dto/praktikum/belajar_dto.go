@@ -23,7 +23,6 @@ type MateriRequest struct {
 	XPHadiah       int            `json:"xp_hadiah"`
 }
 
-// ProgresSayaResponse progres belajar + profil xp/level milik user sendiri.
 type ProgresSayaResponse struct {
 	Progres []entity.ProgresBelajar `json:"progres"`
 	Profil  *entity.ProfilBelajar   `json:"profil"`

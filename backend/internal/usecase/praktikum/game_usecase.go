@@ -65,7 +65,6 @@ func (uc *GameUsecase) SimpanKonfigurasi(req dto.GameKonfigurasiRequest) (*entit
 	return k, nil
 }
 
-// StatusMain memberi tahu apakah user masih boleh main minggu ini.
 func (uc *GameUsecase) StatusMain(userID int) (*dto.StatusMainResponse, error) {
 	k := uc.konfigurasiAtauDefault()
 	if !k.BugHuntAktif {

@@ -78,8 +78,6 @@ func (uc *AktivasiUsecase) GenerateToken(id int) (*entity.AktivasiSesi, error) {
 	return aks, nil
 }
 
-// Aktivasi mengaktifkan sesi untuk kelas+shift, melakukan gacha (untuk sesi normal),
-// membuat baris aktivasi_course untuk course terpilih, lalu mengacak soal-nya.
 func (uc *AktivasiUsecase) Aktivasi(req dto.AktivasiRequest) (*entity.AktivasiSesi, error) {
 	sesi, err := uc.sesi.FindByID(req.SesiPraktikumID)
 	if err != nil {
@@ -107,7 +105,6 @@ func (uc *AktivasiUsecase) Aktivasi(req dto.AktivasiRequest) (*entity.AktivasiSe
 		return nil, err
 	}
 
-	// Tentukan course mana yang dibuatkan aktivasi_course.
 	var dipakai []entity.Course
 	if sesi.IsUjianPraktik {
 		for _, c := range courses {
@@ -119,9 +116,6 @@ func (uc *AktivasiUsecase) Aktivasi(req dto.AktivasiRequest) (*entity.AktivasiSe
 			return nil, errors.New("sesi ujian praktik belum punya course ujian_praktik")
 		}
 	} else {
-		// pilihCourseNormal: gacha pretest/posttest (wajib bila sesi punya
-		// course-nya) + keterampilan. Sesi karyawan (hanya keterampilan)
-		// tidak butuh gacha_pilihan.
 		var err error
 		dipakai, err = pilihCourseNormal(courses, req.GachaPilihan)
 		if err != nil {
@@ -197,7 +191,6 @@ func pilihCourseNormal(courses []entity.Course, gachaPilihan string) ([]entity.C
 	return dipakai, nil
 }
 
-// urutanCourse menentukan urutan default buka course.
 func urutanCourse(jenis entity.JenisCourse, fallback int) int {
 	switch jenis {
 	case entity.CoursePretest:
@@ -257,7 +250,6 @@ func (uc *AktivasiUsecase) BukaTutupCourse(req dto.BukaTutupCourseRequest) (*ent
 	}
 
 	if !req.IsOpen {
-		// Auto-submit massal.
 		if _, err := uc.jawaban.MarkSubmittedForCourse(ac.AktivasiSesiID, ac.CourseID); err != nil {
 			return nil, err
 		}
@@ -342,7 +334,6 @@ func (uc *AktivasiUsecase) DeleteSesi(id int) error {
 	return uc.aktivasi.DeleteSesi(id)
 }
 
-// PesertaProgress: daftar peserta yang sudah join/mengerjakan aktivasi + status live.
 func (uc *AktivasiUsecase) PesertaProgress(aktivasiSesiID int) ([]repository.PesertaProgress, error) {
 	return uc.pengerjaan.ListPesertaProgress(aktivasiSesiID)
 }

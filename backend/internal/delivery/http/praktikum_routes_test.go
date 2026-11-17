@@ -2,7 +2,6 @@ package http
 
 import (
 	"net/http"
-	"net/http/httptest"
 	"strings"
 	"testing"
 
@@ -311,5 +310,3 @@ func TestPraktikumLoginLimitSharedWithAlias(t *testing.T) {
 		t.Errorf("login dari IP lain = %d, want 400", w.Code)
 	}
 }
-
-var _ = httptest.NewRecorder

@@ -11,7 +11,6 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-// TestFaseWindow memverifikasi aturan waktu server-authoritative.
 func TestFaseWindow(t *testing.T) {
 	deadline := time.Date(2026, 6, 1, 12, 0, 0, 0, time.UTC)
 	late := time.Date(2026, 6, 3, 12, 0, 0, 0, time.UTC)
@@ -51,7 +50,6 @@ func TestFaseWindow(t *testing.T) {
 	}
 }
 
-// TestCekGerbangLaporanBesar: gerbang ujian praktik.
 func TestCekGerbangLaporanBesar(t *testing.T) {
 	kelasID := 2
 
@@ -123,7 +121,6 @@ func TestCekGerbangLaporanBesar(t *testing.T) {
 	}
 }
 
-// TestSignedBerkasPemilik memverifikasi matrix akses berkas privat.
 func TestSignedBerkasPemilik(t *testing.T) {
 	m := &mocks.LaporanBesarRepository{}
 	uc := &LaporanBesarUsecase{repo: m}

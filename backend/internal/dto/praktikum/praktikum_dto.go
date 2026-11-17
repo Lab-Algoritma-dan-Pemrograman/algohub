@@ -1,6 +1,5 @@
 package dto
 
-// CourseUserItem: status course untuk seorang mahasiswa dalam aktivasi.
 type CourseUserItem struct {
 	CourseID         int      `json:"course_id"`
 	AktivasiCourseID int      `json:"aktivasi_course_id"`
@@ -12,7 +11,6 @@ type CourseUserItem struct {
 	TotalNilai       *float64 `json:"total_nilai"`
 }
 
-// SesiUserItem: satu sesi dari sudut pandang mahasiswa.
 type SesiUserItem struct {
 	SesiID         int              `json:"sesi_id"`
 	Judul          string           `json:"judul"`
@@ -25,7 +23,6 @@ type SesiUserItem struct {
 	Courses        []CourseUserItem `json:"courses"`
 }
 
-// DashboardUserResponse: data dashboard mahasiswa.
 type DashboardUserResponse struct {
 	Profil       UserResponse      `json:"profil"`
 	Jadwal       *JadwalInfo       `json:"jadwal"`
@@ -33,7 +30,6 @@ type DashboardUserResponse struct {
 	RiwayatNilai []NilaiCourseItem `json:"riwayat_nilai"`
 }
 
-// JadwalInfo: jadwal ringkas mahasiswa.
 type JadwalInfo struct {
 	Hari       string `json:"hari"`
 	JamMulai   string `json:"jam_mulai"`
@@ -41,7 +37,6 @@ type JadwalInfo struct {
 	Keterangan string `json:"keterangan"`
 }
 
-// NilaiCourseItem: nilai mahasiswa per course yang sudah dinilai.
 type NilaiCourseItem struct {
 	SesiJudul  string   `json:"sesi_judul"`
 	Jenis      string   `json:"jenis"`
@@ -49,14 +44,12 @@ type NilaiCourseItem struct {
 	TotalNilai *float64 `json:"total_nilai"`
 }
 
-// RunRequest: jalankan kode (C/Python) lewat sandbox eksternal.
 type RunRequest struct {
 	Language string `json:"language" binding:"required,oneof=c python"`
 	Source   string `json:"source" binding:"required"`
 	Stdin    string `json:"stdin"`
 }
 
-// RunResponse: hasil eksekusi kode.
 type RunResponse struct {
 	Stdout string `json:"stdout"`
 	Stderr string `json:"stderr"`

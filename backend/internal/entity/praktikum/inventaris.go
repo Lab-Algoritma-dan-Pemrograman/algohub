@@ -2,7 +2,6 @@ package entity
 
 import "time"
 
-// Inventaris barang lab.
 type Inventaris struct {
 	ID             int       `gorm:"primaryKey;autoIncrement" json:"id"`
 	Kode           string    `gorm:"type:varchar(50);not null;unique" json:"kode"`

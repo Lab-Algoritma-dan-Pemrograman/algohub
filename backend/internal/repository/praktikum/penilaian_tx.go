@@ -12,7 +12,6 @@ type PenilaianTxRepo struct{ db *gorm.DB }
 
 func NewPenilaianTxRepo(db *gorm.DB) *PenilaianTxRepo { return &PenilaianTxRepo{db: db} }
 
-// PengerjaanKey mengidentifikasi satu unit pengerjaan (mahasiswa+aktivasi+course).
 type PengerjaanKey struct {
 	MahasiswaID    int
 	AktivasiSesiID int
@@ -146,8 +145,6 @@ func recalcKeysTx(tx *gorm.DB, keys []PengerjaanKey) error {
 	return nil
 }
 
-// recalcTotalTx menghitung ulang total_nilai (SUM nilai jawaban) untuk satu
-// pengerjaan_course dan mengupsert nilainya, dalam transaksi tx.
 func recalcTotalTx(tx *gorm.DB, key PengerjaanKey) error {
 	var stIDs []int
 	if err := tx.Model(&entity.SoalTerpilih{}).
@@ -190,7 +187,6 @@ func recalcTotalTx(tx *gorm.DB, key PengerjaanKey) error {
 		}
 	}
 
-	// Upsert total ke pengerjaan_course (update jika ada, create jika belum).
 	res := tx.Model(&entity.PengerjaanCourse{}).
 		Where("mahasiswa_id = ? AND aktivasi_sesi_id = ? AND course_id = ?",
 			key.MahasiswaID, key.AktivasiSesiID, key.CourseID).

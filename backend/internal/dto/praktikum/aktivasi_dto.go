@@ -1,6 +1,5 @@
 package dto
 
-// AktivasiRequest: aktifkan sesi untuk kelas + shift, sekaligus gacha pretest/posttest.
 type AktivasiRequest struct {
 	SesiPraktikumID int `json:"sesi_praktikum_id" binding:"required"`
 	KelasID         int `json:"kelas_id" binding:"required"`

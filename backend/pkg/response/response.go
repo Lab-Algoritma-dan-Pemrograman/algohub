@@ -10,12 +10,10 @@ type Envelope struct {
 	Error   interface{} `json:"error,omitempty"`
 }
 
-// OK mengirim response sukses.
 func OK(c *gin.Context, status int, message string, data interface{}) {
 	c.JSON(status, Envelope{Success: true, Message: message, Data: data})
 }
 
-// Created mengirim response 201.
 func Created(c *gin.Context, message string, data interface{}) {
 	OK(c, 201, message, data)
 }

@@ -30,7 +30,6 @@ func (uc *ProfileUsecase) Get(userID int) (*entity.User, error) {
 	return u, nil
 }
 
-// Update memperbarui profil (nama, kontak, foto, medsos), email, dan opsional ganti password.
 func (uc *ProfileUsecase) Update(userID int, req dto.UpdateProfileRequest) (*entity.User, error) {
 	u, err := uc.users.FindByID(userID)
 	if err != nil {
@@ -49,7 +48,6 @@ func (uc *ProfileUsecase) Update(userID int, req dto.UpdateProfileRequest) (*ent
 		u.FotoURL = req.FotoURL
 	}
 	if req.PasswordBaru != nil && *req.PasswordBaru != "" {
-		// Verifikasi password lama jika user sudah punya hash.
 		if u.PasswordHash != nil {
 			if req.PasswordLama == nil || !hash.Verify(*u.PasswordHash, *req.PasswordLama) {
 				return nil, ErrUnauthorized

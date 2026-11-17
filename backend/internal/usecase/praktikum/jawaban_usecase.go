@@ -50,7 +50,6 @@ func (uc *JawabanUsecase) cekAkses(user *entity.User, aktivasi *entity.AktivasiS
 	return uc.aktivasi.IsSusulan(aktivasi.ID, user.ID)
 }
 
-// loadKonteks mengambil user, aktivasi, aktivasi_course, dan course.
 func (uc *JawabanUsecase) loadKonteks(userID, aktivasiSesiID, courseID int) (*entity.User, *entity.AktivasiSesi, *entity.AktivasiCourse, *entity.Course, error) {
 	user, err := uc.users.FindByID(userID)
 	if err != nil {
@@ -102,7 +101,6 @@ func effectiveDeadline(ac *entity.AktivasiCourse, waktuMulai *time.Time, isSusul
 	return deadlineFrom(ac.StartedAt, durasiMenit)
 }
 
-// GetRuang mengembalikan data ruang pengerjaan (soal + jawaban tersimpan + timer).
 // Read-only: tidak memulai timer.
 func (uc *JawabanUsecase) GetRuang(userID, aktivasiSesiID, courseID int) (*dto.RuangCourseResponse, error) {
 	_, aktivasi, ac, course, err := uc.loadKonteks(userID, aktivasiSesiID, courseID)
@@ -131,7 +129,6 @@ func (uc *JawabanUsecase) Mulai(userID int, req dto.MulaiCourseRequest) (*dto.Ru
 		}
 	}
 
-	// Validasi Token hanya jika jenis course adalah ujian
 	if course.Jenis == entity.CourseUjianPraktik {
 		if aktivasi.Token != nil {
 			if req.Token == nil || *req.Token != *aktivasi.Token {
@@ -212,7 +209,6 @@ func (uc *JawabanUsecase) AutoSave(userID int, req dto.AutoSaveRequest) error {
 		return ErrTimeUp
 	}
 
-	// Upsert jawaban.
 	j, err := uc.jawaban.FindByMahasiswaSoal(userID, st.ID)
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -242,7 +238,6 @@ func (uc *JawabanUsecase) Submit(userID int, req dto.SubmitRequest) error {
 	return uc.finalize(userID, req.AktivasiSesiID, req.CourseID)
 }
 
-// finalize menandai semua jawaban mahasiswa submitted & pengerjaan selesai.
 func (uc *JawabanUsecase) finalize(userID, aktivasiSesiID, courseID int) error {
 	if _, err := uc.jawaban.MarkSubmittedForMahasiswaCourse(userID, aktivasiSesiID, courseID); err != nil {
 		return err

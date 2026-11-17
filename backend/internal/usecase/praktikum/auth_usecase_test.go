@@ -1,7 +1,6 @@
 package usecase_test
 
 import (
-	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -440,5 +439,3 @@ func TestRegister_Supabase_MenyimpanPasswordHashLokal(t *testing.T) {
 	assert.NotEmpty(t, resp.Token)
 	mockUserRepo.AssertExpectations(t)
 }
-
-var _ = errors.New // jaga import errors jika suite dikembangkan

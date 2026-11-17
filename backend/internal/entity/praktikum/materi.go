@@ -18,7 +18,6 @@ type Level struct {
 
 func (Level) TableName() string { return "level" }
 
-// Modul di dalam satu level (mis. "c-level-1-m1").
 type Modul struct {
 	ID      string `gorm:"type:varchar(64);primaryKey" json:"id"`
 	LevelID string `gorm:"type:varchar(64);not null" json:"level_id"`

@@ -2,7 +2,6 @@ package entity
 
 import "time"
 
-// StatusPengumpulanLaporan: status akhir pengumpulan laporan besar per mahasiswa.
 type StatusPengumpulanLaporan string
 
 const (
@@ -10,7 +9,6 @@ const (
 	LaporanTerkumpul StatusPengumpulanLaporan = "terkumpul"
 )
 
-// SumberPengumpulanLaporan: asal pengumpulan berkas.
 type SumberPengumpulanLaporan string
 
 const (

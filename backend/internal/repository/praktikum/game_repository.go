@@ -8,7 +8,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// BarisPeringkat satu baris papan peringkat (hasil join users + profil_belajar).
 type BarisPeringkat struct {
 	UserID  int    `json:"user_id"`
 	NIM     string `json:"nim"`
@@ -20,7 +19,6 @@ type BarisPeringkat struct {
 	Streak  int    `json:"streak"`
 }
 
-// BarisSesiAktif satu baris monitoring (join sesi_aktif + users + kelas).
 type BarisSesiAktif struct {
 	UserID        int       `json:"user_id"`
 	NIM           string    `json:"nim"`

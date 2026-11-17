@@ -72,7 +72,6 @@ func (uc *UserUsecase) BulkUpsertMahasiswa(req *dto.UserBulkRequest) (*dto.BulkR
 	}, nil
 }
 
-// BulkAttrsMahasiswa mengubah atribut massal (gelombang/shift/kelas/kelompok) by NIM.
 func (uc *UserUsecase) BulkAttrsMahasiswa(req *dto.UserBulkAttrsRequest) (*dto.BulkResponse, error) {
 	attrs := map[string]any{}
 	if req.Gelombang != nil {

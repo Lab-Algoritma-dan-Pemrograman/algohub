@@ -1,6 +1,5 @@
 package dto
 
-// RekapKolom merepresentasikan kolom dinamis dari hasil pivot (misal "course_1").
 type RekapKolom struct {
 	Key   string `json:"key"`   // identifier unik course, misal "course_1"
 	Label string `json:"label"` // label human-readable, misal "Modul 1 - Pre-test"
@@ -16,7 +15,6 @@ type RekapSel struct {
 	NilaiAkhir    *float64 `json:"nilai_akhir"`    // konversi 0-100 (murni/max*100), khusus ujian praktik
 }
 
-// RekapMahasiswa merepresentasikan baris pada tabel pivot.
 type RekapMahasiswa struct {
 	NIM        string              `json:"nim"`
 	Nama       string              `json:"nama"`

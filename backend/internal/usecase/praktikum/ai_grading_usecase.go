@@ -44,7 +44,6 @@ func (uc *aiGradingUsecase) ListTargets(aktivasiSesiID, courseID int) (*dto.AIGr
 	return &dto.AIGradeTargetsResponse{JawabanIDs: ids, Total: len(ids)}, nil
 }
 
-// GradeOne menilai SATU jawaban dengan AI lalu menyimpannya (sinkron).
 func (uc *aiGradingUsecase) GradeOne(jawabanID int) (*dto.AIGradeOneResponse, error) {
 	j, err := uc.jawabanRepo.FindByID(jawabanID)
 	if err != nil {

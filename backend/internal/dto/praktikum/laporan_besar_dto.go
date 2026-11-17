@@ -2,7 +2,6 @@ package dto
 
 import "time"
 
-// LaporanBesarRequest: buat/ubah tugas laporan besar.
 type LaporanBesarRequest struct {
 	Judul        string `json:"judul" binding:"omitempty,max=200"`
 	Deskripsi    string `json:"deskripsi"`
@@ -25,7 +24,6 @@ type SetTargetRequest struct {
 	Targets []LaporanBesarTargetRequest `json:"targets" binding:"required,dive"`
 }
 
-// UploadURLRequest: minta signed URL unggah berkas laporan besar.
 type UploadURLRequest struct {
 	Jenis string `json:"jenis" binding:"required,oneof=laporan analisa"`
 	Ext   string `json:"ext" binding:"required,oneof=pdf docx"`
@@ -37,7 +35,6 @@ type UploadURLResponse struct {
 	Path      string `json:"path"`
 }
 
-// KumpulRequest: mahasiswa menandai berkas laporan besar sudah diunggah.
 type KumpulRequest struct {
 	LaporanPath *string `json:"laporan_path"`
 	AnalisaPath *string `json:"analisa_path"`
@@ -64,7 +61,6 @@ type DownloadBatchItem struct {
 	Jenis string `json:"jenis" binding:"required,oneof=laporan analisa"`
 }
 
-// DownloadBatchResult: satu entri hasil signed URL.
 type DownloadBatchResult struct {
 	MhsID    int    `json:"mhs_id"`
 	Jenis    string `json:"jenis"`
@@ -72,7 +68,6 @@ type DownloadBatchResult struct {
 	URL      string `json:"url"`
 }
 
-// LaporanBesarStatusResponse: status laporan besar milik mahasiswa.
 type LaporanBesarStatusResponse struct {
 	LaporanBesarID int    `json:"laporan_besar_id"`
 	Judul          string `json:"judul"`
@@ -102,7 +97,6 @@ type LaporanBesarStatusResponse struct {
 	OverrideAlasan *string    `json:"override_alasan"`
 }
 
-// PengumpulanRow: satu baris mahasiswa pada rekap pengumpulan admin.
 type PengumpulanRow struct {
 	MahasiswaID int     `json:"mahasiswa_id"`
 	NIM         string  `json:"nim"`

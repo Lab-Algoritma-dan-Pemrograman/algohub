@@ -13,12 +13,10 @@ type KeaktifanItem struct {
 	Nilai        float64 `json:"nilai" binding:"min=0,max=100"`
 }
 
-// KeaktifanRequest: input keaktifan massal dari Rekap Nilai.
 type KeaktifanRequest struct {
 	Items []KeaktifanItem `json:"items" binding:"required,dive"`
 }
 
-// RekapItem: satu baris rekap jawaban mahasiswa per soal.
 type RekapItem struct {
 	JawabanID      int      `json:"jawaban_id"`
 	MahasiswaID    int      `json:"mahasiswa_id"`
@@ -36,7 +34,6 @@ type RekapItem struct {
 	Feedback       *string  `json:"feedback"`
 }
 
-// RekapResponse: rekap jawaban satu aktivasi+course.
 type RekapResponse struct {
 	AktivasiSesiID int         `json:"aktivasi_sesi_id"`
 	CourseID       int         `json:"course_id"`
@@ -48,14 +45,12 @@ type AIGradeOneRequest struct {
 	JawabanID int `json:"jawaban_id" binding:"required"`
 }
 
-// AIGradeOneResponse: hasil penilaian AI untuk satu jawaban.
 type AIGradeOneResponse struct {
 	JawabanID int     `json:"jawaban_id"`
 	Nilai     float64 `json:"nilai"`
 	Feedback  string  `json:"feedback"`
 }
 
-// AIGradeTargetsResponse: daftar jawaban_id yang perlu dinilai AI untuk satu course.
 type AIGradeTargetsResponse struct {
 	JawabanIDs []int `json:"jawaban_ids"`
 	Total      int   `json:"total"`

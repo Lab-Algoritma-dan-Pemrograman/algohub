@@ -115,7 +115,6 @@ func (uc *BelajarUsecase) DeleteMateri(id string) error {
 	return mapDeleteErr(uc.repo.DeleteMateri(id))
 }
 
-// ProgresSaya mengembalikan progres + profil xp/level milik user sendiri.
 func (uc *BelajarUsecase) ProgresSaya(userID int) (*dto.ProgresSayaResponse, error) {
 	progres, err := uc.repo.ListProgres(userID)
 	if err != nil {
@@ -226,7 +225,6 @@ func (uc *BelajarUsecase) syaratTerpenuhi(
 	}
 }
 
-// levelTuntas: level dianggap tuntas bila semua materinya sudah selesai.
 func (uc *BelajarUsecase) levelTuntas(userID int) map[string]bool {
 	out := map[string]bool{}
 	levels, err := uc.repo.ListLevel()
@@ -268,7 +266,6 @@ func (uc *BelajarUsecase) levelTuntas(userID int) map[string]bool {
 	return out
 }
 
-// ResetProgres menghapus progres belajar seorang mahasiswa.
 // levelID kosong = seluruh level. XP dihitung ulang dari materi yang tersisa,
 // bukan dikurangi angka tetap, supaya tidak pernah meleset.
 func (uc *BelajarUsecase) ResetProgres(userID int, levelID string) error {
@@ -291,7 +288,6 @@ func (uc *BelajarUsecase) ResetProgres(userID int, levelID string) error {
 	return uc.hitungUlangXP(userID)
 }
 
-// SetXP menetapkan XP secara manual (untuk koreksi asisten).
 func (uc *BelajarUsecase) SetXP(userID, xp int) error {
 	if xp < 0 {
 		xp = 0
@@ -342,8 +338,6 @@ func (uc *BelajarUsecase) hitungUlangXP(userID int) error {
 	return uc.repo.SimpanProfil(profil)
 }
 
-// SesiBelajar menyiapkan seluruh data awal sesi elearning dalam satu panggilan:
-// identitas, profil belajar, dan materi yang sudah selesai.
 func (uc *BelajarUsecase) SesiBelajar(userID int) (*dto.SesiBelajarResponse, error) {
 	b, err := uc.repo.SesiBelajar(userID)
 	if err != nil {
@@ -376,7 +370,6 @@ func (uc *BelajarUsecase) SesiBelajar(userID int) (*dto.SesiBelajarResponse, err
 	}, nil
 }
 
-// ListUserBelajar daftar mahasiswa beserta profil belajarnya (layar admin).
 func (uc *BelajarUsecase) ListUserBelajar() ([]dto.SesiBelajarResponse, error) {
 	rows, err := uc.repo.ListUserBelajar()
 	if err != nil {
@@ -401,7 +394,6 @@ func (uc *BelajarUsecase) ListUserBelajar() ([]dto.SesiBelajarResponse, error) {
 	return out, nil
 }
 
-// ProgresUser progres belajar milik mahasiswa tertentu (layar admin).
 func (uc *BelajarUsecase) ProgresUser(userID int) ([]entity.ProgresBelajar, error) {
 	return uc.repo.ListProgres(userID)
 }
@@ -422,7 +414,6 @@ func (uc *BelajarUsecase) SetAksesLevel(userID int, akses map[string]string) err
 	return uc.repo.SetAksesLevel(userID, b)
 }
 
-// SimpanKurikulum menyimpan seluruh struktur kurikulum sekaligus.
 // Urutan level/modul/materi diambil dari urutan dalam permintaan.
 func (uc *BelajarUsecase) SimpanKurikulum(req dto.SimpanKurikulumRequest) error {
 	var levels []entity.Level
@@ -460,7 +451,6 @@ func (uc *BelajarUsecase) SimpanKurikulum(req dto.SimpanKurikulumRequest) error 
 	return uc.repo.SimpanKurikulum(levels, moduls, materi)
 }
 
-// KosongkanKurikulum menghapus seluruh kurikulum beserta progres yang menempel.
 func (uc *BelajarUsecase) KosongkanKurikulum() error {
 	return uc.repo.KosongkanKurikulum()
 }

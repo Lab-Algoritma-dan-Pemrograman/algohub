@@ -31,7 +31,6 @@ func (r *konfigurasiRepository) Get(key string) (*entity.Konfigurasi, error) {
 	return &k, nil
 }
 
-// Set melakukan upsert berdasarkan key.
 func (r *konfigurasiRepository) Set(key, value string) error {
 	k := entity.Konfigurasi{Key: key, Value: value, UpdatedAt: time.Now()}
 	return r.db.Clauses(clause.OnConflict{

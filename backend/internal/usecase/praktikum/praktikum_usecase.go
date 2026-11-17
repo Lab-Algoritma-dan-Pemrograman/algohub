@@ -8,7 +8,6 @@ import (
 	repository "github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/repository/praktikum"
 )
 
-// PraktikumUsecase melayani sisi mahasiswa: dashboard + daftar sesi.
 type PraktikumUsecase struct {
 	sesi       repository.SesiRepository
 	course     repository.CourseRepository
@@ -38,7 +37,6 @@ func isKelasKaryawan(user *entity.User) bool {
 		(user.Kelas.NamaKelas == "TE AD" || user.Kelas.NamaKelas == "TE AE")
 }
 
-// ListSesi mengembalikan seluruh sesi dari sudut pandang mahasiswa (aktif/terkunci).
 func (uc *PraktikumUsecase) ListSesi(userID int) ([]dto.SesiUserItem, error) {
 	user, err := uc.users.FindByID(userID)
 	if err != nil {
@@ -67,7 +65,6 @@ func (uc *PraktikumUsecase) ListSesi(userID int) ([]dto.SesiUserItem, error) {
 		}
 	}
 
-	// Susulan: aktivasi di kelas/shift lain.
 	susulanAktivasiBySesi := map[int]*entity.AktivasiSesi{}
 	if sus, err := uc.aktivasi.ListSusulanByMahasiswa(userID); err == nil {
 		for _, ps := range sus {

@@ -63,7 +63,6 @@ func (uc *PenilaianUsecase) SetKeaktifanBulk(items []dto.KeaktifanItem) error {
 	return nil
 }
 
-// Rekap mengembalikan rekap jawaban semua mahasiswa untuk satu aktivasi+course.
 func (uc *PenilaianUsecase) Rekap(aktivasiSesiID, courseID int) (*dto.RekapResponse, error) {
 	jawaban, err := uc.jawaban.ListRekap(aktivasiSesiID, courseID)
 	if err != nil {
@@ -106,7 +105,6 @@ func (uc *PenilaianUsecase) Rekap(aktivasiSesiID, courseID int) (*dto.RekapRespo
 // menarik seluruh tabel (hemat kuota read). Pencarian by nama/NIM tetap full.
 const rekapDefaultLimit = 100
 
-// GetRekapJawabanGlobal mengembalikan rekap jawaban secara flat untuk dashboard
 func (uc *PenilaianUsecase) GetRekapJawabanGlobal(kelasID, sesiID int, search, jenis string) (*dto.RekapJawabanResponse, error) {
 	limit := rekapDefaultLimit
 	if search != "" {

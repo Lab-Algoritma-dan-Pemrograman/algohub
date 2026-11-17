@@ -2,7 +2,6 @@ package entity
 
 import "time"
 
-// AktivasiSesi: admin mengaktifkan sesi untuk kelas + shift tertentu.
 type AktivasiSesi struct {
 	ID              int       `gorm:"primaryKey;autoIncrement" json:"id"`
 	SesiPraktikumID int       `gorm:"not null;uniqueIndex:idx_aktivasi_sesi_kelas_shift" json:"sesi_praktikum_id"`

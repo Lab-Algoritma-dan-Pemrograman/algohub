@@ -2,7 +2,6 @@ package entity
 
 import "time"
 
-// SesiPraktikum: satu modul/pertemuan (mis. "Modul 1 - Pengenalan Dasar Bahasa C").
 type SesiPraktikum struct {
 	ID             int       `gorm:"primaryKey;autoIncrement" json:"id"`
 	JudulSesi      string    `gorm:"type:varchar(200);not null" json:"judul_sesi"`

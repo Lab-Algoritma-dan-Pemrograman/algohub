@@ -135,7 +135,6 @@ func (uc *LaporanBesarUsecase) Delete(id int) error {
 	return uc.repo.Delete(id)
 }
 
-// GetDetail: detail laporan + seluruh target kelas.
 func (uc *LaporanBesarUsecase) GetDetail(id int) (*entity.LaporanBesar, []entity.LaporanBesarTarget, error) {
 	l, err := uc.repo.FindByID(id)
 	if err != nil {
@@ -177,7 +176,6 @@ func (uc *LaporanBesarUsecase) SetTargets(laporanID int, req dto.SetTargetReques
 	return uc.repo.ListTarget(laporanID)
 }
 
-// StatusSaya mengembalikan status laporan besar mahasiswa + window kelasnya.
 func (uc *LaporanBesarUsecase) StatusSaya(userID int) (*dto.LaporanBesarStatusResponse, error) {
 	user, err := uc.users.FindByID(userID)
 	if err != nil {
@@ -212,7 +210,6 @@ func (uc *LaporanBesarUsecase) StatusSaya(userID int) (*dto.LaporanBesarStatusRe
 		}
 	}
 
-	// Baris pengumpulan (bila sudah pernah ada).
 	if p, err := uc.repo.FindPengumpulan(l.ID, userID); err == nil {
 		resp.Status = p.Status
 		resp.Sumber = p.Sumber
@@ -226,7 +223,6 @@ func (uc *LaporanBesarUsecase) StatusSaya(userID int) (*dto.LaporanBesarStatusRe
 	return resp, nil
 }
 
-// UploadURL membuat signed upload URL + path unik untuk berkas mahasiswa.
 func (uc *LaporanBesarUsecase) UploadURL(userID int, req dto.UploadURLRequest) (*dto.UploadURLResponse, error) {
 	if !uc.sb.Enabled() {
 		return nil, fmt.Errorf("%w: penyimpanan berkas belum dikonfigurasi", ErrConflict)
@@ -298,7 +294,6 @@ func (uc *LaporanBesarUsecase) Kumpul(userID int, req dto.KumpulRequest) (*entit
 		return nil, fmt.Errorf("%w: waktu pengumpulan laporan besar telah ditutup", ErrForbidden)
 	}
 
-	// Validasi berkas wajib sesuai konfigurasi laporan.
 	laporanPath := trimPtr(req.LaporanPath)
 	analisaPath := trimPtr(req.AnalisaPath)
 	if l.ButuhLaporan && laporanPath == nil {
@@ -403,7 +398,6 @@ func (uc *LaporanBesarUsecase) BatalkanKumpul(userID int) error {
 	return uc.repo.UpsertPengumpulan(p)
 }
 
-// ListPengumpulan: daftar seluruh mahasiswa dari kelas yang ditarget + status + jejak.
 func (uc *LaporanBesarUsecase) ListPengumpulan(laporanID int) ([]dto.PengumpulanRow, error) {
 	if _, err := uc.repo.FindByID(laporanID); err != nil {
 		return nil, ErrNotFound
@@ -473,7 +467,6 @@ func (uc *LaporanBesarUsecase) Mark(laporanID, mhsID, olehID int, req *dto.MarkR
 	}
 	p, err := uc.repo.FindPengumpulan(laporanID, mhsID)
 	if err != nil {
-		// Buat baris lazy.
 		p = &entity.PengumpulanLaporanBesar{
 			LaporanBesarID: laporanID,
 			MahasiswaID:    mhsID,
@@ -541,7 +534,6 @@ func (uc *LaporanBesarUsecase) SetOverride(laporanID, mhsID, olehID int, req *dt
 	return p, nil
 }
 
-// RevokeOverride: cabut override (set NULL).
 func (uc *LaporanBesarUsecase) RevokeOverride(laporanID, mhsID int) (*entity.PengumpulanLaporanBesar, error) {
 	p, err := uc.repo.FindPengumpulan(laporanID, mhsID)
 	if err != nil {
@@ -681,7 +673,6 @@ func trimPtr(s *string) *string {
 	return &t
 }
 
-// namaUnduhan menyusun nama berkas unduhan yang ramah (jenis + ekstensi asli).
 func namaUnduhan(mhsID int, jenis, objPath string) string {
 	ext := path.Ext(objPath)
 	if ext == "" {

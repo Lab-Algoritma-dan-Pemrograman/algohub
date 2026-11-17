@@ -7,7 +7,6 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-// Claims adalah payload JWT untuk autentikasi.
 type Claims struct {
 	UserID int    `json:"uid"`
 	NIM    string `json:"nim"`
@@ -15,7 +14,6 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-// Manager mengelola pembuatan & verifikasi token.
 type Manager struct {
 	secret      []byte
 	expireHours int
@@ -25,7 +23,6 @@ func NewManager(secret string, expireHours int) *Manager {
 	return &Manager{secret: []byte(secret), expireHours: expireHours}
 }
 
-// Generate membuat token JWT bertanda tangan.
 func (m *Manager) Generate(userID int, nim, role string) (string, error) {
 	now := time.Now()
 	claims := Claims{
@@ -41,7 +38,6 @@ func (m *Manager) Generate(userID int, nim, role string) (string, error) {
 	return token.SignedString(m.secret)
 }
 
-// Verify memvalidasi token dan mengembalikan claims.
 func (m *Manager) Verify(tokenStr string) (*Claims, error) {
 	claims := &Claims{}
 	token, err := jwt.ParseWithClaims(tokenStr, claims, func(t *jwt.Token) (interface{}, error) {

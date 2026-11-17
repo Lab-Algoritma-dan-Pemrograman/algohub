@@ -63,7 +63,6 @@ func (c *Client) Upload(path string, content []byte, contentType string, upsert 
 	return c.PublicURL(path), nil
 }
 
-// PublicURL membangun URL publik untuk objek pada bucket public.
 func (c *Client) PublicURL(path string) string {
 	path = strings.TrimLeft(path, "/")
 	return fmt.Sprintf("%s/storage/v1/object/public/%s/%s", c.baseURL, c.bucket, path)
@@ -153,7 +152,6 @@ func (c *Client) SignedDownloadURL(path string, ttl time.Duration, downloadName 
 	return full, nil
 }
 
-// Delete menghapus objek dari bucket.
 func (c *Client) Delete(path string) error {
 	if !c.Enabled() {
 		return fmt.Errorf("supabase belum dikonfigurasi")

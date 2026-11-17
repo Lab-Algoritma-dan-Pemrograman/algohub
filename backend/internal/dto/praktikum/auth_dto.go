@@ -1,11 +1,9 @@
 package dto
 
-// CekNIMRequest: langkah pertama login (cek status NIM).
 type CekNIMRequest struct {
 	NIM string `json:"nim" binding:"required"`
 }
 
-// CekNIMResponse: status NIM untuk menentukan alur (login / register / ditolak).
 type CekNIMResponse struct {
 	NIM          string `json:"nim"`
 	Ditemukan    bool   `json:"ditemukan"`
@@ -14,7 +12,6 @@ type CekNIMResponse struct {
 	Pesan        string `json:"pesan"`
 }
 
-// LoginRequest: login via NIM atau Email + password.
 type LoginRequest struct {
 	Identifier string `json:"identifier" binding:"required"`
 	Password   string `json:"password" binding:"required"`
@@ -52,7 +49,6 @@ type ResetPasswordViaOTPRequest struct {
 	Password string `json:"password" binding:"required,min=6"`
 }
 
-// AuthResponse: hasil login/register berhasil.
 type AuthResponse struct {
 	Token string       `json:"token"`
 	User  UserResponse `json:"user"`

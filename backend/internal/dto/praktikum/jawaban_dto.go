@@ -2,13 +2,11 @@ package dto
 
 import "time"
 
-// AutoSaveRequest: simpan jawaban berkala (per soal).
 type AutoSaveRequest struct {
 	SoalTerpilihID int    `json:"soal_terpilih_id" binding:"required"`
 	JawabanTeks    string `json:"jawaban_teks"`
 }
 
-// SubmitRequest: submit manual seluruh course.
 type SubmitRequest struct {
 	AktivasiSesiID int `json:"aktivasi_sesi_id" binding:"required"`
 	CourseID       int `json:"course_id" binding:"required"`
@@ -34,7 +32,6 @@ type SoalTampilResponse struct {
 	IsSubmitted    bool    `json:"is_submitted"`
 }
 
-// RuangCourseResponse: data lengkap ruang pengerjaan course.
 type RuangCourseResponse struct {
 	AktivasiSesiID int                  `json:"aktivasi_sesi_id"`
 	CourseID       int                  `json:"course_id"`

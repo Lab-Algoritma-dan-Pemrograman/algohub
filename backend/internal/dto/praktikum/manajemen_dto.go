@@ -1,6 +1,5 @@
 package dto
 
-// UserRequest: tambah/ubah data mahasiswa oleh admin.
 type UserRequest struct {
 	NIM       string  `json:"nim" binding:"required"`
 	Nama      string  `json:"nama" binding:"required"`
@@ -10,7 +9,6 @@ type UserRequest struct {
 	Kelompok  *string `json:"kelompok"`
 }
 
-// UserBulkRequest: payload untuk import mahasiswa secara masal via CSV (Frontend JSON).
 type UserBulkRequest struct {
 	Users []UserRequest `json:"users" binding:"required,dive"`
 }
@@ -27,7 +25,6 @@ type UserBulkAttrsRequest struct {
 	Kelompok         *string  `json:"kelompok"`
 }
 
-// BulkResponse: hasil dari operasi import/upsert masal.
 type BulkResponse struct {
 	TotalProcessed int `json:"total_processed"`
 	TotalInserted  int `json:"total_inserted"`

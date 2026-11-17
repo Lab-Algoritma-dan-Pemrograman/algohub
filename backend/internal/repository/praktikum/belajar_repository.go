@@ -9,7 +9,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// BelajarRepository melayani kurikulum elearning: level, modul, materi, progres.
 type BelajarRepository interface {
 	ListLevel() ([]entity.Level, error)
 	ListModul(levelID string) ([]entity.Modul, error)
@@ -50,7 +49,6 @@ type BelajarRepository interface {
 	SimpanProfil(p *entity.ProfilBelajar) error
 }
 
-// BarisSesiBelajar hasil join users + kelas + profil_belajar.
 type BarisSesiBelajar struct {
 	UserID     int    `json:"user_id"`
 	NIM        string `json:"nim"`
@@ -150,7 +148,6 @@ func (r *belajarRepository) HitungMateriSelesai(userID int) (int64, error) {
 	return n, err
 }
 
-// HapusProgres menghapus progres untuk materi tertentu, kembalikan jumlah baris terhapus.
 func (r *belajarRepository) HapusProgres(userID int, materiIDs []string) (int64, error) {
 	if len(materiIDs) == 0 {
 		return 0, nil
@@ -194,7 +191,6 @@ func (r *belajarRepository) SesiBelajar(userID int) (*BarisSesiBelajar, error) {
 }
 
 // SimpanKurikulum menulis level, modul, dan materi dalam satu transaksi.
-// Dipakai layar admin saat menyimpan struktur kurikulum sekaligus.
 func (r *belajarRepository) SimpanKurikulum(levels []entity.Level, moduls []entity.Modul, materi []entity.Materi) error {
 	return r.db.Transaction(func(tx *gorm.DB) error {
 		for i := range levels {
@@ -230,7 +226,6 @@ func (r *belajarRepository) KosongkanKurikulum() error {
 	})
 }
 
-// ListUserBelajar daftar mahasiswa + profil belajar untuk layar admin.
 func (r *belajarRepository) ListUserBelajar() ([]BarisSesiBelajar, error) {
 	var out []BarisSesiBelajar
 	err := r.db.Table("users u").
@@ -246,7 +241,6 @@ func (r *belajarRepository) ListUserBelajar() ([]BarisSesiBelajar, error) {
 	return out, err
 }
 
-// SetAksesLevel menyetel buka/tutup level per mahasiswa.
 func (r *belajarRepository) SetAksesLevel(userID int, akses []byte) error {
 	if err := r.db.Exec(`
 		insert into profil_belajar (user_id) values (?)
@@ -259,7 +253,6 @@ func (r *belajarRepository) SetAksesLevel(userID int, akses []byte) error {
 		Update("akses_level", datatypes.JSON(akses)).Error
 }
 
-// TotalXPMateriSelesai menjumlahkan xp_hadiah dari materi yang sudah selesai.
 func (r *belajarRepository) TotalXPMateriSelesai(userID int) (int, error) {
 	var total *int
 	err := r.db.Table("progres_belajar pb").
@@ -273,7 +266,6 @@ func (r *belajarRepository) TotalXPMateriSelesai(userID int) (int, error) {
 	return *total, nil
 }
 
-// TotalXPGame menjumlahkan XP dari seluruh riwayat main.
 func (r *belajarRepository) TotalXPGame(userID int) (int, error) {
 	var total *int
 	err := r.db.Table("game_riwayat").Select("sum(xp_didapat)").

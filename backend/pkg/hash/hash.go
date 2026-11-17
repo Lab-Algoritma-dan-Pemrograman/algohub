@@ -11,7 +11,6 @@ func Password(plain string) (string, error) {
 	return string(b), nil
 }
 
-// Verify membandingkan password plaintext dengan hash tersimpan.
 func Verify(hashed, plain string) bool {
 	return bcrypt.CompareHashAndPassword([]byte(hashed), []byte(plain)) == nil
 }

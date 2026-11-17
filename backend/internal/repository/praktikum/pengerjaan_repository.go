@@ -40,7 +40,6 @@ type PengerjaanRepository interface {
 	ListPesertaProgress(aktivasiSesiID int) ([]PesertaProgress, error)
 }
 
-// PesertaProgress: satu baris status pengerjaan peserta per course (untuk monitoring).
 type PesertaProgress struct {
 	MahasiswaID  int        `json:"mahasiswa_id"`
 	NIM          string     `json:"nim"`
@@ -52,7 +51,6 @@ type PesertaProgress struct {
 	WaktuSelesai *time.Time `json:"waktu_selesai"`
 }
 
-// ProgressSummary: ringkasan progress per course aktivasi.
 type ProgressSummary struct {
 	Selesai int64 `json:"selesai"`
 	Sedang  int64 `json:"sedang"`
@@ -135,8 +133,6 @@ func (r *pengerjaanRepository) MarkSelesaiForCourse(aktivasiSesiID, courseID int
 		Updates(map[string]interface{}{"status": entity.StatusSelesai, "waktu_selesai": gorm.Expr("NOW()")}).Error
 }
 
-// MarkSelesaiForMahasiswa: submit SATU peserta (per peserta). Hanya mengubah
-// baris pengerjaan peserta tsb; peserta lain tidak tersentuh.
 func (r *pengerjaanRepository) MarkSelesaiForMahasiswa(mahasiswaID, aktivasiSesiID, courseID int) error {
 	return r.db.Model(&entity.PengerjaanCourse{}).
 		Where("mahasiswa_id = ? AND aktivasi_sesi_id = ? AND course_id = ? AND status <> ?",
@@ -144,7 +140,6 @@ func (r *pengerjaanRepository) MarkSelesaiForMahasiswa(mahasiswaID, aktivasiSesi
 		Updates(map[string]interface{}{"status": entity.StatusSelesai, "waktu_selesai": gorm.Expr("NOW()")}).Error
 }
 
-// ResetForCourse melepas kunci seluruh peserta satu course (buka ulang ujian).
 func (r *pengerjaanRepository) ResetForCourse(aktivasiSesiID, courseID int) (int64, error) {
 	res := r.db.Model(&entity.PengerjaanCourse{}).
 		Where("aktivasi_sesi_id = ? AND course_id = ? AND status <> ?", aktivasiSesiID, courseID, entity.StatusBelum).
@@ -156,9 +151,6 @@ func (r *pengerjaanRepository) ResetForCourse(aktivasiSesiID, courseID int) (int
 	return res.RowsAffected, res.Error
 }
 
-// ResetForMahasiswa: lepas kunci SATU peserta (per peserta). status kembali
-// belum_dikerjakan, waktu_mulai/selesai dikosongkan. total_nilai/keaktifan
-// TIDAK diubah.
 func (r *pengerjaanRepository) ResetForMahasiswa(mahasiswaID, aktivasiSesiID, courseID int) (int64, error) {
 	res := r.db.Model(&entity.PengerjaanCourse{}).
 		Where("mahasiswa_id = ? AND aktivasi_sesi_id = ? AND course_id = ? AND status <> ?",

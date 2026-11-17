@@ -21,7 +21,6 @@ type ProfilBelajar struct {
 
 func (ProfilBelajar) TableName() string { return "profil_belajar" }
 
-// ProgresBelajar satu materi yang diselesaikan seorang user.
 type ProgresBelajar struct {
 	ID          int        `gorm:"primaryKey;autoIncrement" json:"id"`
 	UserID      int        `gorm:"not null" json:"user_id"`
@@ -45,7 +44,6 @@ type Pencapaian struct {
 
 func (Pencapaian) TableName() string { return "pencapaian" }
 
-// PencapaianTerbuka = pencapaian yang sudah diraih user.
 type PencapaianTerbuka struct {
 	ID           int       `gorm:"primaryKey;autoIncrement" json:"id"`
 	UserID       int       `gorm:"not null" json:"user_id"`
@@ -55,7 +53,6 @@ type PencapaianTerbuka struct {
 
 func (PencapaianTerbuka) TableName() string { return "pencapaian_terbuka" }
 
-// Syarat pencapaian yang sah.
 const (
 	SyaratXP           = "xp"
 	SyaratStreak       = "streak"

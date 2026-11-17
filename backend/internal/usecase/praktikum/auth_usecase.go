@@ -38,7 +38,6 @@ func punyaKredensial(u *entity.User) bool {
 	return u.PasswordHash != nil || u.FbPasswordHash != nil || u.SupabaseUserID != nil
 }
 
-// CekNIM menentukan alur first-time login (login / register / ditolak).
 func (uc *AuthUsecase) CekNIM(nim string) (*dto.CekNIMResponse, error) {
 	u, err := uc.users.FindByNIM(nim)
 	if err != nil {
@@ -193,7 +192,6 @@ func (uc *AuthUsecase) Register(req dto.RegisterRequest) (*dto.AuthResponse, err
 			u = fresh
 		}
 	} else {
-		// Fallback lokal tanpa Supabase: simpan hash langsung
 		u.PasswordHash = &hashed
 		u.Email = &emailNorm
 		u.IsRegistered = true
@@ -233,7 +231,6 @@ func (uc *AuthUsecase) ForgotPassword(email string) dto.ForgotPasswordResponse {
 	return dto.ForgotPasswordResponse{Sent: true}
 }
 
-// ResetPassword verifikasi OTP + set password baru (Supabase & lokal).
 func (uc *AuthUsecase) ResetPassword(req dto.ResetPasswordViaOTPRequest) error {
 	norm := strings.ToLower(strings.TrimSpace(req.Email))
 	admin := supabase.NewAdmin(uc.cfg.SupabaseURL, uc.cfg.SupabaseServiceKey)

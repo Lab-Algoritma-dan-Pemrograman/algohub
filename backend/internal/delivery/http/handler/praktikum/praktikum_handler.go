@@ -11,7 +11,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// PraktikumHandler melayani sisi mahasiswa (dashboard + daftar sesi).
 type PraktikumHandler struct {
 	uc *usecase.PraktikumUsecase
 }

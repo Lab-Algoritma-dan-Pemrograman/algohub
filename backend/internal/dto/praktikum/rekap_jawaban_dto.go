@@ -2,7 +2,6 @@ package dto
 
 import "time"
 
-// RekapJawabanItem merepresentasikan satu baris jawaban di tabel Rekap Jawaban Global
 type RekapJawabanItem struct {
 	JawabanID       int        `json:"jawaban_id"`
 	NIM             string     `json:"nim"`
@@ -30,7 +29,6 @@ type RekapJawabanResponse struct {
 	Limited bool               `json:"limited"` // true = hasil dipotong; gunakan Cari untuk data lain
 }
 
-// BulkActionRequest digunakan untuk menghapus atau mereset nilai masal
 type BulkActionRequest struct {
 	Action     string `json:"action" binding:"required,oneof=delete reset_nilai buka_kunci"`
 	JawabanIDs []int  `json:"jawaban_ids" binding:"required,min=1"`

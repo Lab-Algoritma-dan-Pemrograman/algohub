@@ -10,7 +10,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// maxRunSource membatasi ukuran kode yang dijalankan (64 KB).
 const maxRunSource = 64 * 1024
 
 type RunHandler struct {

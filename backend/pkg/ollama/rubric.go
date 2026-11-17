@@ -51,7 +51,6 @@ var (
 	subUjianPraktik = subCrit{SesuaiPetunjukMax: 25, BteMax: 7, TwMin: 3, TwMax: 13}
 )
 
-// subForCourse memilih sub-kriteria coding berdasar jenis course.
 func subForCourse(jenisCourse string) subCrit {
 	switch jenisCourse {
 	case "posttest":
@@ -63,7 +62,6 @@ func subForCourse(jenisCourse string) subCrit {
 	}
 }
 
-// rubrikEssay mengembalikan tabel kategori->poin untuk esai sesuai course+level.
 func rubrikEssay(jenisCourse, level string) map[string]int {
 	tbl := rubrikPretest
 	if jenisCourse == "posttest" {

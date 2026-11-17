@@ -9,11 +9,9 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-// ErrLaporanBesarTanpaTarget: tidak ada baris target untuk kelas mahasiswa.
 var ErrLaporanBesarTanpaTarget = errors.New("kelas belum punya window laporan besar")
 
 type LaporanBesarRepository interface {
-	// Laporan (induk)
 	Create(l *entity.LaporanBesar) error
 	Update(l *entity.LaporanBesar) error
 	Delete(id int) error
@@ -21,13 +19,11 @@ type LaporanBesarRepository interface {
 	FindAktif() (*entity.LaporanBesar, error)
 	List() ([]entity.LaporanBesar, error)
 
-	// Target per kelas (dan opsional per shift)
 	UpsertTarget(t *entity.LaporanBesarTarget) error
 	ListTarget(laporanID int) ([]entity.LaporanBesarTarget, error)
 	FindTarget(laporanID, kelasID int, shift *int) (*entity.LaporanBesarTarget, error)
 	DeleteTarget(laporanID, kelasID int) error
 
-	// Pengumpulan per mahasiswa
 	FindPengumpulan(laporanID, mahasiswaID int) (*entity.PengumpulanLaporanBesar, error)
 	UpsertPengumpulan(p *entity.PengumpulanLaporanBesar) error
 	ListPengumpulan(laporanID int) ([]entity.PengumpulanLaporanBesar, error)
@@ -137,7 +133,6 @@ func (r *laporanBesarRepository) ListPengumpulan(laporanID int) ([]entity.Pengum
 	return ps, r.db.Where("laporan_besar_id = ?", laporanID).Find(&ps).Error
 }
 
-// ListMahasiswaByKelas mengambil seluruh mahasiswa pada daftar kelas target.
 func (r *laporanBesarRepository) ListMahasiswaByKelas(kelasIDs []int) ([]entity.User, error) {
 	var us []entity.User
 	if len(kelasIDs) == 0 {

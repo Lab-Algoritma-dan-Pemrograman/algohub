@@ -29,7 +29,6 @@ func New(baseURL, token string) *Client {
 // Enabled menandakan token tersedia.
 func (c *Client) Enabled() bool { return c.token != "" }
 
-// Result adalah hasil eksekusi dari Glot.io.
 type Result struct {
 	Stdout string `json:"stdout"`
 	Stderr string `json:"stderr"`
@@ -47,7 +46,6 @@ type glotRequest struct {
 	Command string     `json:"command"`
 }
 
-// fileName memetakan bahasa ke nama file & validitasnya.
 func fileName(lang string) (string, bool) {
 	switch lang {
 	case "c":
