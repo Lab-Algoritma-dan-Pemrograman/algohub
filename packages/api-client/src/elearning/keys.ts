@@ -1,4 +1,4 @@
-import type { LeaderboardFilter } from './types';
+import type { LeaderboardFilter, PageParams } from './types';
 
 export const elearningKeys = {
   all: ['elearning'] as const,
@@ -17,11 +17,13 @@ export const elearningKeys = {
     mine: () => ['elearning', 'achievements', 'mine'] as const,
   },
   leaderboard: {
-    list: (filter: LeaderboardFilter = {}) => ['elearning', 'leaderboard', 'list', filter] as const,
+    list: (filter: LeaderboardFilter & PageParams = {}) =>
+      ['elearning', 'leaderboard', 'list', filter] as const,
     rank: (xp: number, filter: LeaderboardFilter = {}) =>
       ['elearning', 'leaderboard', 'rank', xp, filter] as const,
     filters: () => ['elearning', 'leaderboard', 'filters'] as const,
-    weekly: () => ['elearning', 'leaderboard', 'weekly'] as const,
+    weekly: (params: LeaderboardFilter & PageParams = {}) =>
+      ['elearning', 'leaderboard', 'weekly', params] as const,
   },
   game: {
     questions: (language?: string) => ['elearning', 'game', 'questions', language ?? null] as const,

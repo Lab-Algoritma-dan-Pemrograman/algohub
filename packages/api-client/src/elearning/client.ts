@@ -172,7 +172,7 @@ export function createElearningApi({ baseUrl, getToken, onUnauthorized }: Elearn
       rank: (opts: LeaderboardFilter & { xp: number }) =>
         api.get<RankResponse>(`/leaderboard/rank${qs({ ...opts })}`),
       filters: () => api.get<LeaderboardFilters>('/leaderboard/filters'),
-      weekly: (p: PageParams = {}) =>
+      weekly: (p: LeaderboardFilter & PageParams = {}) =>
         api.get<Page<WeeklyEntry>>(`/leaderboard/weekly${qs({ ...p })}`),
     },
     prestige: {
