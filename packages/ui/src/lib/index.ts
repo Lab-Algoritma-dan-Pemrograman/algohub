@@ -1,5 +1,6 @@
 // Augmentasi tipe edra harus ikut terbaca oleh app yang memeriksa sumber paket ini.
 import type {} from './components/rich-text/edra-shims.js';
+
 export { Button, buttonVariants } from './components/ui/button/index.js';
 export type { ButtonProps, ButtonSize, ButtonVariant } from './components/ui/button/index.js';
 export {
@@ -34,6 +35,8 @@ export { renderComponent, renderSnippet } from './components/ui/data-table/index
 export type { ColumnDef } from '@tanstack/table-core';
 export { default as RichTextEditor } from './components/rich-text/RichTextEditor.svelte';
 export type { ImageUploader } from './components/rich-text/edra/types.js';
+export { default as RichTextRenderer } from './components/rich-text/RichTextRenderer.svelte';
+export { default as MarkdownRenderer } from './components/markdown/MarkdownRenderer.svelte';
 export { cn } from './utils.js';
 export {
   Table,

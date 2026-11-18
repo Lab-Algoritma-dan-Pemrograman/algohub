@@ -207,8 +207,10 @@
         "@xterm/xterm": "6.0.0",
         "bits-ui": "^2.21.0",
         "clsx": "^2.1.1",
+        "dompurify": "^3.4.18",
         "katex": "^0.17.0",
         "lowlight": "^3.3.0",
+        "marked": "^18.2.1",
         "svelte-sonner": "^1.2.3",
         "svelte-tiptap": "^3.0.1",
         "tailwind-merge": "^3.7.0",
@@ -219,6 +221,10 @@
       },
       "devDependencies": {
         "@algohub/config": "workspace:*",
+        "@sveltejs/vite-plugin-svelte": "^7.3.1",
+        "@testing-library/jest-dom": "^7.0.1",
+        "@testing-library/svelte": "^5.4.2",
+        "jsdom": "^31.0.1",
         "svelte": "^5.57.3",
         "svelte-check": "^4.7.8",
         "typescript": "~6.0.3",
@@ -850,6 +856,8 @@
     "markdown-it": ["markdown-it@14.3.3", "", { "dependencies": { "argparse": "^2.0.1", "entities": "^4.5.0", "linkify-it": "^5.0.2", "mdurl": "^2.0.0", "punycode.js": "^2.3.1", "uc.micro": "^2.1.0" }, "bin": { "markdown-it": "bin/markdown-it.mjs" } }, "sha512-L//tDAkjTjJCU6pBUSBTgs3Kg4InVaZuUZog/b6V12UKhcDQ7S78877ibbCanRExwPuYP1CZD7Gd2dxSy1GXRg=="],
 
     "markdown-it-task-lists": ["markdown-it-task-lists@2.1.1", "", {}, "sha512-TxFAc76Jnhb2OUu+n3yz9RMu4CwGfaT788br6HhEDlvWfdeJcLUsxk1Hgw2yJio0OXsxv7pyIPmvECY7bMbluA=="],
+
+    "marked": ["marked@18.2.1", "", { "bin": { "marked": "bin/marked.js" } }, "sha512-ii4bxCTCqqwpT86XZWgJNs+ZnAIZksmLGYMViWA7PDIXYIeNo1x6cDdX3JOip9NM/cI6p8z57FxliACboTruMA=="],
 
     "mdurl": ["mdurl@2.1.0", "", {}, "sha512-1+HBaOx0zi/dQWht8rNv9MYf9qqpqL/kxI0hXImU6Y547zM6Sni8BQibt7ifgMcYtQg41ao3Ivd6cnSM86inpg=="],
 
