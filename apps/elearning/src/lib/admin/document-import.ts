@@ -9,9 +9,6 @@ export interface ParseResult {
   levels: Level[];
 }
 
-/**
- * AI-assisted parsing using the backend AI proxy.
- */
 async function parseWithAi(text: string): Promise<ParseResult> {
   const schema: JsonValue = {
     type: 'OBJECT',
@@ -131,9 +128,6 @@ ${text}
   return parsed;
 }
 
-/**
- * Standard rule-based parsing for offline or fast preprocessing.
- */
 function escapeHtml(unsafe: string): string {
   return unsafe
     .replace(/&/g, '&amp;')
@@ -334,7 +328,6 @@ export function parseWithRegex(paragraphs: string[]): ParseResult {
       continue;
     }
 
-    // 0. Detect Section switches (if current lesson is active)
     let sectionSwitched = false;
     if (currentLesson) {
       if (line.match(/^(?:#+\s*)?(?:Materi|Teori|Penjelasan|Explanation)\s*:/i)) {
@@ -388,11 +381,9 @@ export function parseWithRegex(paragraphs: string[]): ParseResult {
       continue;
     }
 
-    // 0.5. Check indentation and heading status
     const isIndented = /^\s+/.test(rawLine);
     const startsWithHash = rawLine.trimStart().startsWith('#');
 
-    // 1. Detect Level
     const levelMatch = line.match(/^(?:#\s*)?(?:Level|Tingkat)\s*(\d+)\s*[:\-—]?\s*(.*)/i);
     if (levelMatch && (!isIndented || startsWithHash)) {
       const levelTitle = levelMatch[2].trim();
@@ -413,7 +404,6 @@ export function parseWithRegex(paragraphs: string[]): ParseResult {
       continue;
     }
 
-    // 2. Detect Module / Subbab
     const moduleMatch =
       line.match(/^(?:Subbab|Modul)\b\s*(\d*)[:-]?\s*(.*)/i) ||
       line.match(/^##(?![#])\s*(?:SUBBAB:\s*)?(.*)/i);
@@ -445,7 +435,6 @@ export function parseWithRegex(paragraphs: string[]): ParseResult {
       continue;
     }
 
-    // 3. Detect Lesson / Pelajaran
     const lessonMatch =
       line.match(/^(?:Pelajaran|Judul Pelajaran|Materi Pelajaran)\b\s*[:-]?\s*(.*)/i) ||
       line.match(/^###(?![#])\s*(?:Pelajaran:\s*)?(.*)/i);
@@ -488,7 +477,6 @@ export function parseWithRegex(paragraphs: string[]): ParseResult {
 
     if (!currentLesson) continue;
 
-    // 5. Append content depending on the active section
     if (currentSection === 'explanation') {
       currentLesson.explanation += rawLine + '\n';
     } else if (currentSection === 'codeExample') {
@@ -583,7 +571,6 @@ export function parseWithRegex(paragraphs: string[]): ParseResult {
     }
   }
 
-  // Post-processing cleanup and formatting
   levels.forEach((level) => {
     level.modules.forEach((mod) => {
       mod.lessons.forEach((les) => {
@@ -606,7 +593,6 @@ export function parseWithRegex(paragraphs: string[]): ParseResult {
             .trim();
         };
 
-        // Auto-extract code example from explanation/materi if codeExample is empty
         if (!les.codeExample && cleanExplanation.includes('```')) {
           const blocks = cleanExplanation.split('```');
           for (let i = 1; i < blocks.length; i += 2) {
@@ -627,7 +613,6 @@ export function parseWithRegex(paragraphs: string[]): ParseResult {
         les.solution = stripFences(les.solution);
         les.hint = stripFences(les.hint);
 
-        // Strip fences from expectedOutput and set description to task description if available
         les.testCases.forEach((tc) => {
           if (tc.expectedOutput) {
             tc.expectedOutput = stripFences(tc.expectedOutput);
@@ -641,7 +626,6 @@ export function parseWithRegex(paragraphs: string[]): ParseResult {
           }
         });
 
-        // Strip fences from quiz question and options
         if (les.quiz) {
           if (les.quiz.question) {
             les.quiz.question = stripFences(les.quiz.question);
@@ -666,14 +650,12 @@ export function mergeCurriculum(original: Level[], imported: Level[]): Level[] {
   const updated = [...original];
 
   imported.forEach((impLvl) => {
-    // 1. Find or create Level
     const cleanImpLvlTitle = impLvl.title.trim().toLowerCase();
     let lvlIndex = updated.findIndex(
       (l) => l.title.trim().toLowerCase() === cleanImpLvlTitle || l.id === impLvl.id,
     );
 
     if (lvlIndex === -1) {
-      // Create new level
       const newLvlId = impLvl.id || `c-level-${updated.length + 1}`;
       const newLvl: Level = {
         id: newLvlId,
@@ -686,14 +668,12 @@ export function mergeCurriculum(original: Level[], imported: Level[]): Level[] {
       updated.push(newLvl);
       lvlIndex = updated.length - 1;
     } else {
-      // Update existing level properties if provided
       if (impLvl.description) updated[lvlIndex].description = impLvl.description;
       if (impLvl.accessMode) updated[lvlIndex].accessMode = impLvl.accessMode;
     }
 
     const currentLvl = updated[lvlIndex];
 
-    // 2. Process Modules within Level
     impLvl.modules.forEach((impMod) => {
       const cleanImpModTitle = impMod.title.trim().toLowerCase();
       let modIndex = currentLvl.modules.findIndex(
@@ -701,7 +681,6 @@ export function mergeCurriculum(original: Level[], imported: Level[]): Level[] {
       );
 
       if (modIndex === -1) {
-        // Create new module
         const newModId = impMod.id || `${currentLvl.id}-m${currentLvl.modules.length + 1}`;
         const newMod: Module = {
           id: newModId,
@@ -714,7 +693,6 @@ export function mergeCurriculum(original: Level[], imported: Level[]): Level[] {
 
       const currentMod = currentLvl.modules[modIndex];
 
-      // 3. Process Lessons within Module
       impMod.lessons.forEach((impLes) => {
         const cleanImpLesTitle = impLes.title.trim().toLowerCase();
         const lesIndex = currentMod.lessons.findIndex(
@@ -722,7 +700,6 @@ export function mergeCurriculum(original: Level[], imported: Level[]): Level[] {
         );
 
         if (lesIndex === -1) {
-          // Create new lesson
           const newLesId = impLes.id || `${currentMod.id}-l${currentMod.lessons.length + 1}`;
           const newLes: Lesson = {
             id: newLesId,
@@ -769,7 +746,6 @@ export const documentImportService = {
       try {
         return await parseWithAi(text);
       } catch {
-        // Fallback to regex
         const paragraphs = text.split(/\r?\n/);
         return parseWithRegex(paragraphs);
       }
