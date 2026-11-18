@@ -86,7 +86,11 @@ Catatan:
 - `PUBLIC_COMPILER_BASE_URL` praktikum dan elearning: `https://algohub-portal-gamma.vercel.app/compiler/v1/` sampai cutover langkah 3. Origin yang sama ada di CSP `connect-src` kedua app.
 - Hasil uji: portal `/` 200 dan redirect lama 301 ke `praktikum.algohub.web.id`; `/compiler/v1/clang` 200, `Cache-Control: immutable`, `Access-Control-Allow-Origin: *`, `Cross-Origin-Resource-Policy: cross-origin`, SHA-256 sama dengan GitHub Release. Praktikum, siakad, dan elearning `/` 200 dan bundle-nya memuat env yang benar.
 - `/compiler/v1/SHA256SUMS` 404: file itu hanya dipakai `fetch-compiler` untuk verifikasi, tidak ikut ditulis ke `build/`.
-- Selama `DATABASE_URL_SIAKAD` kosong, `/api/cron/keep-alive` juga 404 karena route-nya dipasang bersama blok siakad (`router_siakad.go`). Cron harian Vercel akan gagal sampai DSN siakad diisi; project Supabase tetap aktif karena praktikum dan elearning melayani trafik.
+- `PUBLIC_API_BASE_URL` ketiga app frontend (praktikum, siakad, elearning): `https://algohub-api.vercel.app`. Awalnya menunjuk `api.algohub.web.id`, backend lama, yang menolak origin preview dengan 403 sehingga login dari frontend baru gagal "failed to fetch".
+- CSP `connect-src` ketiga app memuat `https://algohub-api.vercel.app` **dan** `https://api.algohub.web.id`. Yang pertama dipakai frontend preview sekarang, yang kedua tetap berlaku setelah `api.algohub.web.id` dipindahkan ke backend baru di cutover langkah 1.
+- CORS backend baru: `CORS_ORIGIN_PATTERNS` = `https://algohub-[a-z0-9-]+\.vercel\.app`. Regex awalnya menuntut akhiran `-lab-algoritma-pemrograman`, padahal browser mengirim alias bersih (`algohub-praktikum.vercel.app`), sehingga respons tidak punya `Access-Control-Allow-Origin` dan browser memblok request ("failed to fetch"). Regex diperluas; tetap terbatas ke prefiks `algohub-` dan `.vercel.app`.
+- Hasil uji frontend baru → backend baru (2026-11-19): login praktikum `202711001` berhasil di `algohub-api.vercel.app/api/praktikum/auth/login`, tanpa "failed to fetch".
+- Selama `DATABASE_URL_SIAKAD` kosong, `/api/cron/keep-alive` juga 404 karena route-nya dipasang bersama blok siakad (`router_siakad.go`). Sejak DSN siakad diisi, `keep-alive` mem-ping kedua project Supabase; jadwal `check-shifts` tetap dicabut dari `vercel.json` sampai cutover langkah 4.
 
 
 Uji di preview (`vercel curl /api/health --deployment <url>`):
