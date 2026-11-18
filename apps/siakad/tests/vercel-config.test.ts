@@ -96,6 +96,7 @@ describe('vercel.json', () => {
     expect(cspDirectives().get('connect-src')).toEqual([
       "'self'",
       'https://api.algohub.web.id',
+      'https://algohub-api.vercel.app',
       'https://*.supabase.co',
       'wss://*.supabase.co',
       'https://generativelanguage.googleapis.com',
