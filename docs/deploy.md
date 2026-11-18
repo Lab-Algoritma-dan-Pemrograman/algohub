@@ -86,6 +86,7 @@ Catatan:
 - `PUBLIC_COMPILER_BASE_URL` praktikum dan elearning: `https://algohub-portal-gamma.vercel.app/compiler/v1/` sampai cutover langkah 3. Origin yang sama ada di CSP `connect-src` kedua app.
 - Hasil uji: portal `/` 200 dan redirect lama 301 ke `praktikum.algohub.web.id`; `/compiler/v1/clang` 200, `Cache-Control: immutable`, `Access-Control-Allow-Origin: *`, `Cross-Origin-Resource-Policy: cross-origin`, SHA-256 sama dengan GitHub Release. Praktikum, siakad, dan elearning `/` 200 dan bundle-nya memuat env yang benar.
 - `/compiler/v1/SHA256SUMS` 404: file itu hanya dipakai `fetch-compiler` untuk verifikasi, tidak ikut ditulis ke `build/`.
+- Selama `DATABASE_URL_SIAKAD` kosong, `/api/cron/keep-alive` juga 404 karena route-nya dipasang bersama blok siakad (`router_siakad.go`). Cron harian Vercel akan gagal sampai DSN siakad diisi; project Supabase tetap aktif karena praktikum dan elearning melayani trafik.
 
 
 Uji di preview (`vercel curl /api/health --deployment <url>`):

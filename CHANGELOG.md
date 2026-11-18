@@ -18,6 +18,7 @@ Semua perubahan penting dicatat di file ini. Format mengikuti [Keep a Changelog]
 #### Diketahui
 - `/compiler/v1/SHA256SUMS` tidak disajikan portal (404). `scripts/fetch-compiler.ts` hanya membaca checksum itu untuk memverifikasi unduhan; integritas `clang` sudah dicocokkan dengan GitHub Release `compiler-v1`.
 - `WA_GATEWAY_TOKEN` dan `BYNARA_API_KEY` tidak ada di folder `_secrets` (hanya VAPID private key). Keduanya belum dipasang di `algohub-api` production.
+- Selama `DATABASE_URL_SIAKAD` kosong, route `/api/cron/keep-alive` tidak terpasang karena ikut blok siakad, jadi cron harian Vercel gagal sampai DSN siakad diisi.
 ### Fase 9 — apps/portal (2026-11-18)
 
 #### Ditambahkan
