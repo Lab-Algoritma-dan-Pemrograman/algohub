@@ -4,6 +4,10 @@ Semua perubahan penting dicatat di file ini. Format mengikuti [Keep a Changelog]
 
 ## [Belum dirilis]
 
+### Persiapan cutover (2026-11-18)
+
+#### Diubah
+- Domain siakad di backend menjadi opsional. Kalau `DATABASE_URL_SIAKAD` kosong, route siakad dan cron siakad tidak dipasang, sementara praktikum dan elearning tetap jalan. Kalau DSN siakad diisi tanpa `DATABASE_URL_ELEARNING` atau `SIAKAD_JWT_SECRET`, server tetap gagal start. Sebelumnya env siakad yang belum lengkap ikut mematikan praktikum.
 ### Fase 9 — apps/portal (2026-11-18)
 
 #### Ditambahkan

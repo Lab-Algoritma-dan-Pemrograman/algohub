@@ -10,7 +10,6 @@ func TestSiakadValidate(t *testing.T) {
 		cfg  SiakadConfig
 		want string
 	}{
-		{"siakad kosong", DBConfig{Elearning: full.Elearning}, SiakadConfig{JWTSecret: "x"}, "config: DATABASE_URL_SIAKAD wajib diisi"},
 		{"elearning kosong", DBConfig{Siakad: full.Siakad}, SiakadConfig{JWTSecret: "x"}, "config: DATABASE_URL_ELEARNING wajib diisi"},
 		{"secret kosong", full, SiakadConfig{}, "config: SIAKAD_JWT_SECRET wajib diisi"},
 	}
@@ -22,6 +21,16 @@ func TestSiakadValidate(t *testing.T) {
 	}
 	if err := (&SiakadConfig{JWTSecret: "x"}).Validate(full); err != nil {
 		t.Errorf("konfigurasi lengkap: %v", err)
+	}
+	if (&SiakadConfig{}).Enabled(full) != true {
+		t.Error("siakad dengan DSN harus aktif")
+	}
+	off := DBConfig{Elearning: full.Elearning}
+	if (&SiakadConfig{}).Enabled(off) {
+		t.Error("siakad tanpa DSN harus nonaktif")
+	}
+	if err := (&SiakadConfig{}).Validate(off); err != nil {
+		t.Errorf("siakad nonaktif tidak boleh gagal validasi: %v", err)
 	}
 }
 

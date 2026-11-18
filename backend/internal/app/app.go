@@ -1,6 +1,7 @@
 package app
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/config"
@@ -25,7 +26,11 @@ func New() (http.Handler, error) {
 		return nil, err
 	}
 	deliveryhttp.RegisterPraktikum(r, newPraktikum(cfg, dbs.Praktikum))
-	registerSiakad(r, cfg, dbs)
+	if cfg.Siakad.Enabled(cfg.DB) {
+		registerSiakad(r, cfg, dbs)
+	} else {
+		log.Print("siakad nonaktif: DATABASE_URL_SIAKAD kosong")
+	}
 	registerElearning(r, cfg, dbs)
 	return r, nil
 }

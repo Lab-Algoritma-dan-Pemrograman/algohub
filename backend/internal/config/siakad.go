@@ -26,12 +26,19 @@ func loadSiakad() SiakadConfig {
 	}
 }
 
-// Dipanggil terpisah dari Load supaya test config lama tidak perlu env siakad,
-// tetapi tetap sebelum DB dibuka sehingga server gagal start tanpa mencoba konek.
+// Siakad aktif hanya bila DSN-nya diisi, supaya env siakad yang belum siap tidak ikut mematikan
+// praktikum dan elearning yang berbagi satu function.
+func (s *SiakadConfig) Enabled(db DBConfig) bool {
+	return db.Siakad != ""
+}
+
+// Dipanggil terpisah dari Load dan sebelum DB dibuka: DSN siakad yang diisi tanpa env pendampingnya
+// adalah salah konfigurasi, jadi server gagal start tanpa mencoba konek.
 func (s *SiakadConfig) Validate(db DBConfig) error {
+	if !s.Enabled(db) {
+		return nil
+	}
 	switch {
-	case db.Siakad == "":
-		return errors.New("config: DATABASE_URL_SIAKAD wajib diisi")
 	case db.Elearning == "":
 		return errors.New("config: DATABASE_URL_ELEARNING wajib diisi")
 	case s.JWTSecret == "":
