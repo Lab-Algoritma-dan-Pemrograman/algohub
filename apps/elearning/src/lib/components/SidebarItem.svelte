@@ -1,7 +1,7 @@
 <script lang="ts">
   import { resolve } from '$app/paths';
-  import type { RouteId } from '$app/types';
   import type { Component } from 'svelte';
+  import type { StaticRouteId } from '#lib/paths.ts';
 
   let {
     href,
@@ -19,7 +19,7 @@
 </script>
 
 <a
-  href={resolve(href as RouteId)}
+  href={resolve(href as StaticRouteId)}
   aria-current={active ? 'page' : undefined}
   class="group relative flex items-center space-x-4 overflow-hidden rounded-2xl px-4 py-3 font-bold transition-all {active
     ? 'bg-maroon shadow-bubbly-maroon hover:-translate-y-1 font-black text-white'

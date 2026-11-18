@@ -132,3 +132,78 @@ export function levelProgressPercent(
   }
   return total > 0 ? Math.round((done / total) * 100) : 0;
 }
+
+// Port isLevelLocked di LessonPage.tsx lama. Berbeda dari tampilan dashboard: level sebelumnya
+// yang di-unlock eksplisit tetap harus selesai sebelum level auto berikutnya terbuka.
+export function isLessonLevelLocked(
+  curriculum: TreeLevel[],
+  idx: number,
+  completed: ReadonlySet<string>,
+  overrides: AccessOverrides,
+): boolean {
+  const level = curriculum[idx];
+  if (!level) return true;
+  const override = overrides[level.id];
+  if (override && override !== 'auto') return override === 'locked';
+  if (level.accessMode === 'locked') return true;
+  if (level.accessMode === 'unlocked') return false;
+  if (level.locked === true) return true;
+  if (idx === 0) return false;
+  for (let i = 0; i < idx; i++) {
+    if (lessonIds(curriculum[i]).some((id) => !completed.has(id))) return true;
+  }
+  return false;
+}
+
+// Port isModuleLocked di CourseExplorer.tsx lama.
+export function isModuleLocked(
+  curriculum: TreeLevel[],
+  levelIdx: number,
+  moduleIdx: number,
+  completed: ReadonlySet<string>,
+  overrides: AccessOverrides,
+): boolean {
+  const level = curriculum[levelIdx];
+  if (!level) return true;
+  const mode = effectiveAccessMode(curriculum, level.id, overrides);
+  if (mode === 'locked') return true;
+  if (mode === 'unlocked') return false;
+  if (levelIdx === 0 && moduleIdx === 0) return false;
+  for (let i = 0; i < levelIdx; i++) {
+    const prev = curriculum[i];
+    if (effectiveAccessMode(curriculum, prev.id, overrides) === 'unlocked') continue;
+    if (lessonIds(prev).some((id) => !completed.has(id))) return true;
+  }
+  if (moduleIdx > 0) {
+    const prevModule = level.modules[moduleIdx - 1];
+    if (!prevModule) return false;
+    return !prevModule.lessons.every((lesson) => completed.has(lesson.id));
+  }
+  return false;
+}
+
+const percentOf = (done: number, total: number) =>
+  total > 0 ? Math.round((done / total) * 100) : 0;
+
+export function moduleProgressPercent(
+  module: TreeLevel['modules'][number],
+  completed: ReadonlySet<string>,
+): number {
+  return percentOf(module.lessons.filter((l) => completed.has(l.id)).length, module.lessons.length);
+}
+
+// Progres level di halaman kursus menghitung semua lesson, termasuk yang levelnya terkunci.
+export function levelCompletionPercent(level: TreeLevel, completed: ReadonlySet<string>): number {
+  const ids = lessonIds(level);
+  return percentOf(ids.filter((id) => completed.has(id)).length, ids.length);
+}
+
+// Lesson pertama yang belum selesai di sebuah modul, atau lesson terakhir bila semuanya selesai.
+export function resumeLessonId(
+  module: TreeLevel['modules'][number],
+  completed: ReadonlySet<string>,
+): string | null {
+  if (module.lessons.length === 0) return null;
+  const firstUncompleted = module.lessons.find((l) => !completed.has(l.id));
+  return (firstUncompleted ?? module.lessons[module.lessons.length - 1]).id;
+}

@@ -1,7 +1,6 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import { resolve } from '$app/paths';
-  import type { RouteId } from '$app/types';
   import BookOpenCheck from '@lucide/svelte/icons/book-open-check';
   import Clock from '@lucide/svelte/icons/clock';
   import Flame from '@lucide/svelte/icons/flame';
@@ -22,6 +21,7 @@
     type Checkpoint,
   } from '#lib/curriculum.ts';
   import { getLevelLanguage } from '#lib/levelLanguage.ts';
+  import type { StaticRouteId } from '#lib/paths.ts';
   import { formatStudyTime } from '#lib/profile.ts';
   import { levelsQuery, lessonsQuery, modulesQuery } from '#lib/queries/curriculum.ts';
   import { completedLessonsQuery, recentProgressQuery } from '#lib/queries/progress.ts';
@@ -110,7 +110,7 @@
     const target = pickContinueLesson(curriculum, completed, overrides, readCheckpoint());
     if (!target) return;
     if (target.resetStep) localStorage.setItem(`lesson-step:${target.lessonId}`, 'learn');
-    void goto(resolve(`/lesson/${target.lessonId}` as RouteId));
+    void goto(resolve('/(app)/lesson/[id]', { id: target.lessonId }));
   }
 
   const formatDate = (iso: string) =>
@@ -141,7 +141,7 @@
         </p>
       </div>
       <a
-        href={resolve('/admin' as RouteId)}
+        href={resolve('/admin' as StaticRouteId)}
         class="inline-block rounded-xl bg-rose-700 px-8 py-3 font-bold text-white shadow-lg shadow-rose-700/20 transition-all hover:bg-rose-800 active:scale-95"
         >Buka Admin Panel</a
       >

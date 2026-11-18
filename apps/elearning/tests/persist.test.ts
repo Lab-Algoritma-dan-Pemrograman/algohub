@@ -9,11 +9,15 @@ const api = vi.hoisted(() => ({
     auth: { verify: vi.fn() },
     curriculum: { levels: vi.fn(), modules: vi.fn(), lessons: vi.fn() },
     progress: { myLessons: vi.fn(), recent: vi.fn() },
+    playground: { examples: vi.fn() },
+    validateQuiz: vi.fn(),
   },
 }));
 vi.mock('#lib/api.ts', () => api);
 const { levelsQuery, modulesQuery, lessonsQuery } = await import('../src/lib/queries/curriculum');
 const { completedLessonsQuery, recentProgressQuery } = await import('../src/lib/queries/progress');
+const { playgroundExamplesQuery } = await import('../src/lib/queries/playground');
+const { validateQuizOptions } = await import('../src/lib/queries/quiz');
 const { loadSession } = await import('../src/lib/auth');
 const { queryClient } = await import('../src/lib/query');
 const { session } = await import('../src/lib/session');
@@ -38,6 +42,7 @@ const FORBIDDEN = [
   elearningKeys.game.plays(),
   elearningKeys.leaderboard.weekly(),
   elearningKeys.prestige.eligibility(),
+  elearningKeys.playground.examples('c'),
   ['elearning', 'quiz', 'validate', 'lesson-1'],
 ];
 const page = <T>(items: T[]) => ({ items, total: items.length, page: 1, limit: 100 });
@@ -106,6 +111,23 @@ describe('persist', () => {
     await queryClient.fetchQuery({ ...levelsQuery(), retry: false }).catch(() => undefined);
     expect(dehydratedKeys()).toEqual([]);
   });
+  it('contoh playground tidak dipersist walau berhasil dimuat', async () => {
+    api.api.playground.examples.mockResolvedValue(page([{ id: 'ex1' }]));
+    await queryClient.fetchQuery(playgroundExamplesQuery('c'));
+    expect(dehydratedKeys()).toEqual([]);
+  });
+
+  it('validasi kuis (kunci jawaban) tidak masuk cache yang dipersist', async () => {
+    api.api.validateQuiz.mockResolvedValue({ isCorrect: true, correctAnswer: 2 });
+    const options = validateQuizOptions('lesson-1');
+    expect(options.mutationKey).toEqual(['elearning', 'quiz', 'validate', 'lesson-1']);
+    await queryClient.getMutationCache().build(queryClient, options).execute(2);
+    expect(api.api.validateQuiz).toHaveBeenCalledWith({ lessonId: 'lesson-1', selectedOption: 2 });
+    const state = dehydrate(queryClient, { shouldDehydrateQuery: shouldPersistQuery });
+    expect(state.queries).toEqual([]);
+    expect(JSON.stringify(state)).not.toContain('correctAnswer');
+  });
+
   it('hanya queries/curriculum.ts yang menandai persist: true', () => {
     const srcDir = resolve(process.cwd(), 'src');
     const marked = readdirSync(srcDir, { recursive: true, encoding: 'utf8' })

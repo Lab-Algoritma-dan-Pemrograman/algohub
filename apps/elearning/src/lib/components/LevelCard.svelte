@@ -1,6 +1,5 @@
 <script lang="ts">
   import { resolve } from '$app/paths';
-  import type { RouteId } from '$app/types';
   import Check from '@lucide/svelte/icons/check';
   import Lock from '@lucide/svelte/icons/lock';
   import { lessonIds, type TreeLevel } from '#lib/curriculum.ts';
@@ -120,8 +119,9 @@
 
       <h4 class="mb-3 line-clamp-2 text-base leading-tight font-black text-zinc-900">
         {#if !locked && ids.length > 0}
-          <a href={resolve(`/lesson/${ids[0]}` as RouteId)} class="after:absolute after:inset-0"
-            >{level.title}</a
+          <a
+            href={resolve('/(app)/lesson/[id]', { id: ids[0] })}
+            class="after:absolute after:inset-0">{level.title}</a
           >
         {:else}
           {level.title}
@@ -167,7 +167,7 @@
           <span class="h-3.5 w-3.5 rounded-full bg-zinc-200/85"></span>
         {:else}
           <a
-            href={resolve(`/lesson/${lesson.id}` as RouteId)}
+            href={resolve('/(app)/lesson/[id]', { id: lesson.id })}
             title={lesson.title}
             aria-label={lesson.title}
             class="relative z-10 flex h-3.5 w-3.5 items-center justify-center rounded-full shadow-sm transition-all hover:scale-125 {isDone
