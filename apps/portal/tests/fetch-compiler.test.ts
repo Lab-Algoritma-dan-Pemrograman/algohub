@@ -24,7 +24,8 @@ function fetchCompiler(corrupt?: string) {
 
 afterEach(() => rmSync(dest, { recursive: true, force: true }));
 
-describe('fetch-compiler', () => {
+// Test menjalankan proses bun sungguhan; saat semua paket di-test paralel, satu proses bisa >10 detik.
+describe('fetch-compiler', { timeout: 60_000 }, () => {
   it('menyimpan keempat file kalau SHA-256 cocok', () => {
     const result = fetchCompiler();
     expect(result.status, result.stderr).toBe(0);
