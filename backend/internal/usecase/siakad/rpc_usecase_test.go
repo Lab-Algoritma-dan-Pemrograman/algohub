@@ -116,7 +116,7 @@ func allRPCNames() []string {
 }
 
 func TestWhitelistShape(t *testing.T) {
-	want := map[string]int{"praktikan": 24, "penyewa": 5, "asisten": 69, "koordinator": 78}
+	want := map[string]int{"praktikan": 22, "penyewa": 5, "asisten": 67, "koordinator": 76}
 	for role, n := range want {
 		list := rolePermissions[role]
 		if len(list) != n {
@@ -141,7 +141,7 @@ func TestWhitelistShape(t *testing.T) {
 			t.Errorf("%s ada di praktikan tetapi tidak di asisten", fn)
 		}
 	}
-	if !slices.Equal(rolePermissions["koordinator"][:69], asistenRPCs) {
+	if !slices.Equal(rolePermissions["koordinator"][:67], asistenRPCs) {
 		t.Error("koordinator harus diawali seluruh whitelist asisten")
 	}
 	pinned := []struct {
@@ -304,8 +304,6 @@ func TestGatewayIdentityInjection(t *testing.T) {
 		{"asisten tetap pakai id klien", map[string]any{"id": 7, "role": "asisten"}, "upsert_attendance_log_secure",
 			map[string]json.RawMessage{"p_user_id": raw(`1`), "p_target_id": raw(`2`), "p_viewer_id": raw(`3`)},
 			map[string]string{"p_user_id": "1", "p_target_id": "2", "p_viewer_id": "7"}},
-		{"asisten check_already_absent", map[string]any{"id": 7, "role": "asisten"}, "check_already_absent_secure",
-			map[string]json.RawMessage{"p_user_id": raw(`1`)}, map[string]string{"p_user_id": "7"}},
 		{"koordinator is_pj_absen_today", map[string]any{"id": 7, "role": "kordas"}, "is_pj_absen_today",
 			map[string]json.RawMessage{"p_user_id": raw(`1`)}, map[string]string{"p_user_id": "7"}},
 		{"asisten check_pj_absen_today", map[string]any{"id": 7, "role": "asisten"}, "check_pj_absen_today",

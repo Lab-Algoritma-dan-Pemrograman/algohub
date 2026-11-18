@@ -15,6 +15,7 @@ Semua perubahan penting dicatat di file ini. Format mengikuti [Keep a Changelog]
 - `DATABASE_URL_SIAKAD` dan `DATABASE_URL_ELEARNING` di `algohub-api` production diisi DSN yang sama dengan `DATABASE_URL_PRAKTIKUM` (project `oidwvfcxlxfyojkyurmm`). Ketiga app memakai satu DB, tidak ada project Supabase siakad terpisah.
 - `backend/vercel.json`: jadwal cron `/api/cron/siakad/check-shifts` dicabut sampai cutover C4, karena `labap-siakad` masih menjalankan `cron-check-shifts` pada DB yang sama sehingga push shift bisa terkirim ganda. Route-nya tetap terpasang dan bisa dipicu manual.
 - `repository/siakad/notify`: nomor HP dibaca dari `coalesce(nullif(trim(nomor_hp), ''), nullif(trim(phone_number), ''))`. Kolom `phone` tidak ada di DB inti, sehingga kirim WA/push lewat `targetUserId` selalu gagal "Nomor WhatsApp tujuan tidak ditemukan" (T-74).
+- `usecase/siakad`: RPC `check_already_absent_secure` dan `save_elearning_progress_secure` dihapus dari whitelist izin (praktikan, asisten, `staffSelfRPCs`). Keduanya tidak ada di DB inti dan tidak dipanggil frontend siakad baru (T-75).
 - CSP `connect-src` praktikum dan elearning mengizinkan `https://algohub-portal-gamma.vercel.app`, sumber file compiler selama transisi. Nama `algohub-portal.vercel.app` sudah dipakai akun Vercel lain, jadi alias production project portal memakai akhiran `-gamma`.
 - Domain siakad di backend menjadi opsional. Kalau `DATABASE_URL_SIAKAD` kosong, route siakad dan cron siakad tidak dipasang, sementara praktikum dan elearning tetap jalan. Kalau DSN siakad diisi tanpa `DATABASE_URL_ELEARNING` atau `SIAKAD_JWT_SECRET`, server tetap gagal start. Sebelumnya env siakad yang belum lengkap ikut mematikan praktikum.
 
@@ -24,6 +25,7 @@ Semua perubahan penting dicatat di file ini. Format mengikuti [Keep a Changelog]
 - Selama `DATABASE_URL_SIAKAD` kosong, route `/api/cron/keep-alive` tidak terpasang karena ikut blok siakad, jadi cron harian Vercel gagal sampai DSN siakad diisi.
 - RPC `check_already_absent_secure` dan `save_elearning_progress_secure` tidak ada di DB inti walaupun masih ada di whitelist izin (T-75). Tidak dipanggil frontend siakad baru.
 - 10 baris data siakad (`financial_records` 3, `inventory_items` 3, `equipment` 1, `inventory_rentals` 3) hanya ada di `huddecanbapwjairmaef`, belum dimigrasi ke DB inti (T-76).
+- Cron `check-shifts` (07.00) di `labap-siakad` lama masih aktif bersama `algohub-api` pada DB yang sama, jadi push shift bisa terkirim ganda sampai proyek lama dimatikan di cutover C4 (T-77).
 ### Fase 9 — apps/portal (2026-11-18)
 
 #### Ditambahkan

@@ -16,7 +16,6 @@ var praktikanRPCs = []string{
 	"get_user_profile",
 	"update_user_profile_secure",
 	"update_password",
-	"check_already_absent_secure",
 	"upsert_attendance_log_secure",
 	"get_external_links_secure",
 	"get_personal_schedules_secure",
@@ -27,7 +26,6 @@ var praktikanRPCs = []string{
 	"get_elearning_handshake_secure",
 	"get_my_rentals_secure",
 	"submit_rental_request_secure",
-	"save_elearning_progress_secure",
 	"get_dashboard_stats_secure",
 	"get_attendance_logs_secure",
 	"get_group_members_secure",
@@ -51,7 +49,6 @@ var asistenRPCs = []string{
 	"get_user_profile",
 	"update_user_profile_secure",
 	"update_password",
-	"check_already_absent_secure",
 	"upsert_attendance_log_secure",
 	"get_external_links_secure",
 	"get_personal_schedules_secure",
@@ -63,7 +60,6 @@ var asistenRPCs = []string{
 	"get_elearning_handshake_secure",
 	"get_my_rentals_secure",
 	"submit_rental_request_secure",
-	"save_elearning_progress_secure",
 	"get_dashboard_stats_secure",
 	"get_attendance_logs_secure",
 	"get_group_members_secure",
@@ -137,7 +133,6 @@ var rolePermissions = map[string][]string{
 }
 
 var staffSelfRPCs = []string{
-	"check_already_absent_secure",
 	"get_my_rentals_secure",
 	"submit_rental_request_secure",
 	// Fix #9: is_pj_absen_today memakai p_user_id untuk status diri sendiri,
