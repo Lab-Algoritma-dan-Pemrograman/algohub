@@ -12,6 +12,10 @@ const api = vi.hoisted(() => ({
     playground: { examples: vi.fn() },
     leaderboard: { list: vi.fn(), weekly: vi.fn(), rank: vi.fn() },
     validateQuiz: vi.fn(),
+    admin: { users: vi.fn(), userProgress: vi.fn() },
+    monitoring: { sessions: vi.fn(), students: vi.fn(), progress: vi.fn() },
+    activityLogs: { list: vi.fn() },
+    game: { questions: vi.fn() },
   },
 }));
 vi.mock('#lib/api.ts', () => api);
@@ -21,6 +25,14 @@ const { playgroundExamplesQuery } = await import('../src/lib/queries/playground'
 const { leaderboardListQuery, leaderboardRankQuery, weeklyLeaderboardQuery } =
   await import('../src/lib/queries/leaderboard');
 const { validateQuizOptions } = await import('../src/lib/queries/quiz');
+const { adminUsersQuery, adminUserProgressQuery, adminGameQuestionsQuery, adminPlaygroundQuery } =
+  await import('../src/lib/queries/admin');
+const {
+  activityLogsQuery,
+  monitoringProgressQuery,
+  monitoringSessionsQuery,
+  monitoringStudentsQuery,
+} = await import('../src/lib/queries/monitoring');
 const { loadSession } = await import('../src/lib/auth');
 const { queryClient } = await import('../src/lib/query');
 const { session } = await import('../src/lib/session');
@@ -149,6 +161,28 @@ describe('persist', () => {
     ]);
   });
 
+  it('query admin, monitoring, dan audit log (data pribadi) tidak dipersist walau sukses', async () => {
+    api.api.admin.users.mockResolvedValue(page([{ nim: '1', nama: 'Ani' }]));
+    api.api.admin.userProgress.mockResolvedValue(page([{ lesson_id: 'les1', completed: true }]));
+    api.api.monitoring.sessions.mockResolvedValue(
+      page([{ nim: '1', users: { role: 'praktikan' } }]),
+    );
+    api.api.monitoring.students.mockResolvedValue(page([{ nim: '1', nama: 'Ani' }]));
+    api.api.monitoring.progress.mockResolvedValue(page([{ nim: '1', lessonIds: ['les1'] }]));
+    api.api.activityLogs.list.mockResolvedValue(page([{ id: 'a', nim: '1', nama: 'Ani' }]));
+    api.api.game.questions.mockResolvedValue([{ id: 'q1', code: 'x' }]);
+    api.api.playground.examples.mockResolvedValue(page([{ id: 'ex1' }]));
+    await queryClient.fetchQuery(adminUsersQuery('', 1));
+    await queryClient.fetchQuery(adminUserProgressQuery('1'));
+    await queryClient.fetchQuery(monitoringSessionsQuery());
+    await queryClient.fetchQuery(monitoringStudentsQuery());
+    await queryClient.fetchQuery(monitoringProgressQuery());
+    await queryClient.fetchQuery(activityLogsQuery(1));
+    await queryClient.fetchQuery(adminGameQuestionsQuery());
+    await queryClient.fetchQuery(adminPlaygroundQuery());
+    expect(queryClient.getQueryCache().getAll()).toHaveLength(8);
+    expect(dehydratedKeys()).toEqual([]);
+  });
   it('hanya queries/curriculum.ts dan queries/leaderboard.ts yang menandai persist: true', () => {
     const srcDir = resolve(process.cwd(), 'src');
     const marked = readdirSync(srcDir, { recursive: true, encoding: 'utf8' })

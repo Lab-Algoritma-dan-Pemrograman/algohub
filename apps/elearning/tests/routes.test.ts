@@ -122,3 +122,40 @@ describe('guardRoute', () => {
     expect(await outcome('/admin/users')).toBe('/dashboard');
   });
 });
+
+const layouts = {
+  '/admin': await import('../src/routes/(app)/admin/+layout'),
+  '/monitoring': await import('../src/routes/(app)/monitoring/+layout'),
+  '/auditlog': await import('../src/routes/(app)/auditlog/+layout'),
+};
+
+// Layout per route staf (FEAT-005) dipanggil lewat load() seperti SvelteKit: yang tak berhak
+// mendapat redirect 307 ke /dashboard, yang berhak lolos tanpa error.
+describe('layout route staf', () => {
+  async function enter(path: keyof typeof layouts): Promise<unknown> {
+    try {
+      await layouts[path].load({ url: new URL(`http://localhost${path}`) } as never);
+      return 'ok';
+    } catch (err) {
+      return err;
+    }
+  }
+
+  it.each([
+    ['praktikan', { '/admin': false, '/monitoring': false, '/auditlog': false }],
+    ['asisten', { '/admin': false, '/monitoring': true, '/auditlog': false }],
+    ['kordas', { '/admin': true, '/monitoring': true, '/auditlog': true }],
+    ['admin', { '/admin': true, '/monitoring': true, '/auditlog': true }],
+  ] as const)('%s', async (role, allowed) => {
+    signedIn(role);
+    for (const [path, ok] of Object.entries(allowed)) {
+      const result = await enter(path as keyof typeof layouts);
+      if (ok) expect(result).toBe('ok');
+      else expect(result).toMatchObject({ status: 307, location: '/dashboard' });
+    }
+  });
+
+  it('tanpa sesi diarahkan ke /', async () => {
+    expect(await enter('/admin')).toMatchObject({ status: 307, location: '/' });
+  });
+});
