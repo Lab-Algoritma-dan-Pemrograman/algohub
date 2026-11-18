@@ -3,6 +3,8 @@ import { queryOptions } from '@tanstack/svelte-query';
 import { api } from '#lib/api.ts';
 import { fetchAllPages } from '#lib/paginate.ts';
 import { queryClient } from '#lib/query.ts';
+import { applyXpGain } from '#lib/rewards.ts';
+import { announceAchievements } from './achievements.ts';
 // Progres milik user tidak dipersist: berubah tiap lesson selesai dan mudah basi di perangkat bersama.
 export const completedLessonsQuery = () =>
   queryOptions({
@@ -28,4 +30,14 @@ export const completeLessonOptions = () => ({
       queryClient.invalidateQueries({ queryKey: elearningKeys.progress.lessons() }),
       queryClient.invalidateQueries({ queryKey: elearningKeys.progress.recent() }),
     ]),
+});
+
+// Pemberian XP manual (POST /progress/xp). Level naik memicu popup, achievement XP baru
+// ikut diumumkan dari respons yang sama.
+export const grantXpOptions = () => ({
+  mutationFn: (amount: number) => api.progress.grantXp(amount),
+  onSuccess: (res: Awaited<ReturnType<typeof api.progress.grantXp>>) => {
+    applyXpGain(res);
+    if (res.achievement) announceAchievements([res.achievement]);
+  },
 });

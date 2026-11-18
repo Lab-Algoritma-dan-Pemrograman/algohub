@@ -10,6 +10,7 @@
   import { createQuery } from '@tanstack/svelte-query';
   import { fade } from 'svelte/transition';
   import { api } from '#lib/api.ts';
+  import BugHuntCard from '#lib/components/BugHuntCard.svelte';
   import LevelCard from '#lib/components/LevelCard.svelte';
   import {
     buildCurriculum,
@@ -391,6 +392,8 @@
           {/each}
         </div>
       </div>
+
+      <BugHuntCard isAdmin={user.role === 'admin'} />
 
       <div
         class="relative overflow-hidden rounded-[2rem] border-2 border-rose-800 bg-gradient-to-br from-rose-700 via-rose-800 to-pink-900 p-6 text-white shadow-[0_6px_0_#5C0E25]"

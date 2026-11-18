@@ -10,6 +10,7 @@ const api = vi.hoisted(() => ({
     curriculum: { levels: vi.fn(), modules: vi.fn(), lessons: vi.fn() },
     progress: { myLessons: vi.fn(), recent: vi.fn() },
     playground: { examples: vi.fn() },
+    leaderboard: { list: vi.fn(), weekly: vi.fn(), rank: vi.fn() },
     validateQuiz: vi.fn(),
   },
 }));
@@ -17,6 +18,8 @@ vi.mock('#lib/api.ts', () => api);
 const { levelsQuery, modulesQuery, lessonsQuery } = await import('../src/lib/queries/curriculum');
 const { completedLessonsQuery, recentProgressQuery } = await import('../src/lib/queries/progress');
 const { playgroundExamplesQuery } = await import('../src/lib/queries/playground');
+const { leaderboardListQuery, leaderboardRankQuery, weeklyLeaderboardQuery } =
+  await import('../src/lib/queries/leaderboard');
 const { validateQuizOptions } = await import('../src/lib/queries/quiz');
 const { loadSession } = await import('../src/lib/auth');
 const { queryClient } = await import('../src/lib/query');
@@ -41,6 +44,12 @@ const FORBIDDEN = [
   elearningKeys.game.questions('c'),
   elearningKeys.game.plays(),
   elearningKeys.leaderboard.weekly(),
+  elearningKeys.leaderboard.weekly({ kelas: 'A1', limit: 3 }),
+  elearningKeys.leaderboard.rank(100, { kelas: 'A1' }),
+  elearningKeys.leaderboard.filters(),
+  elearningKeys.game.settings(),
+  elearningKeys.achievements.catalog(),
+  elearningKeys.achievements.mine(),
   elearningKeys.prestige.eligibility(),
   elearningKeys.playground.examples('c'),
   ['elearning', 'quiz', 'validate', 'lesson-1'],
@@ -128,12 +137,24 @@ describe('persist', () => {
     expect(JSON.stringify(state)).not.toContain('correctAnswer');
   });
 
-  it('hanya queries/curriculum.ts yang menandai persist: true', () => {
+  it('papan total ikut dipersist per filter, papan mingguan dan peringkat pribadi tidak', async () => {
+    api.api.leaderboard.list.mockResolvedValue(page([{ nim: '1', nama: 'Ani', xp: 10 }]));
+    api.api.leaderboard.weekly.mockResolvedValue(page([{ nim: '1', nama: 'Ani', weeklyXp: 10 }]));
+    api.api.leaderboard.rank.mockResolvedValue({ rank: 3 });
+    await queryClient.fetchQuery(leaderboardListQuery({ kelas: 'A1', limit: 20 }));
+    await queryClient.fetchQuery(weeklyLeaderboardQuery({ kelas: 'A1', limit: 3 }));
+    await queryClient.fetchQuery(leaderboardRankQuery(10, { kelas: 'A1' }));
+    expect(dehydratedKeys()).toEqual([
+      JSON.stringify(elearningKeys.leaderboard.list({ kelas: 'A1', limit: 20 })),
+    ]);
+  });
+
+  it('hanya queries/curriculum.ts dan queries/leaderboard.ts yang menandai persist: true', () => {
     const srcDir = resolve(process.cwd(), 'src');
     const marked = readdirSync(srcDir, { recursive: true, encoding: 'utf8' })
       .map((file) => file.replaceAll('\\', '/'))
       .filter((file) => /\.(ts|svelte)$/.test(file))
       .filter((file) => /persist:\s*true/.test(readFileSync(`${srcDir}/${file}`, 'utf8')));
-    expect(marked).toEqual(['lib/queries/curriculum.ts']);
+    expect(marked.sort()).toEqual(['lib/queries/curriculum.ts', 'lib/queries/leaderboard.ts']);
   });
 });

@@ -17,8 +17,9 @@
   import { onMount } from 'svelte';
   import { startActivity } from '#lib/activity.ts';
   import { signOut } from '#lib/auth.ts';
+  import AchievementPopup from '#lib/components/AchievementPopup.svelte';
+  import LevelUpPopup from '#lib/components/LevelUpPopup.svelte';
   import SidebarItem from '#lib/components/SidebarItem.svelte';
-  import type { StaticRouteId } from '#lib/paths.ts';
   import { loadProfile } from '#lib/profile.ts';
   import { startRealtimeToken, stopRealtimeToken } from '#lib/realtime/token.ts';
   import { isAdminOrKordas, isStaff } from '#lib/roles.ts';
@@ -204,7 +205,7 @@
           {/if}
         </div>
         <a
-          href={resolve('/profile' as StaticRouteId)}
+          href={resolve('/(app)/profile')}
           class="hover:bg-maroon-bg hover:border-maroon/20 group flex items-center space-x-3 rounded-full border-2 border-transparent bg-white p-1.5 pl-5 shadow-sm transition-colors"
         >
           <div class="hidden text-right sm:block">
@@ -238,4 +239,16 @@
       </div>
     </div>
   </main>
+
+  <!-- Level-up menunggu sampai antrean achievement kosong supaya popup tidak bertumpuk. -->
+  {#if appStore.unlockedAchievement}
+    {#key appStore.unlockedAchievement.id}
+      <AchievementPopup
+        achievement={appStore.unlockedAchievement}
+        onclose={() => appStore.shiftAchievement()}
+      />
+    {/key}
+  {:else if appStore.levelUp !== null}
+    <LevelUpPopup level={appStore.levelUp} onclose={() => appStore.setLevelUp(null)} />
+  {/if}
 </div>
