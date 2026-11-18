@@ -12,6 +12,7 @@
     "dev:api": "cd backend && go run ./cmd/server",
     "dev:praktikum": "bun run --filter @algohub/praktikum dev",
     "dev:siakad": "bun run --filter @algohub/siakad dev",
+    "dev:elearning": "bun run --filter @algohub/elearning dev",
     "fetch-compiler": "bun scripts/fetch-compiler.ts",
     "lint": "eslint . && prettier --check .",
     "format": "prettier --write .",

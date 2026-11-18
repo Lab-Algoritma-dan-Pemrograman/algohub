@@ -1,0 +1,117 @@
+import { elearningKeys } from '@algohub/api-client/elearning';
+import { shouldPersistQuery } from '@algohub/query';
+import { dehydrate } from '@tanstack/svelte-query';
+import { readdirSync, readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+const api = vi.hoisted(() => ({
+  api: {
+    auth: { verify: vi.fn() },
+    curriculum: { levels: vi.fn(), modules: vi.fn(), lessons: vi.fn() },
+    progress: { myLessons: vi.fn(), recent: vi.fn() },
+  },
+}));
+vi.mock('#lib/api.ts', () => api);
+const { levelsQuery, modulesQuery, lessonsQuery } = await import('../src/lib/queries/curriculum');
+const { completedLessonsQuery, recentProgressQuery } = await import('../src/lib/queries/progress');
+const { loadSession } = await import('../src/lib/auth');
+const { queryClient } = await import('../src/lib/query');
+const { session } = await import('../src/lib/session');
+// 03-frontend.md § Persist: hanya data referensi yang tidak rahasia; sisanya wajib hilang saat
+// cache disimpan ke IndexedDB.
+const ALLOWED = [
+  elearningKeys.curriculum.levels(),
+  elearningKeys.curriculum.modules(),
+  elearningKeys.curriculum.lessons(),
+];
+const FORBIDDEN = [
+  elearningKeys.session(),
+  elearningKeys.progress.lessons(),
+  elearningKeys.progress.recent(),
+  elearningKeys.activityLogs.list(),
+  elearningKeys.monitoring.sessions(),
+  elearningKeys.monitoring.students(),
+  elearningKeys.monitoring.progress('2022110083'),
+  elearningKeys.admin.users(),
+  elearningKeys.admin.userProgress('2022110083'),
+  elearningKeys.game.questions('c'),
+  elearningKeys.game.plays(),
+  elearningKeys.leaderboard.weekly(),
+  elearningKeys.prestige.eligibility(),
+  ['elearning', 'quiz', 'validate', 'lesson-1'],
+];
+const page = <T>(items: T[]) => ({ items, total: items.length, page: 1, limit: 100 });
+const dehydratedKeys = () =>
+  dehydrate(queryClient, { shouldDehydrateQuery: shouldPersistQuery }).queries.map((q) =>
+    JSON.stringify(q.queryKey),
+  );
+beforeEach(() => {
+  queryClient.clear();
+  localStorage.clear();
+  session.clear();
+  vi.clearAllMocks();
+});
+describe('persist', () => {
+  it('kurikulum ikut terdehydrate, sesi dan progres tidak', async () => {
+    api.api.curriculum.levels.mockResolvedValue(page([{ id: 'l1' }]));
+    api.api.curriculum.modules.mockResolvedValue(page([{ id: 'm1' }]));
+    api.api.curriculum.lessons.mockResolvedValue(page([{ id: 'les1' }]));
+    api.api.progress.myLessons.mockResolvedValue(
+      page([
+        { lesson_id: 'les1', completed: true },
+        { lesson_id: 'les2', completed: false },
+      ]),
+    );
+    api.api.progress.recent.mockResolvedValue([{ id: 'p1', lesson_id: 'les1' }]);
+    session.set('tok', {
+      id: 1,
+      nim: '1',
+      nama: 'U',
+      kelas: '',
+      role: 'praktikan',
+      jurusan: null,
+      email: null,
+      shift: null,
+    });
+    api.api.auth.verify.mockResolvedValue({
+      token: 'tok',
+      payload: {
+        nim: '1',
+        nama: 'U',
+        kelas: '',
+        shift: null,
+        jurusan: null,
+        email: null,
+        role: 'x',
+      },
+    });
+    await queryClient.fetchQuery(levelsQuery());
+    await queryClient.fetchQuery(modulesQuery());
+    await queryClient.fetchQuery(lessonsQuery());
+    await queryClient.fetchQuery(completedLessonsQuery());
+    await queryClient.fetchQuery(recentProgressQuery());
+    await loadSession();
+    expect(await queryClient.fetchQuery(completedLessonsQuery())).toEqual(['les1']);
+    expect(dehydratedKeys().sort()).toEqual(ALLOWED.map((key) => JSON.stringify(key)).sort());
+  });
+  it.each(FORBIDDEN.map((key) => [JSON.stringify(key), key] as const))(
+    'query %s tidak dipersist walau sukses',
+    async (_name, key) => {
+      await queryClient.fetchQuery({ queryKey: key, queryFn: () => ({ rahasia: true }) });
+      expect(dehydratedKeys()).toEqual([]);
+    },
+  );
+  it('query gagal tidak dipersist walau meta persist menyala', async () => {
+    api.api.curriculum.levels.mockRejectedValue(new Error('x'));
+    await queryClient.fetchQuery({ ...levelsQuery(), retry: false }).catch(() => undefined);
+    expect(dehydratedKeys()).toEqual([]);
+  });
+  it('hanya queries/curriculum.ts yang menandai persist: true', () => {
+    const srcDir = resolve(process.cwd(), 'src');
+    const marked = readdirSync(srcDir, { recursive: true, encoding: 'utf8' })
+      .map((file) => file.replaceAll('\\', '/'))
+      .filter((file) => /\.(ts|svelte)$/.test(file))
+      .filter((file) => /persist:\s*true/.test(readFileSync(`${srcDir}/${file}`, 'utf8')));
+    expect(marked).toEqual(['lib/queries/curriculum.ts']);
+  });
+});

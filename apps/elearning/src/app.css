@@ -1,0 +1,68 @@
+@import '@algohub/config/tailwind.css';
+@theme {
+  --font-sans: Nunito, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+  --color-maroon: #8a1538;
+  --color-maroon-light: #b21f47;
+  --color-maroon-dark: #5c0e25;
+  --color-maroon-bg: #fdf2f4;
+  --color-fun-yellow: #ffc300;
+  --color-fun-blue: #48cae4;
+  --color-fun-green: #06d6a0;
+  --color-fun-purple: #9d4edd;
+  --color-dark: #2d3142;
+  --color-python: #3776ab;
+  --color-c: #00599c;
+  --shadow-soft: 0 10px 25px -5px rgba(138, 21, 56, 0.05), 0 8px 10px -6px rgba(138, 21, 56, 0.02);
+  --shadow-bubbly: 0 6px 0 rgba(0, 0, 0, 0.1);
+  --shadow-bubbly-maroon: 0 6px 0 #5c0e25;
+}
+@layer base {
+  body {
+    @apply text-dark antialiased;
+    background-color: #fdfbf7;
+    background-image:
+      radial-gradient(circle at 10% 20%, rgba(255, 195, 0, 0.05) 0%, transparent 20%),
+      radial-gradient(circle at 90% 80%, rgba(138, 21, 56, 0.04) 0%, transparent 20%);
+    background-attachment: fixed;
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #fdf2f4;
+    border-radius: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #d9a0b0;
+    border-radius: 10px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #8a1538;
+  }
+}
+@layer components {
+  .btn-bubbly {
+    transition: all 0.1s ease;
+  }
+  .btn-bubbly:active {
+    transform: translateY(6px);
+    box-shadow: 0 0 0 transparent;
+  }
+  .card-hover {
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+  .card-hover:hover {
+    transform: translateY(-6px);
+    box-shadow:
+      0 15px 30px -5px rgba(138, 21, 56, 0.1),
+      0 10px 10px -5px rgba(138, 21, 56, 0.04);
+  }
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #d9a0b0;
+    border-radius: 10px;
+  }
+}
