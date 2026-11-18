@@ -10,6 +10,9 @@ import (
 	entity "github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/entity/siakad"
 )
 
+// DB inti tidak punya kolom `phone`; nomor tersimpan di `nomor_hp` (130 baris) dan `phone_number` (13 baris).
+const userPhoneColumn = "coalesce(nullif(trim(nomor_hp), ''), nullif(trim(phone_number), ''))"
+
 type NotifyRepository interface {
 	WASettings(ctx context.Context) (entity.WASettings, error)
 	UserPhone(ctx context.Context, id int64) (string, error)
@@ -47,7 +50,7 @@ func (r *notifyRepository) WASettings(ctx context.Context) (entity.WASettings, e
 
 func (r *notifyRepository) UserPhone(ctx context.Context, id int64) (string, error) {
 	var phone sql.NullString
-	err := r.db.WithContext(ctx).Raw("SELECT phone FROM public.users WHERE id = ?", id).Row().Scan(&phone)
+	err := r.db.WithContext(ctx).Raw("SELECT "+userPhoneColumn+" FROM public.users WHERE id = ?", id).Row().Scan(&phone)
 	if errors.Is(err, sql.ErrNoRows) {
 		return "", nil
 	}

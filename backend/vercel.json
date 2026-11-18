@@ -3,7 +3,6 @@
   "framework": "go",
   "regions": ["sin1"],
   "crons": [
-    { "path": "/api/cron/siakad/check-shifts", "schedule": "0 7 * * *" },
     { "path": "/api/cron/keep-alive", "schedule": "0 0 * * *" }
   ]
 }

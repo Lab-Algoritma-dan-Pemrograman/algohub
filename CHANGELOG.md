@@ -12,6 +12,9 @@ Semua perubahan penting dicatat di file ini. Format mengikuti [Keep a Changelog]
 - Env production `algohub-api`: `CRON_SECRET`, `SUPABASE_*`, `FB_SCRYPT_*`, `GLOT_*`, `OLLAMA_*`, `DATABASE_URL_ELEARNING`, `SIAKAD_JWT_SECRET`, `GEMINI_API_KEY`, `VAPID_PRIVATE_KEY`, `ELEARNING_SUPABASE_*`, `ELEARNING_APP_URL`. Sembilan env yang sebelumnya hanya target preview ikut dipasang di production, ditambah `AUTH_MODE=dual`.
 
 #### Diubah
+- `DATABASE_URL_SIAKAD` dan `DATABASE_URL_ELEARNING` di `algohub-api` production diisi DSN yang sama dengan `DATABASE_URL_PRAKTIKUM` (project `oidwvfcxlxfyojkyurmm`). Ketiga app memakai satu DB, tidak ada project Supabase siakad terpisah.
+- `backend/vercel.json`: jadwal cron `/api/cron/siakad/check-shifts` dicabut sampai cutover C4, karena `labap-siakad` masih menjalankan `cron-check-shifts` pada DB yang sama sehingga push shift bisa terkirim ganda. Route-nya tetap terpasang dan bisa dipicu manual.
+- `repository/siakad/notify`: nomor HP dibaca dari `coalesce(nullif(trim(nomor_hp), ''), nullif(trim(phone_number), ''))`. Kolom `phone` tidak ada di DB inti, sehingga kirim WA/push lewat `targetUserId` selalu gagal "Nomor WhatsApp tujuan tidak ditemukan" (T-74).
 - CSP `connect-src` praktikum dan elearning mengizinkan `https://algohub-portal-gamma.vercel.app`, sumber file compiler selama transisi. Nama `algohub-portal.vercel.app` sudah dipakai akun Vercel lain, jadi alias production project portal memakai akhiran `-gamma`.
 - Domain siakad di backend menjadi opsional. Kalau `DATABASE_URL_SIAKAD` kosong, route siakad dan cron siakad tidak dipasang, sementara praktikum dan elearning tetap jalan. Kalau DSN siakad diisi tanpa `DATABASE_URL_ELEARNING` atau `SIAKAD_JWT_SECRET`, server tetap gagal start. Sebelumnya env siakad yang belum lengkap ikut mematikan praktikum.
 
@@ -19,6 +22,8 @@ Semua perubahan penting dicatat di file ini. Format mengikuti [Keep a Changelog]
 - `/compiler/v1/SHA256SUMS` tidak disajikan portal (404). `scripts/fetch-compiler.ts` hanya membaca checksum itu untuk memverifikasi unduhan; integritas `clang` sudah dicocokkan dengan GitHub Release `compiler-v1`.
 - `WA_GATEWAY_TOKEN` dan `BYNARA_API_KEY` tidak ada di folder `_secrets` (hanya VAPID private key). Keduanya belum dipasang di `algohub-api` production.
 - Selama `DATABASE_URL_SIAKAD` kosong, route `/api/cron/keep-alive` tidak terpasang karena ikut blok siakad, jadi cron harian Vercel gagal sampai DSN siakad diisi.
+- RPC `check_already_absent_secure` dan `save_elearning_progress_secure` tidak ada di DB inti walaupun masih ada di whitelist izin (T-75). Tidak dipanggil frontend siakad baru.
+- 10 baris data siakad (`financial_records` 3, `inventory_items` 3, `equipment` 1, `inventory_rentals` 3) hanya ada di `huddecanbapwjairmaef`, belum dimigrasi ke DB inti (T-76).
 ### Fase 9 — apps/portal (2026-11-18)
 
 #### Ditambahkan

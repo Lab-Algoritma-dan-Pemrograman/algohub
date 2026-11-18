@@ -84,7 +84,7 @@ func TestWASettings(t *testing.T) {
 }
 
 func TestUserPhone(t *testing.T) {
-	const q = "SELECT phone FROM public.users WHERE id = $1"
+	const q = "SELECT " + userPhoneColumn + " FROM public.users WHERE id = $1"
 	db, mock := newMockDB(t)
 	repo := NewNotifyRepository(db)
 
@@ -99,6 +99,20 @@ func TestUserPhone(t *testing.T) {
 	}
 	if err := mock.ExpectationsWereMet(); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestUserPhoneColumnFallsBack(t *testing.T) {
+	if strings.Contains(userPhoneColumn, "public.") || strings.Contains(userPhoneColumn, "phone,") {
+		t.Fatalf("kolom harus nomor_hp lalu phone_number: %s", userPhoneColumn)
+	}
+	for _, col := range []string{"nomor_hp", "phone_number"} {
+		if !strings.Contains(userPhoneColumn, col) {
+			t.Fatalf("kolom %s tidak dipakai: %s", col, userPhoneColumn)
+		}
+	}
+	if strings.Contains(userPhoneColumn, "SELECT") || strings.Contains(userPhoneColumn, ";") {
+		t.Fatalf("kolom tidak boleh memuat SQL: %s", userPhoneColumn)
 	}
 }
 
