@@ -9,10 +9,11 @@ test.skip(
 
 const runButton = (page: Page) => page.getByRole('button', { name: /Jalankan/ });
 
-// Jalankan sebelum runtime siap hanya mengembalikan pesan "masih diunduh", jadi tunggu status hilang.
+// Tombol Jalankan aktif tepat saat runtime siap. Menunggu teks "Menyiapkan" hilang tidak cukup:
+// cek itu bisa lolos sebelum teksnya sempat dirender, lalu Pyodide dari CDN butuh lebih dari 5 detik.
 async function runtimeReady(page: Page) {
-  await expect(page.getByText(/Menyiapkan/)).toHaveCount(0, { timeout: 150_000 });
-  await expect(runButton(page)).toBeEnabled();
+  await expect(runButton(page)).toBeEnabled({ timeout: 150_000 });
+  await expect(page.getByText(/Menyiapkan/)).toHaveCount(0);
 }
 
 test('lesson C: scanf membaca stdin panel sandbox dengan compiler asli', async ({ page }) => {
