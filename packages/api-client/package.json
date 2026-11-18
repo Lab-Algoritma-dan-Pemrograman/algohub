@@ -5,6 +5,7 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
+    "./elearning": "./src/elearning/index.ts",
     "./praktikum": "./src/praktikum/index.ts",
     "./siakad": "./src/siakad/index.ts"
   },
