@@ -1,5 +1,6 @@
 // @vitest-environment node
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { createPwaOptions } from '../pwa-options';
 const options = createPwaOptions('http://localhost:8080');
@@ -46,5 +47,51 @@ describe('PWA', () => {
     expect(
       options.generateSW?.navigateFallbackDenylist?.some((re) => re.test('/runner/x.js')),
     ).toBe(true);
+  });
+});
+
+const buildDir = fileURLToPath(new URL('../build/', import.meta.url));
+const built = existsSync(`${buildDir}sw.js`);
+// Origin dari env hanya ada di sw.js bila build dibuat dengan PUBLIC_API_BASE_URL yang sama.
+const API_URLS = [
+  'https://api.algohub.web.id/api/elearning/profile/sync',
+  ...(process.env.PUBLIC_API_BASE_URL ? [`/api/elearning/leaderboard`] : []),
+];
+const toRegExp = (literal: string) => {
+  const end = literal.lastIndexOf('/');
+  return new RegExp(literal.slice(1, end), literal.slice(end + 1));
+};
+
+// Hanya berjalan setelah `bun run build`; tanpa build, konfigurasi di atas sudah diuji.
+describe.skipIf(!built)('output build PWA', () => {
+  const sw = built ? readFileSync(`${buildDir}sw.js`, 'utf8') : '';
+
+  it('manifest dan service worker ada di build', () => {
+    expect(existsSync(`${buildDir}manifest.webmanifest`)).toBe(true);
+    expect(existsSync(`${buildDir}index.html`)).toBe(true);
+    const manifest = JSON.parse(readFileSync(`${buildDir}manifest.webmanifest`, 'utf8'));
+    expect(manifest).toMatchObject({ name: 'AlgoHub E-Learning', display: 'standalone' });
+  });
+
+  it('service worker tidak punya route cache untuk API', () => {
+    // Nama kelas workbox dimangling di sw.js, jadi route dikenali dari pola dan ada tidaknya opsi:
+    // NetworkOnly dibuat tanpa argumen, sedangkan CacheFirst membawa cacheName.
+    const routes = [
+      ...sw.matchAll(/\b\w\((\/\^https?(?:[^,]|\\,)+?\/[a-z]*),new (\w+)(\(|,)/g),
+    ].map((m) => ({ pattern: toRegExp(m[1]), withOptions: m[3] === '(' }));
+    expect(routes.length).toBeGreaterThan(1);
+    for (const url of API_URLS) {
+      const matched = routes.filter((route) => route.pattern.test(url));
+      expect(matched.length, url).toBeGreaterThan(0);
+      expect(
+        matched.every((route) => !route.withOptions),
+        url,
+      ).toBe(true);
+    }
+    expect([...sw.matchAll(/cacheName:`([^`]+)`/g)].map((m) => m[1])).toEqual(['pyodide-cache']);
+  });
+
+  it('precache tidak memuat URL API', () => {
+    expect(sw).not.toMatch(/url:`[^`]*\/api\//);
   });
 });

@@ -34,3 +34,25 @@ describe('output statis saja', () => {
     expect(rootLayout.prerender).toBe(false);
   });
 });
+const buildDir = `${appDir}build/`;
+
+// Hanya berjalan setelah `bun run build`.
+describe.skipIf(!existsSync(`${buildDir}index.html`))('build statis', () => {
+  const files = existsSync(buildDir)
+    ? readdirSync(buildDir, { recursive: true, encoding: 'utf8' }).map((file) =>
+        file.replaceAll('\\', '/'),
+      )
+    : [];
+
+  it('berisi fallback SPA dan tidak ada output fungsi server', () => {
+    expect(files).toContain('index.html');
+    const functionOutput = files.filter(
+      (file) =>
+        /(^|\/)(functions|api|_worker\.js)(\/|$)/.test(file) ||
+        /\.func(\/|$)/.test(file) ||
+        /vc-config\.json$/.test(file),
+    );
+    expect(functionOutput).toEqual([]);
+    expect(existsSync(`${appDir}.vercel`)).toBe(false);
+  });
+});
