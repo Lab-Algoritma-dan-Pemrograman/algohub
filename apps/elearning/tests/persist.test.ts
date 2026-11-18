@@ -36,15 +36,12 @@ const {
 const { loadSession } = await import('../src/lib/auth');
 const { queryClient } = await import('../src/lib/query');
 const { session } = await import('../src/lib/session');
-// 03-frontend.md § Persist: hanya data referensi yang tidak rahasia; sisanya wajib hilang saat
+// 03-frontend.md Â§ Persist: hanya data referensi yang tidak rahasia; sisanya wajib hilang saat
 // cache disimpan ke IndexedDB.
-const ALLOWED = [
-  elearningKeys.curriculum.levels(),
-  elearningKeys.curriculum.modules(),
-  elearningKeys.curriculum.lessons(),
-];
+const ALLOWED = [elearningKeys.curriculum.levels(), elearningKeys.curriculum.modules()];
 const FORBIDDEN = [
   elearningKeys.session(),
+  elearningKeys.curriculum.lessons(),
   elearningKeys.progress.lessons(),
   elearningKeys.progress.recent(),
   elearningKeys.activityLogs.list(),
@@ -182,6 +179,19 @@ describe('persist', () => {
     await queryClient.fetchQuery(adminPlaygroundQuery());
     expect(queryClient.getQueryCache().getAll()).toHaveLength(8);
     expect(dehydratedKeys()).toEqual([]);
+  });
+  it('lesson staf (dengan kunci jawaban dan solusi) tidak masuk cache yang dipersist', async () => {
+    api.api.curriculum.lessons.mockResolvedValue(
+      page([
+        { id: 'les1', solution: 'SOLUSI-RAHASIA', quiz: { options: ['a'], correctAnswer: 0 } },
+      ]),
+    );
+    await queryClient.fetchQuery(lessonsQuery());
+    const state = dehydrate(queryClient, { shouldDehydrateQuery: shouldPersistQuery });
+    expect(state.queries).toEqual([]);
+    const text = JSON.stringify(state);
+    expect(text).not.toContain('correctAnswer');
+    expect(text).not.toContain('SOLUSI-RAHASIA');
   });
   it('hanya queries/curriculum.ts dan queries/leaderboard.ts yang menandai persist: true', () => {
     const srcDir = resolve(process.cwd(), 'src');

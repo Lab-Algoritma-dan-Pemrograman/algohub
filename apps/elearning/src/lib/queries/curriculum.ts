@@ -2,8 +2,10 @@ import { elearningKeys } from '@algohub/api-client/elearning';
 import { queryOptions } from '@tanstack/svelte-query';
 import { api } from '#lib/api.ts';
 import { fetchAllPages } from '#lib/paginate.ts';
-// Kurikulum sama untuk semua mahasiswa dan tidak rahasia (kunci jawaban kuis dikosongkan backend
-// untuk peran P), jadi aman dipersist untuk tampilan offline.
+// Level dan modul tidak membawa jawaban dan sama untuk semua peran, jadi aman dipersist untuk
+// tampilan offline. Lesson tidak dipersist: untuk admin, kordas, dan asisten backend mengembalikan
+// baris lengkap (quiz.correctAnswer dan solution), dan 03-frontend.md melarang kunci jawaban
+// tersimpan di IndexedDB.
 export const levelsQuery = () =>
   queryOptions({
     queryKey: elearningKeys.curriculum.levels(),
@@ -20,5 +22,4 @@ export const lessonsQuery = () =>
   queryOptions({
     queryKey: elearningKeys.curriculum.lessons(),
     queryFn: () => fetchAllPages((page, limit) => api.curriculum.lessons({ page, limit })),
-    meta: { persist: true },
   });

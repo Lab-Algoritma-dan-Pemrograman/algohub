@@ -1,4 +1,4 @@
-import { activityLog, classmate, page as pageOf, userRow } from './fixtures.ts';
+import { activityLog, classmate, lessons, page as pageOf, userRow } from './fixtures.ts';
 import {
   expect,
   loginAs,
@@ -8,7 +8,7 @@ import {
   waitForPersist,
 } from './test.ts';
 
-test('hanya kurikulum dan papan total yang dipersist; data pribadi staf tidak', async ({
+test('hanya kurikulum dan papan total yang dipersist; lesson dan data pribadi staf tidak', async ({
   page,
   api,
 }) => {
@@ -43,12 +43,39 @@ test('hanya kurikulum dan papan total yang dipersist; data pribadi staf tidak', 
   const keys = persistedQueryKeys(entries);
   expect(keys).toContain('["elearning","curriculum","levels"]');
   expect(keys).toContain('["elearning","curriculum","modules"]');
-  expect(keys).toContain('["elearning","curriculum","lessons"]');
-  const allowed = /^\["elearning","(curriculum","(levels|modules|lessons)"|leaderboard","list",)/;
+  expect(keys).not.toContain('["elearning","curriculum","lessons"]');
+  const allowed = /^\["elearning","(curriculum","(levels|modules)"|leaderboard","list",)/;
   expect(keys.filter((key) => !allowed.test(key))).toEqual([]);
 
   const text = entries.map((e) => e.value).join('\n');
   for (const secret of ['Peserta Rahasia', 'Monitor Rahasia', 'Aktor Rahasia', 'token-']) {
     expect(text).not.toContain(secret);
+  }
+});
+test('staf membuka kurikulum dan lesson: kunci jawaban dan solusi tidak masuk IndexedDB', async ({
+  page,
+  api,
+}) => {
+  api.on('GET', '/curriculum/lessons', () =>
+    pageOf(
+      lessons.map((lesson) => ({
+        ...lesson,
+        solution: 'SOLUSI-RAHASIA-STAF',
+        quiz: { question: 'Q?', options: ['a', 'b'], correctAnswer: 1 },
+      })),
+    ),
+  );
+  await loginAs(page, 'admin');
+  await page.goto('/courses');
+  await expect(page.getByText('Menjumlahkan dengan scanf').first()).toBeVisible();
+  await waitForPersist(page);
+  await page.goto('/admin');
+  await waitForPersist(page);
+  expect(api.callsTo('GET', '/curriculum/lessons').length).toBeGreaterThan(0);
+  const { entries } = await readAlgohubIdb(page);
+  expect(persistedQueryKeys(entries)).toContain('["elearning","curriculum","levels"]');
+  const text = entries.map((e) => e.value).join('\n');
+  for (const marker of ['correctAnswer', 'SOLUSI-RAHASIA-STAF', 'scanf']) {
+    expect(text).not.toContain(marker);
   }
 });
