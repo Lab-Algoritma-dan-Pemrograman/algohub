@@ -4,6 +4,24 @@ Semua perubahan penting dicatat di file ini. Format mengikuti [Keep a Changelog]
 
 ## [Belum dirilis]
 
+### Fase 6 — apps/siakad (2026-11-18)
+
+#### Ditambahkan
+- `apps/siakad`: SvelteKit 3 SPA statis dengan 21 halaman. Role dan menu key sama dengan `App.tsx` lama, dan menu key dicek lewat `get_division_access_secure` seperti `lib/auth.tsx` lama.
+- Data lewat backend Go (`/api/siakad/*`) dengan TanStack Query, `credentials: 'include'`, dan Bearer. Yang dipersist ke IndexedDB hanya pengaturan publik, jadwal, tautan, dan katalog barang.
+- Realtime Supabase hanya untuk `.channel()` (mati kalau `PUBLIC_SUPABASE_URL` kosong). Service worker `/service-worker.js` menangani push dan klik notifikasi.
+- `@algohub/api-client/siakad`: `createSiakadApi` (`rpc` dengan `{ data, error }`, `.single()`, `.maybeSingle()`, endpoint auth/notify/AI/SSO) dan `siakadKeys`.
+- `@algohub/ui`: input, label, select, tabs, badge, switch, checkbox, textarea, separator, sheet, tooltip, skeleton, sidebar, dan hook `is-mobile`.
+- E2E Playwright `apps/siakad/e2e` (mock API + mock Realtime): login per role, guard role dan menu key, aksi tulis halaman inti, Realtime, dan logout. Hasilnya 21 lulus. Script root `dev:siakad`.
+
+#### Diubah
+- Sesi memakai `token`/`user` dari `@algohub/auth`, bukan `lab_jwt_token`. User perlu login ulang setelah cutover.
+- `/service-worker.js` menggantikan `/sw.js`, jadi subscription push lama perlu subscribe ulang.
+- Logout berurutan: unsubscribe push → revoke token → bersihkan cache Query, IndexedDB, dan token.
+
+#### Diketahui
+- Belum diuji dengan backend nyata, dan SQL siakad masih diuji dengan mock (lihat Fase 5).
+- Aksi tulis kritik-saran, buat-qr, manajemen-jadwal, manajemen-kelas, ketersediaan, laporan-keuangan, manajemen-sewa, dan pengaturan belum punya e2e.
 ### Fase 4 — apps/praktikum (2026-11-18)
 
 #### Ditambahkan
