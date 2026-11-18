@@ -6,7 +6,11 @@ Semua perubahan penting dicatat di file ini. Format mengikuti [Keep a Changelog]
 
 ### Persiapan cutover (2026-11-18)
 
+#### Ditambahkan
+- `.vercelignore` di root: `node_modules`, hasil build, worktree, artefak agent, file `.env*`, dan file compiler portal tidak ikut diunggah saat `vercel deploy`.
+
 #### Diubah
+- CSP `connect-src` elearning mengizinkan `https://algohub-portal.vercel.app`, sumber file compiler selama transisi (sama dengan praktikum).
 - Domain siakad di backend menjadi opsional. Kalau `DATABASE_URL_SIAKAD` kosong, route siakad dan cron siakad tidak dipasang, sementara praktikum dan elearning tetap jalan. Kalau DSN siakad diisi tanpa `DATABASE_URL_ELEARNING` atau `SIAKAD_JWT_SECRET`, server tetap gagal start. Sebelumnya env siakad yang belum lengkap ikut mematikan praktikum.
 ### Fase 9 — apps/portal (2026-11-18)
 

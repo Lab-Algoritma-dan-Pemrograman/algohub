@@ -1,0 +1,14 @@
+.git
+.worktrees
+.agents
+.cache
+**/node_modules
+**/.svelte-kit
+**/build
+**/dist
+**/test-results
+**/playwright-report
+**/.env*
+!**/.env.example
+apps/portal/static/compiler
+backend/bin
