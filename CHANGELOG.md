@@ -4,6 +4,41 @@ Semua perubahan penting dicatat di file ini. Format mengikuti [Keep a Changelog]
 
 ## [Belum dirilis]
 
+### Fase 9 — apps/portal (2026-11-18)
+
+#### Ditambahkan
+- `apps/portal`: landing `algohub.web.id` yang di-prerender penuh (tanpa function), dengan link ke siakad, elearning, dan praktikum, plus halaman `/404`. Aksesibilitas Lighthouse 100.
+- `/compiler/v1/{clang,lld,memfs,sysroot.tar}` diunduh saat build oleh `fetch-compiler` dari GitHub Release `compiler-v1` dan dicek SHA-256. Build gagal kalau ada file yang tidak cocok. File compiler tidak disimpan di git.
+- `apps/portal/vercel.json`: redirect 301 semua URL lama praktikum (`/info`, `/praktikum`, `/playground`, `/playground-c`, `/layanan`) ke `praktikum.algohub.web.id` dengan path dan query yang sama, header compiler (`immutable`, CORS `*`, CORP `cross-origin`), header keamanan, dan cache aset.
+- Test Vitest untuk setiap redirect dan header, test `fetch-compiler` dengan release palsu (cocok dan tidak cocok), dan 4 e2e Playwright terhadap hasil build.
+
+#### Diubah
+- `scripts/fetch-compiler.ts` tidak lagi memakai streaming Bun, yang kadang macet di Windows.
+- Test yang menjalankan proses bun diberi batas waktu 60 detik.
+
+#### Diketahui
+- Header HSTS `includeSubDomains; preload` memaksa HTTPS di semua `*.algohub.web.id`. Sebelum cutover langkah 3, pastikan tidak ada subdomain yang hanya melayani HTTP.
+- Font KaTeX ±1,2 MB ikut masuk build portal lewat CSS `@algohub/ui` (T-73).
+
+### Fase 8 — apps/elearning (2026-11-18)
+
+#### Ditambahkan
+- `apps/elearning`: SvelteKit 3 SPA statis dengan 13 route. Navigasi berbasis store lama diganti URL: `/`, `/login`, `/sso`, `/dashboard`, `/courses`, `/lesson/[id]`, `/playground`, `/leaderboard`, `/profile`, `/admin`, `/monitoring`, `/auditlog`, dan `/terminal-demo`. Guard role sama dengan `App.tsx` lama.
+- Login lewat SSO (`/sso?code=`, kode ditukar ke `receive-token`) atau login langsung. Token Realtime diambil dari `auth/supabase-token` dan diperbarui sebelum kedaluwarsa. `supabase-js` hanya dipakai untuk `.channel()`.
+- Compiler C dan Python lewat `@algohub/runner`. Grafik matplotlib dari `images[]`.
+- PWA lewat `@vite-pwa/sveltekit`: manifest dan service worker. Service worker tidak meng-cache respons API (NetworkOnly).
+- `@algohub/api-client/elearning` (client untuk 64 route + `elearningKeys`) dan `@algohub/ui` MarkdownRenderer serta RichTextRenderer.
+- 243 unit test dan 30 e2e Playwright (mock API + mock Realtime, compiler asli). Script root `dev:elearning`.
+
+#### Diubah
+- Yang dipersist ke IndexedDB hanya levels, modules, dan leaderboard. Query lesson **tidak** dipersist, karena staf menerima kunci jawaban (`correctAnswer`, `solution`). Akibatnya daftar lesson juga tidak tersedia offline untuk mahasiswa.
+
+#### Diperbaiki
+- E2E lesson Python kadang gagal karena menunggu teks "Menyiapkan" hilang, padahal cek itu bisa lolos sebelum teks dirender. Sekarang e2e menunggu tombol Jalankan aktif. Diverifikasi 30/30 tiga kali berturut-turut.
+
+#### Diketahui
+- Belum diuji dengan backend nyata: SSO dari siakad, Realtime, instal PWA offline, upload gambar lesson, dan AI grading.
+- Pola tunggu yang sama masih ada di `playground.spec.ts` elearning dan `compiler.spec.ts` praktikum. Keduanya stabil di semua run (T-72).
 ### Fase 6 — apps/siakad (2026-11-18)
 
 #### Ditambahkan
