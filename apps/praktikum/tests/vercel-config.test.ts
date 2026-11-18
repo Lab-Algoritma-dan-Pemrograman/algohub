@@ -126,7 +126,7 @@ describe('vercel.json', () => {
       'https://cdn.jsdelivr.net',
       'https://esm.sh',
       'https://algohub.web.id',
-      'https://algohub-portal.vercel.app',
+      'https://algohub-portal-gamma.vercel.app',
       'https://gcore.jsdelivr.net',
       'https://fastly.jsdelivr.net',
     ]);

@@ -112,7 +112,7 @@ describe('vercel.json', () => {
       'https://gcore.jsdelivr.net',
       'https://fastly.jsdelivr.net',
       'https://algohub.web.id',
-      'https://algohub-portal.vercel.app',
+      'https://algohub-portal-gamma.vercel.app',
       'https://siakad.algohub.web.id',
     ]);
   });

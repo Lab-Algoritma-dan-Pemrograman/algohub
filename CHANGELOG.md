@@ -8,10 +8,16 @@ Semua perubahan penting dicatat di file ini. Format mengikuti [Keep a Changelog]
 
 #### Ditambahkan
 - `.vercelignore` di root: `node_modules`, hasil build, worktree, artefak agent, file `.env*`, dan file compiler portal tidak ikut diunggah saat `vercel deploy`.
+- Project Vercel `algohub-portal`, `algohub-praktikum`, `algohub-siakad`, `algohub-elearning` dengan Root Directory `apps/*`, framework kosong, dan "Include source files outside Root Directory" aktif. Alias production: `algohub-portal-gamma.vercel.app`, `algohub-praktikum.vercel.app`, `algohub-siakad-snowy.vercel.app`, `algohub-elearning-kappa.vercel.app`.
+- Env production `algohub-api`: `CRON_SECRET`, `SUPABASE_*`, `FB_SCRYPT_*`, `GLOT_*`, `OLLAMA_*`, `DATABASE_URL_ELEARNING`, `SIAKAD_JWT_SECRET`, `GEMINI_API_KEY`, `VAPID_PRIVATE_KEY`, `ELEARNING_SUPABASE_*`, `ELEARNING_APP_URL`. Sembilan env yang sebelumnya hanya target preview ikut dipasang di production, ditambah `AUTH_MODE=dual`.
 
 #### Diubah
-- CSP `connect-src` elearning mengizinkan `https://algohub-portal.vercel.app`, sumber file compiler selama transisi (sama dengan praktikum).
+- CSP `connect-src` praktikum dan elearning mengizinkan `https://algohub-portal-gamma.vercel.app`, sumber file compiler selama transisi. Nama `algohub-portal.vercel.app` sudah dipakai akun Vercel lain, jadi alias production project portal memakai akhiran `-gamma`.
 - Domain siakad di backend menjadi opsional. Kalau `DATABASE_URL_SIAKAD` kosong, route siakad dan cron siakad tidak dipasang, sementara praktikum dan elearning tetap jalan. Kalau DSN siakad diisi tanpa `DATABASE_URL_ELEARNING` atau `SIAKAD_JWT_SECRET`, server tetap gagal start. Sebelumnya env siakad yang belum lengkap ikut mematikan praktikum.
+
+#### Diketahui
+- `/compiler/v1/SHA256SUMS` tidak disajikan portal (404). `scripts/fetch-compiler.ts` hanya membaca checksum itu untuk memverifikasi unduhan; integritas `clang` sudah dicocokkan dengan GitHub Release `compiler-v1`.
+- `WA_GATEWAY_TOKEN` dan `BYNARA_API_KEY` tidak ada di folder `_secrets` (hanya VAPID private key). Keduanya belum dipasang di `algohub-api` production.
 ### Fase 9 — apps/portal (2026-11-18)
 
 #### Ditambahkan

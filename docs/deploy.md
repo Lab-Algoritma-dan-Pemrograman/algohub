@@ -62,7 +62,7 @@ Tidak bisa dibaca lewat CLI. `vercel usage` di team Hobby mengembalikan "Billing
 | Git integration | **belum disambungkan** (deploy lewat `vercel deploy` dari laptop) |
 | Domain | belum ada. `api.algohub.web.id` masih di `labap-backend`. |
 | Env (preview) | `APP_ENV=production`, `CORS_ORIGINS` (5 domain prod), `CORS_ORIGIN_PATTERNS=https://algohub-[a-z0-9-]+-lab-algoritma-pemrograman\.vercel\.app`. Sejak Fase 2 juga `DATABASE_URL_PRAKTIKUM` (encrypted, disusun dari `DB_*` `labap-backend`), `JWT_SECRET` (encrypted, sama dengan prod), `JWT_EXPIRE_HOURS`, `AUTH_MODE`, `SUPABASE_JWKS_URL`, `SUPABASE_JWT_ISSUER`, `SUPABASE_JWT_AUD`. `FB_SCRYPT_*` sengaja tidak dipasang supaya login uji tidak memigrasi hash password. |
-| Env (production) | belum diisi. **Jangan deploy production `algohub-api` sebelum cutover**: `vercel.json` berisi cron `check-shifts` (07.00) dan `keep-alive`, sehingga deployment production akan mengirim notifikasi push shift **ganda** bersama siakad lama. |
+| Env (production) | terisi sejak 2026-11-18 (Langkah A). Kecuali `DATABASE_URL_SIAKAD`, `ELEARNING_SUPABASE_JWT_SECRET`, `WA_GATEWAY_TOKEN`, dan `BYNARA_API_KEY` yang nilainya belum tersedia. Selama `DATABASE_URL_SIAKAD` kosong, route siakad dan cron `check-shifts` tidak dipasang, jadi tidak ada push ganda dengan siakad lama. |
 
 Deployment:
 - `algohub-r1g6oxqvq-…vercel.app` (preview): lulus uji `/api/health` dan CORS (lihat di bawah).
@@ -71,6 +71,22 @@ Deployment:
 Catatan:
 - Deployment Protection standar aktif. URL deployment preview mengembalikan 302 ke login Vercel. Alias production `algohub-api.vercel.app` publik.
 - `vercel curl` membuat **Protection Bypass for Automation** secret di project ini (otomatis, untuk uji). Secret bisa dicabut di Settings → Deployment Protection.
+
+### Project frontend baru (Langkah A, 2026-11-18)
+| Project | ID | Root Directory | Alias production |
+|---|---|---|---|
+| `algohub-portal` | `prj_RLTSjcnv7qYQaMp941hlDWp0zWJ8` | `apps/portal` | `algohub-portal-gamma.vercel.app` |
+| `algohub-praktikum` | `prj_uUPzNn1jct8cAivSf36ZVRqNNiYH` | `apps/praktikum` | `algohub-praktikum.vercel.app` |
+| `algohub-siakad` | `prj_rg5hLev48lfWazZEvwsnmk73KEAF` | `apps/siakad` | `algohub-siakad-snowy.vercel.app` |
+| `algohub-elearning` | `prj_Al0bkfl2oeptiah50Mm5AddZ0U4U` | `apps/elearning` | `algohub-elearning-kappa.vercel.app` |
+
+- Keempat project: framework `null`, `sourceFilesOutsideRootDirectory=true`, env `PUBLIC_*` target production+preview. Belum ada domain kustom dan belum disambungkan ke Git.
+- Nama `<project>.vercel.app` untuk portal, siakad, dan elearning sudah dipakai akun Vercel lain, jadi Vercel menambahkan akhiran (`-gamma`, `-snowy`, `-kappa`). Hanya `algohub-praktikum.vercel.app` yang bersih.
+- Alias berakhiran `-lab-algoritma-pemrograman` (mis. `algohub-portal-lab-algoritma-pemrograman.vercel.app`) dilindungi Deployment Protection, jadi tidak dipakai sebagai `PUBLIC_COMPILER_BASE_URL`.
+- `PUBLIC_COMPILER_BASE_URL` praktikum dan elearning: `https://algohub-portal-gamma.vercel.app/compiler/v1/` sampai cutover langkah 3. Origin yang sama ada di CSP `connect-src` kedua app.
+- Hasil uji: portal `/` 200 dan redirect lama 301 ke `praktikum.algohub.web.id`; `/compiler/v1/clang` 200, `Cache-Control: immutable`, `Access-Control-Allow-Origin: *`, `Cross-Origin-Resource-Policy: cross-origin`, SHA-256 sama dengan GitHub Release. Praktikum, siakad, dan elearning `/` 200 dan bundle-nya memuat env yang benar.
+- `/compiler/v1/SHA256SUMS` 404: file itu hanya dipakai `fetch-compiler` untuk verifikasi, tidak ikut ditulis ke `build/`.
+
 
 Uji di preview (`vercel curl /api/health --deployment <url>`):
 
