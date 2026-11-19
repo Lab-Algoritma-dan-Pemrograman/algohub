@@ -4,6 +4,17 @@ Semua perubahan penting dicatat di file ini. Format mengikuti [Keep a Changelog]
 
 ## [Belum dirilis]
 
+### Cutover (2026-11-19)
+
+#### Diubah
+- Semua domain produksi dipindahkan dari proyek Vercel lama ke proyek baru. `api.algohub.web.id` → `algohub-api`, `praktikum.algohub.web.id` → `algohub-praktikum`, `algohub.web.id` + `www` → `algohub-portal`, `siakad.algohub.web.id` → `algohub-siakad`, `elearning.algohub.web.id` → `algohub-elearning`. DNS Cloudflare tidak diubah (semua tetap `CNAME cname.vercel-dns.com`).
+- `PUBLIC_COMPILER_BASE_URL` praktikum dan elearning diganti dari alias preview ke `https://algohub.web.id/compiler/v1/`, lalu keduanya di-redeploy.
+
+#### Verifikasi
+- Kelima domain 200. Login praktikum, siakad, dan elearning lewat domain produksi 200. SSO siakad → elearning 302. Compiler C 200 immutable. Redirect lama portal `/info/*` → `praktikum.algohub.web.id` 301.
+- Proyek Vercel lama (`labap-*`) dorman tapi tidak dihapus, sebagai jalur mundur sampai 7 hari (08-deploy.md).
+- Pemindahan domain antar proyek memicu verifikasi TXT baru setiap kali. Ditangani lewat MCP Cloudflare, jadi tidak perlu input manual per langkah.
+
 ### Persiapan cutover (2026-11-18)
 
 #### Ditambahkan

@@ -7,6 +7,20 @@ Rencana lengkap: `docs/updates/` (salinan `_update/2026-11-17-monorepo-sveltekit
 ### Project Vercel yang melayani domain produksi sekarang
 Semua ada di team `lab-algoritma-pemrograman` (Hobby), akun `lordbgsdts-afk`. Sumber: `vercel alias ls`.
 
+**Sesudah cutover (2026-11-19):**
+
+| Domain | Project Vercel | Status |
+|---|---|---|
+| `algohub.web.id`, `www.algohub.web.id` | `algohub-portal` | 200 |
+| `api.algohub.web.id` | `algohub-api` | 200 (`/api/health`) |
+| `siakad.algohub.web.id` | `algohub-siakad` | 200 |
+| `elearning.algohub.web.id` | `algohub-elearning` | 200 |
+| `praktikum.algohub.web.id` | `algohub-praktikum` | 200 |
+
+Proyek lama (`labap-frontend`, `labap-backend`, `labap-siakad`, `labap-elearning`) dorman tapi tidak dihapus, sebagai jalur mundur 7 hari.
+
+**Sebelum cutover (baseline Fase 0):**
+
 | Domain | Project Vercel | Deployment |
 |---|---|---|
 | `algohub.web.id`, `www.algohub.web.id` | `labap-frontend` | `labap-frontend-859rlu8ta-…` |
@@ -83,7 +97,7 @@ Catatan:
 - Keempat project: framework `null`, `sourceFilesOutsideRootDirectory=true`, env `PUBLIC_*` target production+preview. Belum ada domain kustom dan belum disambungkan ke Git.
 - Nama `<project>.vercel.app` untuk portal, siakad, dan elearning sudah dipakai akun Vercel lain, jadi Vercel menambahkan akhiran (`-gamma`, `-snowy`, `-kappa`). Hanya `algohub-praktikum.vercel.app` yang bersih.
 - Alias berakhiran `-lab-algoritma-pemrograman` (mis. `algohub-portal-lab-algoritma-pemrograman.vercel.app`) dilindungi Deployment Protection, jadi tidak dipakai sebagai `PUBLIC_COMPILER_BASE_URL`.
-- `PUBLIC_COMPILER_BASE_URL` praktikum dan elearning: `https://algohub-portal-gamma.vercel.app/compiler/v1/` sampai cutover langkah 3. Origin yang sama ada di CSP `connect-src` kedua app.
+- `PUBLIC_COMPILER_BASE_URL` praktikum dan elearning: sekarang `https://algohub.web.id/compiler/v1/` (domain prod, setelah cutover langkah 3). Origin yang sama ada di CSP `connect-src` kedua app.
 - Hasil uji: portal `/` 200 dan redirect lama 301 ke `praktikum.algohub.web.id`; `/compiler/v1/clang` 200, `Cache-Control: immutable`, `Access-Control-Allow-Origin: *`, `Cross-Origin-Resource-Policy: cross-origin`, SHA-256 sama dengan GitHub Release. Praktikum, siakad, dan elearning `/` 200 dan bundle-nya memuat env yang benar.
 - `/compiler/v1/SHA256SUMS` 404: file itu hanya dipakai `fetch-compiler` untuk verifikasi, tidak ikut ditulis ke `build/`.
 - `PUBLIC_API_BASE_URL` ketiga app frontend (praktikum, siakad, elearning): `https://algohub-api.vercel.app`. Awalnya menunjuk `api.algohub.web.id`, backend lama, yang menolak origin preview dengan 403 sehingga login dari frontend baru gagal "failed to fetch".
