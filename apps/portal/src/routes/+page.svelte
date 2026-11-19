@@ -40,9 +40,9 @@
     <img
       src="/logo_new.png"
       alt="Logo Lab AP"
-      class="h-16 w-auto rounded-xl bg-white p-2 shadow-xs ring-1 ring-border"
+      class="anim-intro h-16 w-auto rounded-xl bg-white p-2 shadow-xs ring-1 ring-border"
     />
-    <div class="space-y-5">
+    <div class="anim-intro space-y-5" style="--i: 1">
       <Badge variant="outline" class="text-ink-caption">Ekosistem Digital Kampus</Badge>
       <h1 class="font-display text-4xl font-extrabold tracking-tight text-ink-heading md:text-5xl">
         Selamat datang di <span class="text-primary">AlgoHub</span>
@@ -57,7 +57,7 @@
         e-Learning, dan Praktikum agar kegiatan akademik terasa ringan, cepat, dan mudah dipercaya.
       </p>
     </div>
-    <div class="flex flex-wrap items-center justify-center gap-3">
+    <div class="anim-intro flex flex-wrap items-center justify-center gap-3" style="--i: 2">
       <Button href={apps[0].href} size="lg">
         Masuk SIAKAD <ArrowRight aria-hidden="true" />
       </Button>
@@ -69,7 +69,7 @@
 <!-- Platform -->
 <section class="px-4 pb-28 sm:px-6 lg:px-8">
   <div class="mx-auto flex max-w-5xl flex-col items-center gap-10">
-    <div class="space-y-2 text-center">
+    <div class="anim-reveal space-y-2 text-center">
       <h2 class="font-display text-2xl font-bold tracking-tight text-ink-heading md:text-3xl">
         Integrated Platform
       </h2>
@@ -77,7 +77,7 @@
     </div>
     <ul class="grid w-full grid-cols-1 gap-6 sm:grid-cols-3">
       {#each apps as app, i (app.href)}
-        <li>
+        <li class="anim-reveal">
           <a
             href={app.href}
             class="group block rounded-xl focus-visible:ring-4 focus-visible:ring-ring/40 focus-visible:outline-none"
