@@ -4,6 +4,17 @@ Semua perubahan penting dicatat di file ini. Format mengikuti [Keep a Changelog]
 
 ## [Belum dirilis]
 
+### Redesign landing portal (2026-11-20)
+
+#### Diubah
+- `apps/portal`: landing `algohub.web.id` didesain ulang mengikuti mockup Framer. Hero kini memuat badge "Ekosistem Digital Kampus", heading "Selamat datang di AlgoHub", dan rotator kata ("One platform for SIAKAD / e-Learning / Praktikum / Portal") menggantikan deskripsi statis tunggal.
+- Tombol hero diarahkan ke layanan: "Masuk SIAKAD" (primary) dan "Buka e-Learning" (outline), menggantikan "View my work" / "Say hello".
+- Background foto gelap pada hero dihapus; memakai latar terang dengan aksen maroon (`--primary`).
+- Footer portal diringkas menjadi satu baris: tagline, tiga link layanan (SIAKAD / e-Learning / Praktikum) dengan hover maroon, dan copyright.
+
+#### Ditambahkan
+- `apps/portal/src/lib/components/TypeRotator.svelte`: komponen ketik-berputar (Svelte 5 runes) untuk rotator kata hero.
+
 ### Cutover (2026-11-19)
 
 #### Diubah
