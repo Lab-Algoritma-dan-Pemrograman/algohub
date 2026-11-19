@@ -7,10 +7,15 @@ Semua perubahan penting dicatat di file ini. Format mengikuti [Keep a Changelog]
 ### Redesign landing portal (2026-11-20)
 
 #### Diubah
-- `apps/portal`: landing `algohub.web.id` didesain ulang mengikuti mockup Framer. Hero kini memuat badge "Ekosistem Digital Kampus", heading "Selamat datang di AlgoHub", dan rotator kata ("One platform for SIAKAD / e-Learning / Praktikum / Portal") menggantikan deskripsi statis tunggal.
-- Tombol hero diarahkan ke layanan: "Masuk SIAKAD" (primary) dan "Buka e-Learning" (outline), menggantikan "View my work" / "Say hello".
-- Background foto gelap pada hero dihapus; memakai latar terang dengan aksen maroon (`--primary`).
-- Footer portal diringkas menjadi satu baris: tagline, tiga link layanan (SIAKAD / e-Learning / Praktikum) dengan hover maroon, dan copyright.
+- `apps/portal`: landing `algohub.web.id` dibangun ulang mengikuti export situs Framer (`_docs.old/frmer/site-export-1795127296700`), memakai spesifikasi visual asli dari HTML/CSS export: Ground/Page `#f4f4f4`, Ink/Primary `#0a0a0a`, Ink/Muted `#605f5f`, Ink/Faint `#8a8a8a`.
+- Hero kini dua kolom (teks kiri + panel gambar kanan, aspect-ratio 0.8, max-width 460px, bg `#ececec`), menggantikan layout satu kolom terpusat.
+- Tipografi disamakan dengan preset Framer: welcome/nama/role 90→36px w600 ls-0.045em lh1.08em; intro 16px lh1.55em; judul section 56px; judul kartu 18px w500.
+- Tombol menjadi pill (radius 999px, padding 14×26, Fill `#0a0a0a`/teks `#f4f4f4`; Line border `rgba(10,10,10,0.1)`).
+- Kartu platform kini memakai cover gambar (aspect-ratio 1.333, radius 20px) + meta (judul 18px + type·year 12px) + summary 14px, menggantikan kartu ikon.
+- Footer menjadi panel gelap (`#0a0a0a`, radius 32px) dengan lead 56px, bar copyright + 3 link layanan (hover `#8a1538`), dan wordmark "AlgoHub" raksasa 174px beranimasi wave (weight 200→900).
+
+#### Ditambahkan
+- `apps/portal/static/framer/`: gambar cover kartu & panel portrait hasil ekspor Framer.
 
 #### Ditambahkan
 - `apps/portal/src/lib/components/TypeRotator.svelte`: komponen ketik-berputar (Svelte 5 runes) untuk rotator kata hero.
