@@ -22,3 +22,6 @@ backend/bin/
 .DS_Store
 Thumbs.db
 .idea/
+
+.vercel
+.env*
