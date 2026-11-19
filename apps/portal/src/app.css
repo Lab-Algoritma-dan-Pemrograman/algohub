@@ -1,5 +1,10 @@
 @import '@algohub/config/tailwind.css';
 
+/* Latar halaman mengikuti Ground/Page pada mockup Framer. */
+body {
+  background-color: #f4f4f4;
+}
+
 /* Animasi intro & reveal. Murni CSS agar tetap jalan walau csr=false.
    Browser tanpa dukungan animation-timeline lihat konten statis normal. */
 @keyframes fade-up {
