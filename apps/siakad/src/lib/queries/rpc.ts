@@ -29,7 +29,12 @@ type RpcKey = ReturnType<typeof siakadKeys.rpc>;
 
 export type RpcQueryExtra<T> = Pick<
   CreateQueryOptions<T, Error, T, RpcKey>,
-  'enabled' | 'staleTime' | 'refetchInterval' | 'placeholderData' | 'retry'
+  | 'enabled'
+  | 'staleTime'
+  | 'refetchInterval'
+  | 'refetchIntervalInBackground'
+  | 'placeholderData'
+  | 'retry'
 >;
 
 export function rpcQueryOptions<T>(fn: string, params?: object, extra?: RpcQueryExtra<T>) {

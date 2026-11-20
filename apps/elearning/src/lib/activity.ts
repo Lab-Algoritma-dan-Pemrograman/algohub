@@ -2,7 +2,7 @@ import { PUBLIC_API_BASE_URL } from '$app/env/public';
 import { api } from './api.ts';
 import { session, type ElearningSessionUser } from './session.ts';
 import { appStore } from './stores/app.svelte.ts';
-const HEARTBEAT_MS = 30_000;
+const HEARTBEAT_MS = 60_000;
 const TAB_STALE_MS = 4_000;
 const TAB_KEY = 'study_time_active_tab';
 const TAB_TIME_KEY = 'study_time_active_tab_timestamp';
@@ -36,6 +36,8 @@ export function startActivity({ user, pathname }: ActivityOptions): () => void {
     return localStorage.getItem(TAB_KEY) === tabId;
   };
   const tick = () => {
+    // Tab hidden = user tidak sedang belajar: jangan tambah detik agar waktu belajar tak menggelembung palsu.
+    if (document.hidden) return;
     if (claimTab() && isStudyActivity(activityName(pathname()))) {
       pending += 1;
       appStore.patchProfile({ studyTime: (appStore.profile?.studyTime ?? 0) + 1 });
@@ -82,11 +84,23 @@ export function startActivity({ user, pathname }: ActivityOptions): () => void {
   claimTab();
   void heartbeat();
   const tickTimer = setInterval(tick, 1000);
-  const beatTimer = setInterval(() => void heartbeat(), HEARTBEAT_MS);
+  let beatTimer = setInterval(() => void heartbeat(), HEARTBEAT_MS);
+  // Tab hidden = pause heartbeat & tick; kembali visible = restart + kirim satu heartbeat.
+  const onVisibility = () => {
+    if (document.hidden) {
+      clearInterval(beatTimer);
+    } else {
+      clearInterval(beatTimer);
+      beatTimer = setInterval(() => void heartbeat(), HEARTBEAT_MS);
+      void heartbeat();
+    }
+  };
+  document.addEventListener('visibilitychange', onVisibility);
   window.addEventListener('pagehide', flushOnHide);
   return () => {
     clearInterval(tickTimer);
     clearInterval(beatTimer);
+    document.removeEventListener('visibilitychange', onVisibility);
     window.removeEventListener('pagehide', flushOnHide);
     if (localStorage.getItem(TAB_KEY) === tabId) {
       localStorage.removeItem(TAB_KEY);

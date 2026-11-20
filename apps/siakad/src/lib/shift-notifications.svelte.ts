@@ -41,7 +41,10 @@ export const mapAssignment = (a: AssignmentRow) => ({
 
 export type Assignment = ReturnType<typeof mapAssignment>;
 
-export const assignmentsQuery = (viewerId: number, extra?: { refetchInterval?: number }) =>
+export const assignmentsQuery = (
+  viewerId: number,
+  extra?: { refetchInterval?: number; refetchIntervalInBackground?: boolean },
+) =>
   rpcQueryOptions<AssignmentRow[]>(
     'get_schedule_assignments_secure',
     { p_viewer_id: viewerId },
@@ -56,7 +59,10 @@ export function useShiftNotifications(getUser: () => SiakadUser) {
   };
 
   const query = createQuery(() => ({
-    ...assignmentsQuery(getUser().id, { refetchInterval: 30_000 }),
+    ...assignmentsQuery(getUser().id, {
+      refetchInterval: 120_000,
+      refetchIntervalInBackground: false,
+    }),
     enabled: isStaff(),
   }));
 
