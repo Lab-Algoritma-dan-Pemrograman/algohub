@@ -106,7 +106,7 @@ beforeEach(() => {
       requirementValue: null,
     },
   ]);
-  api.api.progress.myLessons.mockResolvedValue(page([{ lesson_id: 'l1', completed: true }]));
+  api.api.progress.myLessons.mockResolvedValue(page(['l1']));
   api.api.prestige.eligibility.mockResolvedValue(eligibility);
 });
 

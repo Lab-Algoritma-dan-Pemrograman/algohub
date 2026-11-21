@@ -79,12 +79,7 @@ describe('persist', () => {
     api.api.curriculum.levels.mockResolvedValue(page([{ id: 'l1' }]));
     api.api.curriculum.modules.mockResolvedValue(page([{ id: 'm1' }]));
     api.api.curriculum.lessons.mockResolvedValue(page([{ id: 'les1' }]));
-    api.api.progress.myLessons.mockResolvedValue(
-      page([
-        { lesson_id: 'les1', completed: true },
-        { lesson_id: 'les2', completed: false },
-      ]),
-    );
+    api.api.progress.myLessons.mockResolvedValue(page(['les1']));
     api.api.progress.recent.mockResolvedValue([{ id: 'p1', lesson_id: 'les1' }]);
     session.set('tok', {
       id: 1,

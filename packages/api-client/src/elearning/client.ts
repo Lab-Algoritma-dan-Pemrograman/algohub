@@ -102,7 +102,7 @@ export function createElearningApi({ baseUrl, getToken, onUnauthorized }: Elearn
     },
     progress: {
       myLessons: (p: PageParams = {}) =>
-        api.get<Page<StudentProgress>>(`/progress/me/lessons${qs({ ...p })}`),
+        api.get<Page<string>>(`/progress/me/lessons${qs({ ...p })}`),
       recent: (limit?: number) => api.get<StudentProgress[]>(`/progress/me/recent${qs({ limit })}`),
       completeLesson: (lessonId: string, xpReward: number) =>
         api.post<CompleteLessonResponse>(`/progress/lessons/${seg(lessonId)}/complete`, {

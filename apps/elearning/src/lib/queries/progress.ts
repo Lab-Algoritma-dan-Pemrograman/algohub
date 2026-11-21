@@ -10,8 +10,8 @@ export const completedLessonsQuery = () =>
   queryOptions({
     queryKey: elearningKeys.progress.lessons(),
     queryFn: async () => {
-      const rows = await fetchAllPages((page, limit) => api.progress.myLessons({ page, limit }));
-      return rows.filter((row) => row.completed).map((row) => row.lesson_id);
+      // Backend mengembalikan Page<string> berisi lesson_id yang sudah difilter completed = true.
+      return fetchAllPages<string>((page, limit) => api.progress.myLessons({ page, limit }));
     },
   });
 export const recentProgressQuery = (limit = 5) =>

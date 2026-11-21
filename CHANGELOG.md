@@ -4,6 +4,13 @@ Semua perubahan penting dicatat di file ini. Format mengikuti [Keep a Changelog]
 
 ## [Belum dirilis]
 
+### Perbaikan progress E-Learning nol (2026-11-21)
+
+#### Diperbaiki
+- `apps/elearning`: `completedLessonsQuery` masih memfilter `row.completed` ala respons Supabase lama, padahal `GET /progress/me/lessons` backend Go mengembalikan `Page<string>` berisi `lesson_id` yang sudah difilter `completed = true`. Akibatnya semua ID terbuang dan progress praktikan selalu tampil 0 meski data di tabel `student_progress` aman.
+- `packages/api-client`: tipe `progress.myLessons` dikoreksi dari `Page<StudentProgress>` menjadi `Page<string>` sesuai kontrak backend.
+- Mock `myLessons` di `tests/persist.test.ts` dan `tests/gamification-pages.test.ts` disesuaikan ke bentuk baru (array string).
+
 ### Redesign landing portal (2026-11-20)
 
 #### Diubah
