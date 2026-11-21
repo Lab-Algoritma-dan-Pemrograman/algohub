@@ -1,5 +1,6 @@
 <script lang="ts">
   import '../app.css';
+  import { resolve } from '$app/paths';
   import { Building2, GraduationCap, FlaskConical } from '@lucide/svelte';
 
   let { children } = $props();
@@ -54,8 +55,8 @@
 
 <header class="nav">
   <div class="nav-inner">
-    <a href="/" class="brand">AlgoHub.</a>
-    <a href="/contact" class="contact">Get in touch</a>
+    <a href={resolve('/')} class="brand">AlgoHub.</a>
+    <a href={resolve('/contact')} class="contact">Get in touch</a>
   </div>
 </header>
 
@@ -70,15 +71,15 @@
         <p class="lead" aria-label="Satu ekosistem untuk kemudahan akademik.">
           {#each 'Satu ekosistem untuk kemudahan akademik.'.split(' ') as word, i (i)}<span
               class="w"
-              style="--i: {i}"
-            >{word}</span
+              style="--i: {i}">{word}</span
             >{/each}
         </p>
         <div class="bar">
           <p class="copyright">© {new Date().getFullYear()} AlgoHub · Lab AP</p>
           <nav class="links" aria-label="Layanan">
             {#each services as service (service.href)}
-              <a href={service.href} class="link" target="_blank" rel="noreferrer">{service.name}</a>
+              <a href={service.href} class="link" target="_blank" rel="noreferrer">{service.name}</a
+              >
             {/each}
           </nav>
         </div>
@@ -118,12 +119,7 @@
   :global(body) {
     background-color: #f4f4f4;
     color: #0a0a0a;
-    font-family:
-      'Geist',
-      'Inter',
-      ui-sans-serif,
-      system-ui,
-      sans-serif;
+    font-family: 'Geist', 'Inter', ui-sans-serif, system-ui, sans-serif;
   }
 
   .skip {

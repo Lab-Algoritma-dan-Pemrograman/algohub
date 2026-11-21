@@ -66,7 +66,9 @@
         {#each headlineLines as line, li (li)}
           <p class="hl" style="color: {line.color}; --d: {li * 0.08}s">
             {#if line.perLetter}
-              {#each line.text.split('') as ch, ci (ci)}<span class="ltr" style="--d: {li * 0.08 + ci * 0.03}s">{ch}</span
+              {#each line.text.split('') as ch, ci (ci)}<span
+                  class="ltr"
+                  style="--d: {li * 0.08 + ci * 0.03}s">{ch}</span
                 >{/each}
             {:else}
               {line.text}
@@ -103,7 +105,16 @@
         <span class="portrait-size">460 × 575</span>
       </div>
       <div class="cursor-chip" aria-hidden="true">
-        <svg class="cursor-arrow" width="14" height="14" viewBox="0 0 24 24" fill="rgb(10,10,10)" stroke="#fff" stroke-width="1.2" stroke-linejoin="round">
+        <svg
+          class="cursor-arrow"
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="rgb(10,10,10)"
+          stroke="#fff"
+          stroke-width="1.2"
+          stroke-linejoin="round"
+        >
           <path d="M4 3l7 17 2.5-6.5L20 11 4 3z" />
         </svg>
         King Nopal

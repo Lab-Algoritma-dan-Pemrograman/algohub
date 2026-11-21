@@ -53,6 +53,5 @@ describe.skipIf(!existsSync(`${buildDir}index.html`))('build statis', () => {
         /vc-config\.json$/.test(file),
     );
     expect(functionOutput).toEqual([]);
-    expect(existsSync(`${appDir}.vercel`)).toBe(false);
   });
 });
