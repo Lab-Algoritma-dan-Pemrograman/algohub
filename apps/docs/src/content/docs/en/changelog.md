@@ -20,6 +20,16 @@ Following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 
 ## Recent entry examples
 
+### Update 2: structure, auth, UI, and hardening (2026-11-23)
+
+- **Structure**: `algohub-docs` moved into the monorepo as `apps/docs`; the Vercel git connection now uses Root Directory `apps/docs` (auto-deploy active). The old folder was removed.
+- **R2 rejected**: actual storage usage is ~33 MB of the 10 GB free tier — migration would save nothing. Supabase Storage stays.
+- **Versioning**: chose the expand-contract discipline (additive migrations, deploy backend→frontend) instead of `/api/v1`-`/api/v2` infrastructure.
+- **Auth**: `ClientIP` anti-spoofing, timing-safe cron secret, praktikum logout now revokes tokens via the `revoked_tokens` table (migration applied to Supabase).
+- **Praktikum UI**: skeleton loading, ≥12:1 badge contrast, mobile card-stack for the grade history, admin nav grouped into 5 groups, focus-visible rings, form errors near fields, `Intl.NumberFormat`.
+- **Mobile baseline (4 apps)**: viewport-fit=cover, light/dark theme-color, 16px inputs (no iOS zoom), transparent tap-highlight, overscroll none, 100vh→100dvh.
+- **Security**: `{@html}` XSS now sanitized with DOMPurify; dashboard crash on null `nama` fixed; RLS + grants tightened on `revoked_tokens` & `schema_migrations`; the `legacy_preserve` archive (42 MB) was backed up then dropped.
+
 ### Landing portal redesign (2026-11-20)
 
 The `algohub.web.id` landing was rebuilt following a Framer site export, using

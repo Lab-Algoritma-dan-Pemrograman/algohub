@@ -21,6 +21,16 @@ di dalamnya dipakai sub-judul seperti:
 
 ## Contoh entri terbaru
 
+### Update 2: struktur, auth, UI, dan hardening (2026-11-23)
+
+- **Struktur**: `algohub-docs` menjadi workspace member `apps/docs`; git Vercel terhubung ke repo dengan Root Directory `apps/docs` (auto-deploy aktif). Folder lama dihapus.
+- **R2 ditolak**: pemakaian storage aktual ~33 MB dari free tier 10 GB — migrasi tidak menghemat biaya. Tetap Supabase Storage.
+- **Versioning**: dipilih disiplin expand-contract (migration additive, deploy backend→frontend), tanpa infra `/api/v1`-`/api/v2`.
+- **Auth**: anti-spoof `ClientIP`, cron secret timing-safe, logout praktikum mencabut token via tabel `revoked_tokens` (migrasi dijalankan ke Supabase).
+- **UI praktikum**: skeleton loading, kontras badge ≥12:1, card-stack riwayat di ponsel, nav admin dikelompokkan 5 grup, focus-visible ring, error form dekat field, format angka `Intl.NumberFormat`.
+- **Mobile baseline 4 app**: viewport-fit=cover, theme-color light/dark, input 16px (anti iOS zoom), tap-highlight transparan, overscroll none, 100vh→100dvh.
+- **Keamanan**: XSS `{@html}` disanitasi DOMPurify; crash dashboard karena `nama` null ditutup; RLS + GRANT `revoked_tokens` & `schema_migrations` diperketat; arsip `legacy_preserve` (42 MB) dibackup lalu dihapus.
+
 ### Redesign landing portal (2026-11-20)
 
 Landing `algohub.web.id` dibangun ulang mengikuti export situs Framer, memakai

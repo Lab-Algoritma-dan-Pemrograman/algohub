@@ -4,6 +4,38 @@ Semua perubahan penting dicatat di file ini. Format mengikuti [Keep a Changelog]
 
 ## [Belum dirilis]
 
+### Update 2: struktur, auth, UI, dan hardening (2026-11-23)
+
+#### Ditambahkan
+- `apps/docs`: `algohub-docs` dipindah ke dalam monorepo sebagai workspace member (`@algohub/docs`). `.git` kosong dan `bun.lock` terpisah dibuang; lock kini satu di root. Git Vercel project `algohub-docs` terhubung ke repo ini dengan Root Directory `apps/docs` dan `sourceFilesOutsideRootDirectory=false` (sebelumnya hanya 148 file ter-upload sehingga build gagal "Root Directory apps/docs does not exist").
+- `apps/praktikum/src/lib/sanitize.test.ts`: 12 test vitest untuk `sanitizeSoal` (script tag, onerror, javascript: URL, iframe/object/style, string aman, null) dan `firstName` (null, kosong, spasi berlebih, emoji).
+- `apps/praktikum/src/lib/utils.ts`: `firstName()` (guard nama null/emoji) dan `fmtNilai()` (`Intl.NumberFormat('id-ID')`).
+- Blok mobile baseline di `app.css` keempat app: input 16px pada `pointer: coarse` (anti iOS zoom), `-webkit-tap-highlight-color: transparent`, `overscroll-behavior: none`, `user-select: none` pada kontrol, plus `prefers-reduced-motion` untuk siakad & elearning.
+- Meta `theme-color` light/dark + `color-scheme` dan viewport `viewport-fit=cover, interactive-widget=resizes-content` di keempat `app.html`.
+
+#### Diperbaiki
+- `apps/praktikum` laporan-besar: `{@html data.deskripsi}` kini disanitasi `sanitizeSoal` (DOMPurify, dependency existing) — menutup vektor XSS dari konten admin.
+- `apps/praktikum` dashboard: `data.profil.nama.split(' ')` diganti `firstName(data.profil.nama)` — mencegah TypeError yang memblankakan seluruh dashboard saat `nama` null.
+- `apps/praktikum` backend: `ClientIP` memakai trusted platform `X-Vercel-Forwarded-For` (XFF spoof client ditolak, fallback `RemoteIP` untuk dev lokal); cron secret dibandingkan `crypto/subtle.ConstantTimeCompare`; logout praktikum kini mencabut `jti` via tabel `revoked_tokens` (pola siakad), token legacy tanpa `jti` tetap diterima.
+- `apps/praktikum` UI: skeleton loading dashboard/admin, kontras badge ≥ 12:1 via `statusBadgeClass`, label/aria pada filter riwayat, toast error saat cache basi + `Toaster` dipasang, AppShell memakai token warna (visual identik), animasi tunggal + `prefers-reduced-motion`, font Nunito mati dihapus, label role topbar, urutan nav mahasiswa.
+- `apps/praktikum` UI lanjutan: riwayat nilai mobile menjadi card-stack (tak lagi scroll-samping), nav admin dikelompokkan 5 grup (15 link utuh), `.aurora` dead markup dihapus.
+- `apps/praktikum` a11y: `:focus-visible` ring di `.input`, login, `.sidebar-link`, `.logout-btn`; error form pindah dekat field dengan `role="alert"`/`aria-describedby`; `:active` feedback filter sesi; `transition-all` → properti eksak 200ms.
+- `apps/praktikum` stress-test: `break-words` pada teks panjang, `Intl.NumberFormat` untuk angka statistik & nilai, `.badge` `nowrap` + `shrink-0`, `labelShift` (shift 0 tampil "Arsip"), fallback label status/jenis, baris kosong tabel kelas admin.
+- `100vh` → `100dvh`/`100svh` pada shell elearning/siakad, terminal-demo, playground, LessonView, Ruang, AppShell, dan hero portal.
+
+#### Dihapus
+- Folder `algohub-docs` lama (duplikat `apps/docs`, 37 file src identik).
+- Schema arsip `legacy_preserve` (42 MB, 78.829 baris) dari database setelah dibackup penuh ke luar repo (16 JSONL + metadata, terverifikasi jumlah & hash).
+
+#### Keamanan database
+- RLS aktif di `revoked_tokens`; GRANT `anon`/`authenticated` dicabut dari `revoked_tokens` dan `schema_migrations` (sebelumnya anon dapat `TRUNCATE`).
+
+#### Verifikasi
+- `go build ./...` EXIT 0, `go test ./...` EXIT 0.
+- Build 4 app (portal/praktikum/siakad/elearning) sukses; svelte-check praktikum 0 error; vitest sanitize 12/12 lulus.
+- Deploy Vercel READY untuk praktikum & docs; `docs.algohub.web.id` HTTP 200.
+- Catatan: test `fetch-compiler` portal gagal 2 = pre-existing (fixture `git clone`), bukan dari update ini.
+
 ### Perbaikan progress E-Learning nol (2026-11-21)
 
 #### Diperbaiki
