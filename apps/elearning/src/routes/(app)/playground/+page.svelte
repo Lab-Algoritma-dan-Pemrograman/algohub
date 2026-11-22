@@ -1,4 +1,4 @@
-<script lang="ts">
+﻿<script lang="ts">
   import { messages, type Language } from '@algohub/runner';
   import { Terminal, toast } from '@algohub/ui';
   import BookOpen from '@lucide/svelte/icons/book-open';
@@ -78,7 +78,7 @@
 
 <svelte:window onkeydown={(e) => showExamples && e.key === 'Escape' && (showExamples = false)} />
 
-<div class="flex h-auto flex-col gap-6 pb-6 lg:h-[calc(100vh-160px)]" in:fade={{ duration: 200 }}>
+<div class="flex h-auto flex-col gap-6 pb-6 lg:h-[calc(100dvh-160px)]" in:fade={{ duration: 200 }}>
   <div class="flex flex-col justify-between gap-4 select-none sm:flex-row sm:items-center">
     <div>
       <h1 class="mb-1 flex items-center text-3xl font-black tracking-tight text-maroon">
@@ -142,7 +142,7 @@
     >
       <div class="flex items-center gap-2 border-b-2 border-zinc-950/40 bg-zinc-800/80 px-4 py-3">
         <span class="flex-1 font-mono text-xs font-bold text-zinc-400">
-          {language === 'python' ? 'python' : 'clang'} — playground
+          {language === 'python' ? 'python' : 'clang'} â€” playground
         </span>
         <button
           type="button"

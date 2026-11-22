@@ -58,15 +58,6 @@
       </p>
     </div>
 
-    {#if err}
-      <div
-        class="mb-5 rounded-2xl border border-red-100 bg-red-50 p-4 text-xs font-semibold text-red-700 shadow-sm flex items-start gap-2.5 text-left animate-shake"
-      >
-        <AlertCircle class="shrink-0 text-red-500 mt-0.5" size={15} />
-        <span>{err}</span>
-      </div>
-    {/if}
-
     <form
       onsubmit={(e) => {
         e.preventDefault();
@@ -87,12 +78,23 @@
           </div>
           <input
             id="identifier"
-            class="w-full h-12 pl-10 pr-4 bg-slate-50/80 border border-slate-200 rounded-2xl text-sm font-semibold text-slate-800 placeholder-slate-400/50 focus:outline-none focus:border-[#8A1538]/50 focus:bg-white transition-all"
+            class="w-full h-12 pl-10 pr-4 bg-slate-50/80 border border-slate-200 rounded-2xl text-sm font-semibold text-slate-800 placeholder-slate-400/50 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 focus:border-primary/50 focus:bg-white transition-all"
             bind:value={identifier}
             placeholder="Masukkan NIM atau Email"
             required
+            aria-describedby={err ? 'login-err' : undefined}
           />
         </div>
+        {#if err}
+          <div
+            id="login-err"
+            role="alert"
+            class="mt-2 rounded-xl border border-red-100 bg-red-50 p-3 text-xs font-semibold text-red-700 shadow-sm flex items-start gap-2 text-left animate-shake"
+          >
+            <AlertCircle class="shrink-0 text-red-500 mt-0.5" size={15} />
+            <span>{err}</span>
+          </div>
+        {/if}
       </div>
       <div>
         <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2" for="pw"
@@ -107,7 +109,7 @@
           <input
             id="pw"
             type={showPassword ? 'text' : 'password'}
-            class="w-full h-12 pl-10 pr-11 bg-slate-50/80 border border-slate-200 rounded-2xl text-sm font-semibold text-slate-800 placeholder-slate-400/50 focus:outline-none focus:border-[#8A1538]/50 focus:bg-white transition-all"
+            class="w-full h-12 pl-10 pr-11 bg-slate-50/80 border border-slate-200 rounded-2xl text-sm font-semibold text-slate-800 placeholder-slate-400/50 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 focus:border-primary/50 focus:bg-white transition-all"
             bind:value={password}
             placeholder="Masukkan password Anda"
             required

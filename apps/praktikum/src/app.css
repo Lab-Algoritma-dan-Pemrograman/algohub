@@ -1,4 +1,4 @@
-@import '@algohub/config/tailwind.css';
+﻿@import '@algohub/config/tailwind.css';
 @plugin '@tailwindcss/typography';
 
 @theme {
@@ -150,11 +150,15 @@
   .input {
     @apply focus:border-primary/50 focus:ring-primary/5 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none transition-all focus:ring-4;
   }
+  .input:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
   .label {
     @apply mb-1.5 block text-sm font-semibold text-slate-700;
   }
   .badge {
-    @apply inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wider text-slate-700;
+    @apply inline-flex shrink-0 items-center whitespace-nowrap rounded-full border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wider text-slate-700;
   }
   .table-wrap {
     @apply w-full overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm;
@@ -233,4 +237,17 @@ body,
 *:hover::-webkit-scrollbar-thumb,
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(138, 21, 56, 0.85);
+}
+
+
+/* mobile baseline */
+@media (pointer: coarse) {
+  input, textarea, select, [contenteditable] { font-size: 16px; }
+}
+html { -webkit-tap-highlight-color: transparent; }
+html, body { overscroll-behavior: none; }
+button, [role="button"], .chip, .tab {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }

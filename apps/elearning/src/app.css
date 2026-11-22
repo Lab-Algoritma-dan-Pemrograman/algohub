@@ -1,4 +1,4 @@
-@import '@algohub/config/tailwind.css';
+﻿@import '@algohub/config/tailwind.css';
 @theme {
   --font-sans: Nunito, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
@@ -64,5 +64,25 @@
   .custom-scrollbar::-webkit-scrollbar-thumb {
     background: #d9a0b0;
     border-radius: 10px;
+  }
+}
+
+
+/* mobile baseline */
+@media (pointer: coarse) {
+  input, textarea, select, [contenteditable] { font-size: 16px; }
+}
+html { -webkit-tap-highlight-color: transparent; }
+html, body { overscroll-behavior: none; }
+button, [role="button"], .chip, .tab {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
   }
 }

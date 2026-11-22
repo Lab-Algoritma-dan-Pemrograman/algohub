@@ -15,6 +15,7 @@
   } from '@lucide/svelte';
   import type { LaporanBesarStatus } from '@algohub/api-client/praktikum';
   import Countdown from '#lib/components/Countdown.svelte';
+  import { sanitizeSoal } from '#lib/sanitize.ts';
   import {
     createBatalKumpulLaporanMutation,
     createKumpulLaporanMutation,
@@ -276,8 +277,8 @@
             {/if}
           </div>
           <div class="prose prose-sm prose-slate max-w-2xl mt-2 break-words text-ink-body">
-            <!-- eslint-disable-next-line svelte/no-at-html-tags -- deskripsi dari admin dirender apa adanya seperti app lama (temuan, tidak disanitasi) -->
-            {@html data.deskripsi || '<span class="text-ink-caption">(tidak ada deskripsi)</span>'}
+            <!-- eslint-disable-next-line svelte/no-at-html-tags -- deskripsi dari admin disanitasi sanitizeSoal (DOMPurify allowlist) sebelum dirender -->
+            {@html sanitizeSoal(data.deskripsi) || '<span class="text-ink-caption">(tidak ada deskripsi)</span>'}
           </div>
           {#if data.status === 'terkumpul' && data.terlambat && data.deadline_at}
             <div

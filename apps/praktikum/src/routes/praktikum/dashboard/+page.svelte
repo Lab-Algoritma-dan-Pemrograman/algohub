@@ -4,7 +4,7 @@
   import { Calendar, User, ArrowRight, Trophy, Bell, BookOpen, Search } from '@lucide/svelte';
   import { mahasiswaQueries } from '#lib/queries/mahasiswa.ts';
   import { praktikumRunner } from '#lib/runner.ts';
-  import { labelJenis, labelStatus, statusBadgeClass } from '#lib/utils.ts';
+  import { firstName, fmtNilai, labelJenis, labelShift, labelStatus, statusBadgeClass } from '#lib/utils.ts';
   import { Skeleton, toast } from '@algohub/ui';
 
   let riwayatSearch = $state('');
@@ -117,23 +117,24 @@
         <div>
           <span class="badge bg-primary/10 text-primary">Dashboard</span>
           <h1
-            class="mt-4 font-display text-3xl font-extrabold leading-tight tracking-tight text-ink-heading text-balance md:text-4xl"
+            class="mt-4 font-display text-3xl font-extrabold leading-tight tracking-tight text-ink-heading text-balance break-words md:text-4xl"
           >
-            Halo, {data.profil.nama.split(' ')[0]}
+            Halo, {firstName(data.profil.nama)}
           </h1>
           <p class="mt-3 max-w-md text-base leading-relaxed text-ink-body">
             Selamat datang kembali di Lab Algoritma &amp; Pemrograman. Pantau sesi aktif, jadwal,
             dan progres nilaimu di satu tempat.
           </p>
           <div class="mt-5 flex flex-wrap gap-2">
-            <span class="badge border border-white/60 bg-white/50 text-ink-body"
+            <span
+              class="badge max-w-full border border-white/60 bg-white/50 text-ink-body [overflow-wrap:anywhere]"
               >NIM {data.profil.nim}</span
             >
             <span class="badge border border-white/60 bg-white/50 text-ink-body"
               >{data.profil.nama_kelas ?? 'Kelas -'}</span
             >
             <span class="badge border border-white/60 bg-white/50 text-ink-body"
-              >Shift {data.profil.shift ?? '-'}</span
+              >{labelShift(data.profil.shift ?? 0)}</span
             >
           </div>
         </div>
@@ -186,21 +187,21 @@
         <div class="min-w-0">
           <h2 class="font-display text-base font-bold text-ink-heading">Profil Kamu</h2>
           <div class="mt-3 grid grid-cols-2 gap-x-6 gap-y-3 text-sm sm:grid-cols-4">
-            <div>
+            <div class="min-w-0">
               <dt class="text-xs text-ink-caption">Nama</dt>
-              <dd class="font-medium text-ink-heading">{data.profil.nama}</dd>
+              <dd class="font-medium break-words text-ink-heading [overflow-wrap:anywhere]">{data.profil.nama}</dd>
             </div>
-            <div>
+            <div class="min-w-0">
               <dt class="text-xs text-ink-caption">NIM</dt>
-              <dd class="font-medium text-ink-heading">{data.profil.nim}</dd>
+              <dd class="font-medium break-words text-ink-heading [overflow-wrap:anywhere]">{data.profil.nim}</dd>
             </div>
-            <div>
+            <div class="min-w-0">
               <dt class="text-xs text-ink-caption">Kelas</dt>
-              <dd class="font-medium text-ink-heading">{data.profil.nama_kelas ?? '-'}</dd>
+              <dd class="font-medium break-words text-ink-heading">{data.profil.nama_kelas ?? '-'}</dd>
             </div>
-            <div>
+            <div class="min-w-0">
               <dt class="text-xs text-ink-caption">Shift</dt>
-              <dd class="font-medium text-ink-heading">{data.profil.shift ?? '-'}</dd>
+              <dd class="font-medium break-words text-ink-heading">{labelShift(data.profil.shift ?? 0)}</dd>
             </div>
           </div>
         </div>
@@ -323,7 +324,7 @@
                         >{labelStatus(r.status)}</span
                       ></td
                     >
-                    <td class="font-semibold text-primary">{r.total_nilai ?? '-'}</td>
+                    <td class="font-semibold text-primary">{fmtNilai(r.total_nilai)}</td>
                   </tr>
                 {/each}
               </tbody>
@@ -331,12 +332,12 @@
           </div>
           <div class="md:hidden grid gap-3">
             {#each filteredRiwayat as r, i (i)}
-              <article class="glass-card p-4">
-                <h3 class="font-medium text-ink-heading">{r.sesi_judul}</h3>
+              <article class="glass-card p-4 min-w-0">
+                <h3 class="font-medium break-words text-ink-heading [overflow-wrap:anywhere]">{r.sesi_judul}</h3>
                 <p class="text-sm text-ink-caption mt-0.5">{labelJenis(r.jenis)}</p>
                 <div class="flex items-center justify-between gap-3 mt-3">
                   <span class="badge {statusBadgeClass(r.status)}">{labelStatus(r.status)}</span>
-                  <span class="text-2xl font-semibold text-primary">{r.total_nilai ?? '-'}</span>
+                  <span class="text-2xl font-semibold text-primary flex-shrink-0 text-right">{fmtNilai(r.total_nilai)}</span>
                 </div>
               </article>
             {/each}

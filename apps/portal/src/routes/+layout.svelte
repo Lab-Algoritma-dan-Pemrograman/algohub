@@ -1,4 +1,4 @@
-<script lang="ts">
+﻿<script lang="ts">
   import '../app.css';
   import { resolve } from '$app/paths';
   import { Building2, GraduationCap, FlaskConical } from '@lucide/svelte';
@@ -75,7 +75,7 @@
             >{/each}
         </p>
         <div class="bar">
-          <p class="copyright">© {new Date().getFullYear()} AlgoHub · Lab AP</p>
+          <p class="copyright">Â© {new Date().getFullYear()} AlgoHub Â· Lab AP</p>
           <nav class="links" aria-label="Layanan">
             {#each services as service (service.href)}
               <a href={service.href} class="link" target="_blank" rel="noreferrer">{service.name}</a
@@ -189,7 +189,7 @@
   .wrap {
     display: flex;
     flex-flow: column;
-    min-height: 100vh;
+    min-height: 100svh;
   }
   .main {
     display: flex;

@@ -1,4 +1,4 @@
-<script lang="ts">
+﻿<script lang="ts">
   import { messages } from '@algohub/runner';
   import { Terminal } from '@algohub/ui';
   import Loader from '@lucide/svelte/icons/loader-circle';
@@ -11,10 +11,10 @@
   import { TerminalRun } from '#lib/terminal-run.svelte.ts';
 
   const BANNER = [
-    '\x1b[1;36m╔══════════════════════════════════════════╗\x1b[0m',
-    '\x1b[1;36m║\x1b[0m  \x1b[1mTerminal Interaktif Demo\x1b[0m                \x1b[1;36m║\x1b[0m',
-    '\x1b[1;36m║\x1b[0m  Pilih script lalu klik \x1b[1;32m▶ Jalankan\x1b[0m       \x1b[1;36m║\x1b[0m',
-    '\x1b[1;36m╚══════════════════════════════════════════╝\x1b[0m',
+    '\x1b[1;36mâ•”â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•—\x1b[0m',
+    '\x1b[1;36mâ•‘\x1b[0m  \x1b[1mTerminal Interaktif Demo\x1b[0m                \x1b[1;36mâ•‘\x1b[0m',
+    '\x1b[1;36mâ•‘\x1b[0m  Pilih script lalu klik \x1b[1;32mâ–¶ Jalankan\x1b[0m       \x1b[1;36mâ•‘\x1b[0m',
+    '\x1b[1;36mâ•šâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•\x1b[0m',
     '',
   ];
 
@@ -37,7 +37,7 @@
   onDestroy(() => run.cancel());
 
   function runScript() {
-    const header = `\x1b[1;36mScript: ${script.name}\x1b[0m\r\n\x1b[2m${'─'.repeat(44)}\x1b[0m\r\n\r\n`;
+    const header = `\x1b[1;36mScript: ${script.name}\x1b[0m\r\n\x1b[2m${'â”€'.repeat(44)}\x1b[0m\r\n\r\n`;
     void run.run('python', script.code, header);
   }
 
@@ -47,7 +47,7 @@
   }
 </script>
 
-<div class="flex h-[calc(100vh-160px)] flex-col gap-6" in:fade={{ duration: 200 }}>
+<div class="flex h-[calc(100dvh-160px)] flex-col gap-6" in:fade={{ duration: 200 }}>
   <div class="flex flex-wrap items-center justify-between gap-4">
     <div>
       <h1 class="text-3xl font-bold tracking-tight">Terminal Demo</h1>
@@ -115,7 +115,7 @@
       <span role="alert">{messages.unavailablePython}</span>
     {:else}
       <span>Klik <b>Jalankan</b> lalu ketik langsung di terminal saat diminta input</span>
-      <span class="text-zinc-300">•</span>
+      <span class="text-zinc-300">â€¢</span>
       <span>
         Tekan
         <kbd class="rounded bg-zinc-200 px-1.5 py-0.5 font-mono text-xs text-zinc-600">Enter</kbd>

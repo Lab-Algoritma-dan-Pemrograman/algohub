@@ -1,4 +1,4 @@
-<script lang="ts">
+﻿<script lang="ts">
   import { Book, Building2, FlaskConical } from '@lucide/svelte';
 
   const apps = [
@@ -51,10 +51,10 @@
 </script>
 
 <svelte:head>
-  <title>AlgoHub · Lab Algoritma &amp; Pemrograman</title>
+  <title>AlgoHub Â· Lab Algoritma &amp; Pemrograman</title>
   <meta
     name="description"
-    content="Satu ekosistem digital untuk SIAKAD, e-Learning, dan Praktikum — dirancang agar kegiatan akademik terasa ringan, cepat, dan andal."
+    content="Satu ekosistem digital untuk SIAKAD, e-Learning, dan Praktikum â€” dirancang agar kegiatan akademik terasa ringan, cepat, dan andal."
   />
 </svelte:head>
 
@@ -102,7 +102,7 @@
           <span class="handle {h.pos}" style="cursor: {h.cursor}" aria-hidden="true"></span>
         {/each}
         <span class="portrait-hint">Drag a handle to resize me</span>
-        <span class="portrait-size">460 × 575</span>
+        <span class="portrait-size">460 Ã— 575</span>
       </div>
       <div class="cursor-chip" aria-hidden="true">
         <svg
@@ -148,7 +148,7 @@
             <div class="card-body">
               <div class="card-meta">
                 <h3 class="card-title">{app.name}</h3>
-                <p class="card-info">{app.type} · {app.year}</p>
+                <p class="card-info">{app.type} Â· {app.year}</p>
               </div>
               <p class="card-summary">{app.summary}</p>
             </div>
@@ -166,7 +166,7 @@
   }
   .hero-inner {
     max-width: 1776px;
-    min-height: 100vh;
+    min-height: 100svh;
     display: flex;
     flex-flow: row;
     align-items: center;

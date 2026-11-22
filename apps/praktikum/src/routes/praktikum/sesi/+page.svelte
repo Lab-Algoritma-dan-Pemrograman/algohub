@@ -80,23 +80,23 @@
         <Filter size={14} class="text-ink-caption" />
         <div class="flex rounded-lg border border-gray-200 overflow-hidden">
           <button
-            class="px-3 py-1.5 text-xs font-semibold transition-colors {filterMode === 'semua'
-              ? 'bg-primary text-white'
-              : 'bg-white text-ink-body hover:bg-gray-50'}"
+            class="px-3 py-1.5 text-xs font-semibold transition-colors active:scale-[0.97] {filterMode === 'semua'
+              ? 'bg-primary/80 text-white active:bg-primary/80'
+              : 'bg-white text-ink-body hover:bg-slate-100 active:bg-slate-100'}"
             onclick={() => (filterMode = 'semua')}>Semua ({sesi.length})</button
           >
           <button
-            class="px-3 py-1.5 text-xs font-semibold transition-colors border-l border-gray-200 {filterMode ===
+            class="px-3 py-1.5 text-xs font-semibold transition-colors border-l border-gray-200 active:scale-[0.97] {filterMode ===
             'aktif'
-              ? 'bg-state-success text-white'
-              : 'bg-white text-ink-body hover:bg-gray-50'}"
+              ? 'bg-primary/80 text-white active:bg-primary/80'
+              : 'bg-white text-ink-body hover:bg-slate-100 active:bg-slate-100'}"
             onclick={() => (filterMode = 'aktif')}>Aktif ({countAktif})</button
           >
           <button
-            class="px-3 py-1.5 text-xs font-semibold transition-colors border-l border-gray-200 {filterMode ===
+            class="px-3 py-1.5 text-xs font-semibold transition-colors border-l border-gray-200 active:scale-[0.97] {filterMode ===
             'terkunci'
-              ? 'bg-ink-caption text-white'
-              : 'bg-white text-ink-body hover:bg-gray-50'}"
+              ? 'bg-ink-heading text-white active:bg-ink-heading'
+              : 'bg-white text-ink-body hover:bg-slate-100 active:bg-slate-100'}"
             onclick={() => (filterMode = 'terkunci')}>Terkunci ({countTerkunci})</button
           >
         </div>
@@ -111,7 +111,7 @@
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {#each filteredSesi as s (s.sesi_id)}
           <div
-            class="rounded-2xl border bg-white shadow-sm flex flex-col justify-between overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-primary/20 {s.aktif
+            class="rounded-2xl border bg-white shadow-sm flex flex-col justify-between overflow-hidden transition-[transform,box-shadow,border-color] duration-200 hover:-translate-y-1 hover:shadow-md hover:border-primary/20 {s.aktif
               ? 'border-slate-200 border-l-4 border-l-primary'
               : 'border-slate-200 border-l-4 border-l-slate-300 bg-slate-50/40 opacity-80'}"
           >

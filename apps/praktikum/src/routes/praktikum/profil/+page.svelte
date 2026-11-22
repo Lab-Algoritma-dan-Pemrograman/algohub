@@ -82,17 +82,16 @@
     </div>
   </div>
 
-  {#if msg}<p class="rounded-xl bg-state-success-bg p-3 text-sm font-semibold text-state-success">
-      {msg}
-    </p>{/if}
-  {#if err}<p class="rounded-xl bg-state-error-bg p-3 text-sm font-semibold text-state-error">
-      {err}
-    </p>{/if}
-
   <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm space-y-4">
     <h2 class="text-base font-bold text-ink-heading flex items-center gap-2">
       <User size={16} class="text-primary" /> Informasi Dasar
     </h2>
+    {#if msg}<p role="status" class="rounded-xl bg-state-success-bg p-3 text-sm font-semibold text-state-success">
+        {msg}
+      </p>{/if}
+    {#if err}<p role="alert" class="rounded-xl bg-state-error-bg p-3 text-sm font-semibold text-state-error">
+        {err}
+      </p>{/if}
 
     <div>
       <label class="label flex items-center gap-1.5" for="nama"

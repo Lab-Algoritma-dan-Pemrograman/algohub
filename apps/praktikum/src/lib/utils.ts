@@ -15,6 +15,14 @@ export function secondsUntil(deadlineISO?: string | null): number {
   return Math.max(0, Math.floor(diff / 1000));
 }
 
+// Nama dari DB bisa null/ kosong; ambil token pertama yang berisi huruf/angka
+// (lewati token kosong atau emoji saja). Tanpa token valid: nama penuh, lalu "Pengguna".
+export function firstName(nama: string | null | undefined): string {
+  const trimmed = nama?.trim() ?? '';
+  const token = trimmed.split(/\s+/).find((w) => /[\p{L}\p{N}]/u.test(w));
+  return token || trimmed || 'Pengguna';
+}
+
 export function labelJenis(jenis: string): string {
   switch (jenis) {
     case 'pretest':
@@ -26,7 +34,7 @@ export function labelJenis(jenis: string): string {
     case 'ujian_praktik':
       return 'Ujian Praktik';
     default:
-      return jenis;
+      return 'Jenis lain';
   }
 }
 
@@ -44,8 +52,13 @@ export function labelStatus(status: string): string {
     case 'selesai':
       return 'Selesai';
     default:
-      return status;
+      return 'Status lain';
   }
+}
+
+const nilaiFmt = new Intl.NumberFormat('id-ID', { maximumFractionDigits: 1 });
+export function fmtNilai(value: number | null | undefined): string {
+  return value == null ? '-' : nilaiFmt.format(value);
 }
 
 // Teks badge memakai warna ink gelap di atas latar tinted state agar kontras ≥ 4.5:1 (WCAG AA).

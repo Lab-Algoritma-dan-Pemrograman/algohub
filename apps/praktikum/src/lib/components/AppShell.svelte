@@ -270,7 +270,7 @@
 
   .dashboard-layout {
     display: flex;
-    min-height: 100vh;
+    min-height: 100dvh;
     background: var(--color-surface-base);
   }
 
@@ -395,6 +395,14 @@
     background: rgba(255, 255, 255, 0.1);
     color: #fff;
   }
+  .sidebar-link:active {
+    background: rgba(255, 255, 255, 0.18);
+    transform: scale(0.985);
+  }
+  .sidebar-link:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+  }
   .sidebar-link:visited {
     color: rgba(255, 255, 255, 0.78);
   }
@@ -501,6 +509,14 @@
   .logout-btn:hover {
     background: rgba(239, 68, 68, 0.22);
     color: #fca5a5;
+  }
+  .logout-btn:active {
+    background: rgba(239, 68, 68, 0.3);
+    transform: scale(0.985);
+  }
+  .logout-btn:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
   }
 
   .main-area {

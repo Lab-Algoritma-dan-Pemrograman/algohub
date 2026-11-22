@@ -1,4 +1,4 @@
-<script lang="ts">
+﻿<script lang="ts">
   import { onMount, onDestroy } from 'svelte';
   import { SvelteSet } from 'svelte/reactivity';
   import { goto } from '$app/navigation';
@@ -137,7 +137,7 @@
 </script>
 
 {#if loading}
-  <p class="text-ink-caption">Memuat ruang pengerjaan…</p>
+  <p class="text-ink-caption">Memuat ruang pengerjaanâ€¦</p>
 {:else if err && !ruang}
   <p class="rounded-lg bg-state-error-bg p-3 text-state-error">{err}</p>
 {:else if ruang}
@@ -305,7 +305,7 @@
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
         <div class="lg:col-span-4 flex flex-col">
           <div
-            class="flex-grow flex flex-col overflow-hidden lg:h-[calc(100vh-320px)] lg:min-h-[500px] rounded-2xl border-y border-r border-slate-200 border-l-4 border-l-primary bg-white text-slate-800 shadow-sm p-6"
+            class="flex-grow flex flex-col overflow-hidden lg:h-[calc(100dvh-320px)] lg:min-h-[500px] rounded-2xl border-y border-r border-slate-200 border-l-4 border-l-primary bg-white text-slate-800 shadow-sm p-6"
           >
             <div
               class="mb-4 flex items-center justify-between pb-3 border-b border-slate-100 flex-shrink-0"
@@ -353,7 +353,7 @@
         </div>
 
         <div class="lg:col-span-8 flex flex-col">
-          <div class="flex-grow flex flex-col lg:h-[calc(100vh-320px)] lg:min-h-[500px] text-left">
+          <div class="flex-grow flex flex-col lg:h-[calc(100dvh-320px)] lg:min-h-[500px] text-left">
             {#key s.soal_terpilih_id}
               {#if s.jenis_soal === 'coding'}
                 <div class="flex-grow flex flex-col min-h-0">
@@ -362,7 +362,7 @@
                     readonly={locked}
                     language="c"
                     runnable={true}
-                    height="calc(100vh - 460px)"
+                    height="calc(100dvh - 460px)"
                     oninput={() => markDirty(s.soal_terpilih_id)}
                   />
                 </div>
@@ -425,7 +425,7 @@
           onclick={submit}
           disabled={submitting}
         >
-          {submitting ? 'Mengirim…' : 'Submit Jawaban'}
+          {submitting ? 'Mengirimâ€¦' : 'Submit Jawaban'}
         </button>
       </div>
     {/if}

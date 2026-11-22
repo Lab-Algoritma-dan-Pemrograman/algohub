@@ -1,4 +1,4 @@
-<script lang="ts">
+﻿<script lang="ts">
   import { Separator, SidebarInset, SidebarProvider, SidebarTrigger } from '@algohub/ui';
   import { signOut } from '#lib/auth.ts';
   import AppSidebar from '#lib/components/AppSidebar.svelte';
@@ -29,7 +29,7 @@
 
 <SidebarProvider>
   <AppSidebar auth={data.auth} />
-  <SidebarInset class="flex h-screen flex-col overflow-hidden bg-transparent">
+  <SidebarInset class="flex h-[100dvh] flex-col overflow-hidden bg-transparent">
     <header
       class="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-2 border-b bg-white px-4 shadow-sm transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12"
     >

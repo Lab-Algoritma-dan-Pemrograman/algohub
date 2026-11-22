@@ -1,4 +1,4 @@
-<script lang="ts">
+﻿<script lang="ts">
   import { goto } from '$app/navigation';
   import { resolve } from '$app/paths';
   import { messages } from '@algohub/runner';
@@ -459,7 +459,7 @@
       </a>
       <div>
         <div class="text-xs font-bold tracking-widest text-zinc-400 uppercase">
-          Level {pos.levelIdx + 1} • {moduleTitle}
+          Level {pos.levelIdx + 1} â€¢ {moduleTitle}
         </div>
         <h1 class="text-xl font-bold">{lesson.title}</h1>
       </div>
@@ -492,7 +492,7 @@
   {#if step === 'learn'}
     <div
       in:fly={{ x: 20, duration: 200 }}
-      class="grid h-auto grid-cols-1 items-stretch gap-8 lg:h-[calc(100vh-240px)] lg:grid-cols-12"
+      class="grid h-auto grid-cols-1 items-stretch gap-8 lg:h-[calc(100dvh-240px)] lg:grid-cols-12"
     >
       <div
         class="custom-scrollbar flex h-full min-h-[300px] flex-col justify-between gap-6 overflow-y-auto pr-4 pb-4 lg:col-span-5"
@@ -502,7 +502,7 @@
             class="flex w-fit items-center gap-2 rounded-full bg-rose-50 px-3 py-1 text-sm font-bold text-rose-700"
           >
             <BookOpen size={16} />
-            Level {pos.levelIdx + 1} • Pelajaran {pos.lessonIdx + 1}
+            Level {pos.levelIdx + 1} â€¢ Pelajaran {pos.lessonIdx + 1}
           </div>
           <h2 class="text-4xl leading-tight font-black tracking-tight text-zinc-900">
             {lesson.title}
@@ -619,7 +619,7 @@
       in:fly={{ x: 20, duration: 200 }}
       class="grid grid-cols-1 gap-8 lg:grid-cols-2 {lesson.isFlowchart
         ? 'h-auto'
-        : 'h-auto lg:h-[calc(100vh-280px)]'}"
+        : 'h-auto lg:h-[calc(100dvh-280px)]'}"
     >
       <div class="custom-scrollbar flex h-auto flex-col gap-6 pr-4 lg:h-full lg:overflow-y-auto">
         <h2 class="text-3xl font-bold tracking-tight">
@@ -744,7 +744,7 @@
             >
               {#each lesson.testCases.filter((tc) => tc.input) as tc, i (i)}
                 <span class="inline-block">
-                  {#if i > 0}<span class="mx-1 text-zinc-300">•</span>{/if}
+                  {#if i > 0}<span class="mx-1 text-zinc-300">â€¢</span>{/if}
                   <span class="rounded bg-zinc-100 px-2 py-0.5 font-mono text-xs text-zinc-700">
                     {tc.input}
                   </span>

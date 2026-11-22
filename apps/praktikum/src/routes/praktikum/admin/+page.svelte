@@ -8,6 +8,9 @@
   const statQuery = createQuery(dashboardQuery);
   let stat = $derived(statQuery.data ?? null);
   let err = $derived(statQuery.error?.message ?? '');
+
+  const numFmt = new Intl.NumberFormat('id-ID');
+  const fmt = (n: number | null | undefined) => (n == null ? '-' : numFmt.format(n));
 </script>
 
 <h1 class="mb-1 text-2xl font-bold text-ink-heading">Dashboard Admin</h1>
@@ -20,10 +23,10 @@
     <div class="card flex items-start justify-between">
       <div>
         <p class="text-sm text-ink-caption">Total Mahasiswa</p>
-        <p class="mt-1 text-3xl font-bold text-primary">{stat.total_mahasiswa}</p>
+        <p class="mt-1 text-3xl font-bold tabular-nums text-primary">{fmt(stat.total_mahasiswa)}</p>
       </div>
       <span
-        class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary"
+        class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"
       >
         <Users size={20} />
       </span>
@@ -31,11 +34,11 @@
     <div class="card flex items-start justify-between">
       <div>
         <p class="text-sm text-ink-caption">Sudah Register</p>
-        <p class="mt-1 text-3xl font-bold text-state-info">{stat.sudah_register}</p>
-        <p class="text-xs text-ink-caption">Belum: {stat.belum_register}</p>
+        <p class="mt-1 text-3xl font-bold tabular-nums text-state-info">{fmt(stat.sudah_register)}</p>
+        <p class="text-xs tabular-nums text-ink-caption">Belum: {fmt(stat.belum_register)}</p>
       </div>
       <span
-        class="flex h-10 w-10 items-center justify-center rounded-xl bg-state-info-bg text-state-info"
+        class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-state-info-bg text-state-info"
       >
         <UserCheck size={20} />
       </span>
@@ -43,10 +46,10 @@
     <div class="card flex items-start justify-between">
       <div>
         <p class="text-sm text-ink-caption">Total Asisten</p>
-        <p class="mt-1 text-3xl font-bold text-ink-heading">{stat.total_asisten}</p>
+        <p class="mt-1 text-3xl font-bold tabular-nums text-ink-heading">{fmt(stat.total_asisten)}</p>
       </div>
       <span
-        class="flex h-10 w-10 items-center justify-center rounded-xl bg-surface-soft text-ink-heading"
+        class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-surface-soft text-ink-heading"
       >
         <GraduationCap size={20} />
       </span>
@@ -59,7 +62,9 @@
       <thead><tr><th>Kelas</th><th>Shift</th><th>Jumlah</th></tr></thead>
       <tbody>
         {#each stat.per_kelas_shift ?? [] as r, i (i)}
-          <tr><td>{r.nama_kelas}</td><td>{r.shift}</td><td>{r.jumlah}</td></tr>
+          <tr><td>{r.nama_kelas}</td><td>{r.shift}</td><td class="tabular-nums">{fmt(r.jumlah)}</td></tr>
+        {:else}
+          <tr><td colspan="3" class="text-center text-ink-caption">Belum ada data kelas.</td></tr>
         {/each}
       </tbody>
     </table>

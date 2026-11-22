@@ -1,4 +1,4 @@
-<script lang="ts">
+﻿<script lang="ts">
   import { resolve } from '$app/paths';
   import { page } from '$app/state';
   import ArrowLeft from '@lucide/svelte/icons/arrow-left';
@@ -57,7 +57,7 @@
   });
 </script>
 
-<div class="text-dark flex min-h-screen overflow-hidden bg-[#FDFBF7] font-sans">
+<div class="text-dark flex min-h-[100dvh] overflow-hidden bg-[#FDFBF7] font-sans">
   {#if appStore.sidebarOpen}
     <aside
       transition:fly={{ x: -256, duration: 200 }}
@@ -171,7 +171,7 @@
   {/if}
 
   <main
-    class="relative flex h-screen flex-1 flex-col overflow-hidden transition-all duration-300 {appStore.sidebarOpen
+    class="relative flex h-[100dvh] flex-1 flex-col overflow-hidden transition-all duration-300 {appStore.sidebarOpen
       ? 'lg:ml-64'
       : 'ml-0'}"
   >
