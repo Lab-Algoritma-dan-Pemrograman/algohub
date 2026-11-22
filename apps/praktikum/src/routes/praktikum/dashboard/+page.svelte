@@ -40,12 +40,6 @@
   });
 </script>
 
-<div class="aurora" aria-hidden="true">
-  <div class="aurora-blob aurora-blob-1"></div>
-  <div class="aurora-blob aurora-blob-2"></div>
-  <div class="aurora-blob aurora-blob-3"></div>
-</div>
-
 <div class="relative z-10 mx-auto max-w-6xl">
   {#if err}
     <p class="glass-card p-4 text-state-error">{err}</p>
@@ -316,7 +310,7 @@
             Tidak ada riwayat yang sesuai filter.
           </p>
         {:else}
-          <div class="glass-card overflow-x-auto p-0">
+          <div class="hidden md:block glass-card overflow-x-auto p-0">
             <table class="tbl">
               <thead><tr><th>Sesi</th><th>Course</th><th>Status</th><th>Nilai</th></tr></thead>
               <tbody>
@@ -334,6 +328,18 @@
                 {/each}
               </tbody>
             </table>
+          </div>
+          <div class="md:hidden grid gap-3">
+            {#each filteredRiwayat as r, i (i)}
+              <article class="glass-card p-4">
+                <h3 class="font-medium text-ink-heading">{r.sesi_judul}</h3>
+                <p class="text-sm text-ink-caption mt-0.5">{labelJenis(r.jenis)}</p>
+                <div class="flex items-center justify-between gap-3 mt-3">
+                  <span class="badge {statusBadgeClass(r.status)}">{labelStatus(r.status)}</span>
+                  <span class="text-2xl font-semibold text-primary">{r.total_nilai ?? '-'}</span>
+                </div>
+              </article>
+            {/each}
           </div>
         {/if}
       {/if}

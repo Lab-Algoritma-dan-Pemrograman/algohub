@@ -42,35 +42,65 @@
     icon: LucideIcon;
   }
 
+  interface NavGroup {
+    label: string;
+    links: NavLink[];
+  }
+
   const userLinks: NavLink[] = [
     { href: '/praktikum/dashboard', label: 'Dashboard', icon: Home },
     { href: '/praktikum/sesi', label: 'Daftar Sesi', icon: BookOpen },
     { href: '/praktikum/profil', label: 'Profil', icon: User },
     { href: '/praktikum/laporan-besar', label: 'Tugas Akhir Praktikum', icon: FileText },
   ];
-  const adminLinks: NavLink[] = [
-    { href: '/praktikum/admin', label: 'Dashboard', icon: BarChart2 },
-    { href: '/praktikum/admin/users', label: 'Data User', icon: Users },
-    { href: '/praktikum/admin/asisten', label: 'Asisten', icon: GraduationCap },
-    { href: '/praktikum/admin/kelas', label: 'Kelas', icon: School },
-    { href: '/praktikum/admin/jadwal', label: 'Jadwal', icon: Calendar },
-    { href: '/praktikum/admin/pedoman', label: 'Pedoman', icon: FileText },
-    { href: '/praktikum/admin/laporan-besar', label: 'Tugas Akhir Praktikum', icon: Book },
-    { href: '/praktikum/admin/modul', label: 'Modul', icon: Book },
-    { href: '/praktikum/admin/sesi', label: 'Sesi & Soal', icon: Puzzle },
-    { href: '/praktikum/admin/aktivasi', label: 'Aktivasi Sesi', icon: Zap },
-    { href: '/praktikum/admin/penilaian', label: 'Penilaian', icon: CheckCircle },
-    { href: '/praktikum/admin/rekap-jawaban', label: 'Rekap Jawaban', icon: ClipboardList },
-    { href: '/praktikum/admin/rekap-nilai', label: 'Rekap Nilai', icon: Trophy },
-    { href: '/praktikum/admin/log', label: 'Log Aktivitas', icon: Terminal },
-    { href: '/praktikum/admin/pengaturan', label: 'Pengaturan Lobby', icon: Settings },
+  const adminLinkGroups: NavGroup[] = [
+    {
+      label: 'Ringkasan',
+      links: [{ href: '/praktikum/admin', label: 'Dashboard', icon: BarChart2 }],
+    },
+    {
+      label: 'Data Master',
+      links: [
+        { href: '/praktikum/admin/users', label: 'Data User', icon: Users },
+        { href: '/praktikum/admin/asisten', label: 'Asisten', icon: GraduationCap },
+        { href: '/praktikum/admin/kelas', label: 'Kelas', icon: School },
+        { href: '/praktikum/admin/jadwal', label: 'Jadwal', icon: Calendar },
+        { href: '/praktikum/admin/pedoman', label: 'Pedoman', icon: FileText },
+      ],
+    },
+    {
+      label: 'Kurikulum & Sesi',
+      links: [
+        { href: '/praktikum/admin/modul', label: 'Modul', icon: Book },
+        { href: '/praktikum/admin/sesi', label: 'Sesi & Soal', icon: Puzzle },
+        { href: '/praktikum/admin/aktivasi', label: 'Aktivasi Sesi', icon: Zap },
+      ],
+    },
+    {
+      label: 'Penilaian',
+      links: [
+        { href: '/praktikum/admin/penilaian', label: 'Penilaian', icon: CheckCircle },
+        { href: '/praktikum/admin/laporan-besar', label: 'Tugas Akhir Praktikum', icon: Book },
+        { href: '/praktikum/admin/rekap-jawaban', label: 'Rekap Jawaban', icon: ClipboardList },
+        { href: '/praktikum/admin/rekap-nilai', label: 'Rekap Nilai', icon: Trophy },
+      ],
+    },
+    {
+      label: 'Sistem',
+      links: [
+        { href: '/praktikum/admin/log', label: 'Log Aktivitas', icon: Terminal },
+        { href: '/praktikum/admin/pengaturan', label: 'Pengaturan Lobby', icon: Settings },
+      ],
+    },
   ];
 
   const logoutMutation = createLogoutMutation();
 
   let user = $derived(session.user);
   let isAdmin = $derived(user?.role === 'asisten' || user?.role === 'koordinator');
-  let links = $derived(isAdmin ? adminLinks : userLinks);
+  let navGroups = $derived<NavGroup[]>(
+    isAdmin ? adminLinkGroups : [{ label: '', links: userLinks }],
+  );
 
   let open = $state(false);
   let collapsed = $state(false);
@@ -159,18 +189,23 @@
       </div>
 
       <nav class="sidebar-nav custom-scrollbar">
-        {#each links as l (l.href)}
-          {@const Icon = l.icon}
-          {@const isActive = active(l.href)}
-          <a
-            href={l.href}
-            onclick={() => (open = false)}
-            class="sidebar-link"
-            class:active={isActive}
-          >
-            <span class="link-icon"><Icon size={18} /></span>
-            <span class="link-label">{l.label}</span>
-          </a>
+        {#each navGroups as group}
+          {#if !collapsed && group.label}
+            <div class="nav-group-label">{group.label}</div>
+          {/if}
+          {#each group.links as l (l.href)}
+            {@const Icon = l.icon}
+            {@const isActive = active(l.href)}
+            <a
+              href={l.href}
+              onclick={() => (open = false)}
+              class="sidebar-link"
+              class:active={isActive}
+            >
+              <span class="link-icon"><Icon size={18} /></span>
+              <span class="link-label">{l.label}</span>
+            </a>
+          {/each}
         {/each}
       </nav>
 
@@ -381,6 +416,18 @@
   }
   .link-label {
     white-space: nowrap;
+  }
+
+  .nav-group-label {
+    padding: 0.85rem 0.8rem 0.35rem;
+    font-size: 0.625rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(255, 255, 255, 0.45);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .sidebar-footer {
