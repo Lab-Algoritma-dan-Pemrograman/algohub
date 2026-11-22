@@ -395,7 +395,7 @@ func TestElearningAuthEndpoints(t *testing.T) {
 
 func TestElearningLoginRateLimit(t *testing.T) {
 	r := newElearningRouter(t)
-	ip := map[string]string{"X-Forwarded-For": "203.0.113.9"}
+	ip := map[string]string{"X-Vercel-Forwarded-For": "203.0.113.9"}
 	for i := range 10 {
 		if rec := postBody(r, "/api/elearning/login", "application/json", `{}`, ip); rec.Code != http.StatusBadRequest {
 			t.Fatalf("login ke-%d = %d, want 400", i+1, rec.Code)

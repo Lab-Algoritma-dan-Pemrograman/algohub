@@ -99,7 +99,9 @@ func (h *AuthHandler) Register(c *gin.Context) {
 func (h *AuthHandler) Logout(c *gin.Context) {
 	userID := middleware.UserID(c)
 	_ = h.auditLog.LogAction(userID, "", "LOGOUT", "Logout berhasil", middleware.ClientIP(c), c.Request.UserAgent())
-	h.auth.Logout(userID)
+	// K-1: kirim jti + exp token valid agar usecase bisa mencabut token ini.
+	exp, _ := middleware.TokenExpiry(c)
+	h.auth.Logout(userID, middleware.TokenID(c), exp)
 	response.OK(c, http.StatusOK, "Logout berhasil", nil)
 }
 

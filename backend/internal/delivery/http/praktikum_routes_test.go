@@ -296,7 +296,7 @@ func TestPraktikumAuthChain(t *testing.T) {
 
 func TestPraktikumLoginLimitSharedWithAlias(t *testing.T) {
 	r := newPraktikumRouter(t, "test")
-	ip := map[string]string{"X-Forwarded-For": "203.0.113.7"}
+	ip := map[string]string{"X-Vercel-Forwarded-For": "203.0.113.7"}
 	for i := range 10 {
 		if w := serve(r, http.MethodPost, "/api/praktikum/auth/login", "", ip); w.Code != http.StatusBadRequest {
 			t.Fatalf("login ke-%d = %d, want 400", i+1, w.Code)
@@ -305,7 +305,7 @@ func TestPraktikumLoginLimitSharedWithAlias(t *testing.T) {
 	if w := serve(r, http.MethodPost, "/api/auth/login", "", ip); w.Code != http.StatusTooManyRequests {
 		t.Errorf("alias login setelah kuota habis = %d, want 429", w.Code)
 	}
-	other := map[string]string{"X-Forwarded-For": "203.0.113.8"}
+	other := map[string]string{"X-Vercel-Forwarded-For": "203.0.113.8"}
 	if w := serve(r, http.MethodPost, "/api/auth/login", "", other); w.Code != http.StatusBadRequest {
 		t.Errorf("login dari IP lain = %d, want 400", w.Code)
 	}

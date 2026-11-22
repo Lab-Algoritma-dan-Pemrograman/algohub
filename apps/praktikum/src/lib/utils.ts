@@ -48,14 +48,20 @@ export function labelStatus(status: string): string {
   }
 }
 
+// Teks badge memakai warna ink gelap di atas latar tinted state agar kontras ≥ 4.5:1 (WCAG AA).
+// Warna state asli (#06d6a0 / #ffc300) di atas putih < 4.5:1, jadi hanya dipakai sebagai latar tint.
 export function statusBadgeClass(status: string): string {
   switch (status) {
     case 'selesai':
-      return 'bg-state-success-bg text-state-success';
+      return 'bg-state-success-bg text-ink-heading';
     case 'sedang_dikerjakan':
-      return 'bg-state-warning-bg text-state-warning';
+      return 'bg-state-warning-bg text-ink-heading';
+    case 'gagal':
+      return 'bg-state-error-bg text-ink-heading';
+    case 'info':
+      return 'bg-state-info-bg text-ink-heading';
     default:
-      return 'bg-gray-100 text-ink-caption';
+      return 'bg-gray-100 text-ink-heading';
   }
 }
 

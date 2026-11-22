@@ -3,13 +3,26 @@
   import { Lock, Search, ArrowRight, Filter, BookOpen, Layers } from '@lucide/svelte';
   import { mahasiswaQueries } from '#lib/queries/mahasiswa.ts';
   import { labelJenis, labelStatus, statusBadgeClass } from '#lib/utils.ts';
+  import { toast } from '@algohub/ui';
 
   const sesiQuery = createQuery(mahasiswaQueries.sesi);
 
   let sesi = $derived(sesiQuery.data ?? []);
   let loading = $derived(sesiQuery.isPending);
   // Seperti swrGet lama: error hanya tampil bila belum ada data yang bisa ditampilkan.
+  // Jika cache ada tapi revalidasi gagal, err kosong oleh sengaja; toast yang memberi tahu.
   let err = $derived(sesiQuery.data ? '' : (sesiQuery.error?.message ?? ''));
+
+  let lastToastError = $state<string | null>(null);
+  $effect(() => {
+    const msg = sesiQuery.error?.message;
+    if (!msg || !sesiQuery.data) return;
+    if (lastToastError === msg) return;
+    lastToastError = msg;
+    toast.error('Gagal memperbarui daftar sesi', {
+      description: 'Menampilkan data terakhir yang tersimpan. Tarik untuk coba lagi.',
+    });
+  });
 
   let searchQuery = $state('');
   let filterMode = $state<'semua' | 'aktif' | 'terkunci'>('semua');

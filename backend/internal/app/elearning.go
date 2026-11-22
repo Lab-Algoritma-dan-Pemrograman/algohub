@@ -79,7 +79,8 @@ type praktikumLogin struct {
 
 func newPraktikumLogin(cfg *config.Config, db *gorm.DB) praktikumLogin {
 	users := prakrepo.NewUserRepository(db)
-	auth := prakusecase.NewAuthUsecase(users, prakrepo.NewKelasRepository(db), jwt.NewManager(cfg.JWTSecret, cfg.JWTExpireHours), cfg, fbScryptConfig(cfg))
+	auth := prakusecase.NewAuthUsecase(users, prakrepo.NewKelasRepository(db), jwt.NewManager(cfg.JWTSecret, cfg.JWTExpireHours), cfg, fbScryptConfig(cfg)).
+		WithBlocklist(prakrepo.NewTokenBlocklist(db))
 	return praktikumLogin{auth: auth, audit: prakusecase.NewAuditLogUsecase(prakrepo.NewAuditLogRepository(db), users)}
 }
 

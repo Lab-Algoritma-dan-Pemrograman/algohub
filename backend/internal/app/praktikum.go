@@ -54,6 +54,9 @@ func newPraktikum(cfg *config.Config, db *gorm.DB) *deliveryhttp.Praktikum {
 	laporanBesarRepo := repository.NewLaporanBesarRepository(db)
 
 	authUC := usecase.NewAuthUsecase(userRepo, kelasRepo, jm, cfg, fbScryptConfig(cfg))
+	// K-1: blocklist jti di DB praktikum. Token yang sudah logout ditolak di middleware.
+	tokenBlocklist := repository.NewTokenBlocklist(db)
+	authUC = authUC.WithBlocklist(tokenBlocklist)
 	profileUC := usecase.NewProfileUsecase(userRepo, cfg)
 	dashboardUC := usecase.NewDashboardUsecase(userRepo, aktivasiRepo, pengerjaanRepo)
 	sesiUC := usecase.NewSesiUsecase(sesiRepo, courseRepo)
@@ -80,6 +83,7 @@ func newPraktikum(cfg *config.Config, db *gorm.DB) *deliveryhttp.Praktikum {
 		Config:      cfg,
 		JWT:         jm,
 		Users:       userRepo,
+		Blocklist:   tokenBlocklist,
 		Konfigurasi: konfRepo,
 		Handlers: deliveryhttp.PraktikumHandlers{
 			Auth:         handler.NewAuthHandler(authUC, profileUC, auditLogUC),

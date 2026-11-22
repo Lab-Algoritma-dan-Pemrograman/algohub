@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 )
 
 type Claims struct {
@@ -23,6 +24,8 @@ func NewManager(secret string, expireHours int) *Manager {
 	return &Manager{secret: []byte(secret), expireHours: expireHours}
 }
 
+// Generate menandatangani token praktikum dengan jti unik (K-1/K-3) supaya
+// logout bisa mencabut token spesifik, bukan seluruh sesi user.
 func (m *Manager) Generate(userID int, nim, role string) (string, error) {
 	now := time.Now()
 	claims := Claims{
@@ -30,6 +33,7 @@ func (m *Manager) Generate(userID int, nim, role string) (string, error) {
 		NIM:    nim,
 		Role:   role,
 		RegisteredClaims: jwt.RegisteredClaims{
+			ID:        uuid.NewString(),
 			IssuedAt:  jwt.NewNumericDate(now),
 			ExpiresAt: jwt.NewNumericDate(now.Add(time.Duration(m.expireHours) * time.Hour)),
 		},
@@ -53,4 +57,13 @@ func (m *Manager) Verify(tokenStr string) (*Claims, error) {
 		return nil, errors.New("token tidak valid")
 	}
 	return claims, nil
+}
+
+// ExpiryTime mengembalikan exp klaim sebagai time.Time; bool kedua false bila
+// klaim tidak punya exp (token manual/legacy). Dipakai RevokeToken untuk TTL.
+func ExpiryTime(c *Claims) (time.Time, bool) {
+	if c == nil || c.ExpiresAt == nil {
+		return time.Time{}, false
+	}
+	return c.ExpiresAt.Time, true
 }

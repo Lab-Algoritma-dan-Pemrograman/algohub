@@ -146,9 +146,7 @@
   .cta-band {
     @apply border-primary/10 bg-primary relative overflow-hidden rounded-2xl border p-6 text-white shadow-md sm:p-8;
   }
-  .fade-up {
-    animation: fadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
-  }
+  /* Q9: satu animasi per halaman (in:fly di AppShell). .fade-up dan keyframes-nya dihapus. */
   .input {
     @apply focus:border-primary/50 focus:ring-primary/5 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none transition-all focus:ring-4;
   }
@@ -175,17 +173,6 @@
   }
   .tbl tbody tr:hover {
     @apply bg-slate-50/50;
-  }
-}
-
-@keyframes fadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
   }
 }
 

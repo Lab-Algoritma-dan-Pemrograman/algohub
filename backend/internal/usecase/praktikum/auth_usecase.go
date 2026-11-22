@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"context"
 	"errors"
 	"log"
 	"strings"
@@ -23,6 +24,7 @@ type AuthUsecase struct {
 	jwt      *jwt.Manager
 	cfg      *config.Config
 	fbScrypt hash.FbScryptConfig
+	block    repository.TokenBlocklist
 }
 
 func NewAuthUsecase(u repository.UserRepository, k repository.KelasRepository, j *jwt.Manager, cfg *config.Config, fb hash.FbScryptConfig) *AuthUsecase {
@@ -261,7 +263,44 @@ func validateEmailAllowlist(email string, cfg *config.Config) error {
 	return errors.Join(ErrBadRequest, errors.New("domain email tidak diizinkan (hanya gmail.com, yahoo.com, outlook.com, hotmail.com)"))
 }
 
-func (uc *AuthUsecase) Logout(userID int) { _ = userID }
+// Logout mencabut token spesifik lewat jti-nya (K-1/K-3). userID tetap diterima
+// hanya untuk audit. jti kosong = token legacy sebelum fitur jti: tak ada yang
+// bisa dicabut, cookie di klien sudah dihapus (jendela maksimal 12 jam berlalu).
+func (uc *AuthUsecase) Logout(userID int, jti string, exp time.Time) {
+	if uc.block == nil || strings.TrimSpace(jti) == "" {
+		return
+	}
+	if exp.IsZero() {
+		// Tanpa exp, beri umur maksimal token (config) supaya tidak tersimpan permanen.
+		exp = time.Now().Add(time.Duration(uc.cfg.JWTExpireHours) * time.Hour)
+	}
+	if exp.Before(time.Now()) {
+		exp = time.Now().Add(time.Minute) // kedaluwarsa hampir seketika; dibersihkan kru pembersih
+	}
+	_ = uc.block.RevokeToken(context.Background(), jti, userID, exp)
+}
+
+// Verify memvalidasi token praktikum + cek blocklist jti (K-1). Mengembalikan
+// klaim + flag revoked. Error lookup blocklist dianggap belum dicabut (fail-open),
+// sama seperti keputusan siakad — token tetap sah, tidak mengunci seluruh user saat DB bergolak.
+func (uc *AuthUsecase) Verify(tokenStr string) (*jwt.Claims, bool, error) {
+	claims, err := uc.jwt.Verify(tokenStr)
+	if err != nil || uc.block == nil || strings.TrimSpace(claims.ID) == "" {
+		return claims, false, err
+	}
+	revoked, err := uc.block.IsTokenRevoked(context.Background(), claims.ID)
+	if err != nil {
+		return claims, false, nil
+	}
+	return claims, revoked, nil
+}
+
+// WithBlocklist menyuntik blocklist jti. Dep opsional supaya pemanggil lama
+// (CLI mktoken, login elearning) dan test berjalan tanpa DB blocklist.
+func (uc *AuthUsecase) WithBlocklist(b repository.TokenBlocklist) *AuthUsecase {
+	uc.block = b
+	return uc
+}
 
 func (uc *AuthUsecase) issue(u *entity.User) (*dto.AuthResponse, error) {
 	token, err := uc.jwt.Generate(u.ID, u.NIM, string(u.Role))

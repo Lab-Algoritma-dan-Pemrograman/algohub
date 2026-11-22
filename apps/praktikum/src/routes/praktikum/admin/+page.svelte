@@ -3,6 +3,7 @@
   import { Users, UserCheck, GraduationCap } from '@lucide/svelte';
   import { dashboardQuery } from '#lib/queries/admin/dashboard.ts';
   import { labelJenis } from '#lib/utils.ts';
+  import { Skeleton } from '@algohub/ui';
 
   const statQuery = createQuery(dashboardQuery);
   let stat = $derived(statQuery.data ?? null);
@@ -95,5 +96,31 @@
     </div>
   {/if}
 {:else if !err}
-  <p class="text-ink-caption">Memuat…</p>
+  <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-label="Memuat dashboard admin">
+    {#each Array(3) as _, i (i)}
+      <div class="card flex items-start justify-between">
+        <div class="flex-1">
+          <Skeleton class="h-4 w-28" />
+          <Skeleton class="mt-2 h-8 w-16" />
+          {#if i === 1}<Skeleton class="mt-1 h-3 w-24" />{/if}
+        </div>
+        <Skeleton class="h-10 w-10 rounded-xl" />
+      </div>
+    {/each}
+  </div>
+
+  <Skeleton class="mb-3 mt-8 h-6 w-48" />
+  <div class="table-wrap max-w-xl">
+    <div class="space-y-3 p-4">
+      <Skeleton class="h-4 w-full" />
+      <Skeleton class="h-4 w-full" />
+      <Skeleton class="h-4 w-full" />
+    </div>
+  </div>
+
+  <Skeleton class="mb-3 mt-8 h-6 w-44" />
+  <div class="grid gap-4 md:grid-cols-2">
+    <Skeleton class="h-40 rounded-2xl" />
+    <Skeleton class="h-40 rounded-2xl" />
+  </div>
 {/if}

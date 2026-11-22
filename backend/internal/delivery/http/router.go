@@ -20,6 +20,14 @@ func NewRouter(cfg *config.Config) (*gin.Engine, error) {
 	}
 
 	r := gin.New()
+	// Vercel menulis X-Vercel-Forwarded-For di edge; client tidak bisa
+	// mengirim header ini (Vercel menimpa/menghapusnya saat masuk).
+	// Gin v1.10.0 belum punya gin.PlatformVercel, jadi pakai nama headernya
+	// langsung — TrustedPlatform memang berupa nama header.
+	// Combined dengan SetTrustedProxies(nil) di bawah: X-Forwarded-For/X-Real-IP
+	// dari client selalu diabaikan.
+	const PlatformVercel = "X-Vercel-Forwarded-For"
+	r.TrustedPlatform = PlatformVercel
 	if err := r.SetTrustedProxies(nil); err != nil {
 		return nil, err
 	}
@@ -73,6 +81,7 @@ type Praktikum struct {
 	Config      *config.Config
 	JWT         *jwt.Manager
 	Users       repository.UserRepository
+	Blocklist   repository.TokenBlocklist
 	Konfigurasi repository.KonfigurasiRepository
 	Handlers    PraktikumHandlers
 }
@@ -85,7 +94,7 @@ func RegisterPraktikum(r *gin.Engine, p *Praktikum) {
 	authLimit := middleware.RateLimit(20, time.Minute)
 	loginLimit := middleware.RateLimit(10, time.Minute)
 	runLimit := middleware.RateLimitUser(30, time.Minute)
-	authmw := middleware.PraktikumAuth(p.Config, p.JWT, p.Users)
+	authmw := middleware.PraktikumAuth(p.Config, p.JWT, p.Users, p.Blocklist)
 
 	api := r.Group("/api")
 

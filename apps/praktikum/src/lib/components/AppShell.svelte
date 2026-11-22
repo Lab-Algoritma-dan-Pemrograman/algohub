@@ -45,8 +45,8 @@
   const userLinks: NavLink[] = [
     { href: '/praktikum/dashboard', label: 'Dashboard', icon: Home },
     { href: '/praktikum/sesi', label: 'Daftar Sesi', icon: BookOpen },
-    { href: '/praktikum/laporan-besar', label: 'Tugas Akhir Praktikum', icon: FileText },
     { href: '/praktikum/profil', label: 'Profil', icon: User },
+    { href: '/praktikum/laporan-besar', label: 'Tugas Akhir Praktikum', icon: FileText },
   ];
   const adminLinks: NavLink[] = [
     { href: '/praktikum/admin', label: 'Dashboard', icon: BarChart2 },
@@ -111,6 +111,19 @@
       .join('')
       .substring(0, 2)
       .toUpperCase();
+  }
+
+  function roleLabel(role?: string): string {
+    switch (role) {
+      case 'koordinator':
+        return 'Koordinator · Superadmin';
+      case 'asisten':
+        return 'Asisten';
+      case 'mahasiswa':
+        return 'Mahasiswa';
+      default:
+        return '';
+    }
   }
 
   async function logout() {
@@ -191,14 +204,14 @@
           <div class="topbar-avatar">{initials(user?.nama)}</div>
           <div class="topbar-id">
             <span class="topbar-name">{user?.nama || 'Pengguna'}</span>
-            <span class="topbar-role">{user?.role || ''}</span>
+            <span class="topbar-role">{roleLabel(user?.role)}</span>
           </div>
         </a>
       </header>
     {/if}
     <main class="content-area" class:content-full={inSession}>
       {#key page.url.pathname}
-        <div in:fly={{ y: 8, duration: 240, easing: cubicOut }}>
+        <div class="page-enter" in:fly={{ y: 8, duration: 240, easing: cubicOut }}>
           {@render children()}
         </div>
       {/key}
@@ -208,15 +221,27 @@
 <ConfirmModal />
 
 <style>
+  .page-enter {
+    display: block;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .page-enter {
+      animation: none !important;
+      transition: none !important;
+      transform: none !important;
+      opacity: 1 !important;
+    }
+  }
+
   .dashboard-layout {
     display: flex;
     min-height: 100vh;
-    background: #f8fafc;
+    background: var(--color-surface-base);
   }
 
   .sidebar {
     width: 250px;
-    background: linear-gradient(180deg, #5c0e25 0%, #4a0b1e 100%);
+    background: linear-gradient(180deg, var(--color-sidebar) 0%, var(--color-sidebar-deep) 100%);
     color: #fff;
     display: flex;
     flex-direction: column;
@@ -339,10 +364,10 @@
     color: rgba(255, 255, 255, 0.78);
   }
   .sidebar-link.active {
-    background: #8a1538;
+    background: var(--color-primary);
     color: #fff;
     font-weight: 600;
-    box-shadow: 0 2px 8px rgba(138, 21, 56, 0.4);
+    box-shadow: 0 2px 8px rgb(138 21 56 / 0.4);
   }
   .sidebar-link.active:visited {
     color: #fff;
@@ -475,7 +500,7 @@
   }
   .hamburger:hover {
     background: #f1f5f9;
-    color: #8a1538;
+    color: var(--color-primary);
   }
 
   .topbar-user {
@@ -497,7 +522,7 @@
     height: 2.1rem;
     flex-shrink: 0;
     border-radius: 50%;
-    background: #8a1538;
+    background: var(--color-primary);
     color: #fff;
     display: flex;
     align-items: center;
@@ -522,7 +547,7 @@
   }
   .topbar-role {
     font-size: 0.65rem;
-    color: #8a1538;
+    color: var(--color-primary);
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.08em;

@@ -11,8 +11,8 @@ import (
 
 func TestSiakadRateLimit(t *testing.T) {
 	r := limitedEngine(t, SiakadRateLimit(5, time.Minute, "pesan batas", nil))
-	a := map[string]string{"X-Forwarded-For": "203.0.113.7"}
-	b := map[string]string{"X-Forwarded-For": "203.0.113.8, 10.0.0.1"}
+	a := map[string]string{"X-Vercel-Forwarded-For": "203.0.113.7"}
+	b := map[string]string{"X-Vercel-Forwarded-For": "203.0.113.8, 10.0.0.1"}
 
 	for i := range 5 {
 		if code := hit(r, a); code != http.StatusOK {
@@ -20,7 +20,7 @@ func TestSiakadRateLimit(t *testing.T) {
 		}
 	}
 	req := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
-	req.Header.Set("X-Forwarded-For", "203.0.113.7")
+	req.Header.Set("X-Vercel-Forwarded-For", "203.0.113.7")
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 	if w.Code != http.StatusTooManyRequests {
@@ -40,14 +40,14 @@ func TestSiakadRateLimitApplies(t *testing.T) {
 	ip := "203.0.113.9"
 
 	for range 3 {
-		if code := hit(r, map[string]string{"X-Forwarded-For": ip}); code != http.StatusOK {
+		if code := hit(r, map[string]string{"X-Vercel-Forwarded-For": ip}); code != http.StatusOK {
 			t.Fatalf("request yang tidak dihitung = %d, ingin 200", code)
 		}
 	}
-	if code := hit(r, map[string]string{"X-Forwarded-For": ip, "X-Hitung": "1"}); code != http.StatusOK {
+	if code := hit(r, map[string]string{"X-Vercel-Forwarded-For": ip, "X-Hitung": "1"}); code != http.StatusOK {
 		t.Fatalf("request dihitung ke-1 = %d, ingin 200", code)
 	}
-	if code := hit(r, map[string]string{"X-Forwarded-For": ip, "X-Hitung": "1"}); code != http.StatusTooManyRequests {
+	if code := hit(r, map[string]string{"X-Vercel-Forwarded-For": ip, "X-Hitung": "1"}); code != http.StatusTooManyRequests {
 		t.Fatalf("request dihitung ke-2 = %d, ingin 429", code)
 	}
 }

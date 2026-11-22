@@ -5,6 +5,7 @@
   import { mahasiswaQueries } from '#lib/queries/mahasiswa.ts';
   import { praktikumRunner } from '#lib/runner.ts';
   import { labelJenis, labelStatus, statusBadgeClass } from '#lib/utils.ts';
+  import { Skeleton, toast } from '@algohub/ui';
 
   let riwayatSearch = $state('');
   let riwayatFilterJenis = $state('');
@@ -13,7 +14,19 @@
 
   let data = $derived(dashboardQuery.data ?? null);
   // Seperti swrGet lama: error hanya tampil bila belum ada data yang bisa ditampilkan.
+  // Saat cache masih ada tapi revalidasi gagal, `err` kosong dan pengguna diberi tahu lewat toast.
   let err = $derived(data ? '' : (dashboardQuery.error?.message ?? ''));
+
+  let lastToastError = $state<string | null>(null);
+  $effect(() => {
+    const msg = dashboardQuery.error?.message;
+    if (!msg || !data) return;
+    if (lastToastError === msg) return;
+    lastToastError = msg;
+    toast.error('Gagal memperbarui data', {
+      description: 'Menampilkan data terakhir yang tersimpan. Tarik untuk coba lagi.',
+    });
+  });
 
   let ctaHref = $derived(
     data && data.sesi_aktif.length > 0
@@ -37,7 +50,69 @@
   {#if err}
     <p class="glass-card p-4 text-state-error">{err}</p>
   {:else if !data}
-    <p class="text-ink-caption">Memuat…</p>
+    <div
+      class="grid auto-rows-[minmax(158px,auto)] grid-cols-1 gap-[18px] sm:grid-cols-2 lg:grid-cols-4"
+      aria-label="Memuat dashboard"
+    >
+      <section class="glass-hero flex flex-col justify-between p-8 sm:col-span-2 lg:row-span-2">
+        <div>
+          <Skeleton class="h-6 w-20 rounded-full" />
+          <Skeleton class="mt-4 h-9 w-3/4" />
+          <Skeleton class="mt-3 h-4 w-2/3" />
+          <Skeleton class="mt-3 h-4 w-1/2" />
+          <div class="mt-5 flex flex-wrap gap-2">
+            <Skeleton class="h-6 w-24 rounded-full" />
+            <Skeleton class="h-6 w-24 rounded-full" />
+            <Skeleton class="h-6 w-20 rounded-full" />
+          </div>
+        </div>
+        <div class="mt-7 flex flex-wrap gap-3">
+          <Skeleton class="h-10 w-36 rounded-xl" />
+          <Skeleton class="h-10 w-24 rounded-xl" />
+        </div>
+      </section>
+
+      <div class="glass-card flex flex-col p-6">
+        <Skeleton class="h-12 w-12 rounded-xl" />
+        <Skeleton class="mt-4 h-4 w-32" />
+        <Skeleton class="mt-1 h-4 w-40" />
+      </div>
+
+      <div class="glass-card flex flex-col p-6">
+        <Skeleton class="h-12 w-12 rounded-xl" />
+        <Skeleton class="mt-4 h-4 w-20" />
+        <Skeleton class="mt-2 h-8 w-16" />
+        <Skeleton class="mt-2 h-3 w-32" />
+      </div>
+
+      <section class="glass-card flex items-start gap-4 p-6 sm:col-span-2 lg:col-span-4">
+        <Skeleton class="h-11 w-11 flex-shrink-0 rounded-xl" />
+        <div class="min-w-0 flex-1">
+          <Skeleton class="h-4 w-24" />
+          <div class="mt-3 grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-4">
+            <Skeleton class="h-4 w-full" />
+            <Skeleton class="h-4 w-full" />
+            <Skeleton class="h-4 w-full" />
+            <Skeleton class="h-4 w-full" />
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="mt-12">
+      <Skeleton class="h-6 w-40" />
+      <Skeleton class="mt-1 h-4 w-56" />
+      <div class="mt-5 grid gap-[18px] md:grid-cols-2">
+        <Skeleton class="h-44 rounded-2xl" />
+        <Skeleton class="h-44 rounded-2xl" />
+      </div>
+    </div>
+
+    <div class="mt-12">
+      <Skeleton class="h-6 w-32" />
+      <Skeleton class="mt-1 h-4 w-48" />
+      <div class="mt-5 h-40 rounded-2xl"></div>
+    </div>
   {:else}
     <div
       class="grid auto-rows-[minmax(158px,auto)] grid-cols-1 gap-[18px] sm:grid-cols-2 lg:grid-cols-4"
@@ -199,22 +274,35 @@
         </div>
       {:else}
         <div class="mt-5 mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
-          <div class="relative flex-1 max-w-xs">
-            <Search size={14} class="absolute left-3 top-1/2 -translate-y-1/2 text-ink-caption" />
+      <div class="relative flex-1 max-w-xs">
+        <Search
+          size={14}
+          aria-hidden="true"
+          class="absolute left-3 top-1/2 -translate-y-1/2 text-ink-caption"
+        />
             <input
               type="text"
+              id="riwayat-search"
               placeholder="Cari sesi..."
               bind:value={riwayatSearch}
               class="input pl-9 w-full text-sm"
+              aria-label="Cari sesi riwayat nilai"
             />
           </div>
-          <select bind:value={riwayatFilterJenis} class="input w-auto text-sm bg-white">
+          <div class="flex flex-col gap-1">
+            <label for="riwayat-jenis" class="sr-only">Filter jenis penilaian</label>
+            <select
+              id="riwayat-jenis"
+              bind:value={riwayatFilterJenis}
+              class="input w-auto text-sm bg-white"
+            >
             <option value="">Semua Jenis</option>
             <option value="pretest">Pre-test</option>
             <option value="posttest">Post-test</option>
             <option value="keterampilan">Keterampilan</option>
             <option value="ujian_praktik">Ujian Praktik</option>
-          </select>
+            </select>
+          </div>
         </div>
 
         {@const filteredRiwayat = data.riwayat_nilai.filter((r) => {

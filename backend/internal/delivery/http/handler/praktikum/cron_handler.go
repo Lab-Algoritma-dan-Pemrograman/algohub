@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"crypto/subtle"
 	"net/http"
 
 	usecase "github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/usecase/praktikum"
@@ -29,7 +30,7 @@ func NewCronHandler(j *usecase.JawabanUsecase, r *usecase.RumpangUsecase, secret
 // @Router			/cron/praktikum/auto-submit [post]
 func (h *CronHandler) AutoSubmit(c *gin.Context) {
 	// Tolak bila secret kosong (salah konfigurasi) atau tidak cocok.
-	if h.secret == "" || c.GetHeader("X-Cron-Secret") != h.secret {
+	if h.secret == "" || subtle.ConstantTimeCompare([]byte(c.GetHeader("X-Cron-Secret")), []byte(h.secret)) != 1 {
 		response.Fail(c, http.StatusUnauthorized, "Akses ditolak", nil)
 		return
 	}
@@ -49,7 +50,7 @@ func (h *CronHandler) AutoSubmit(c *gin.Context) {
 // @Router			/cron/praktikum/rumpang [post]
 func (h *CronHandler) Rumpang(c *gin.Context) {
 	// Tolak bila secret kosong (salah konfigurasi) atau tidak cocok.
-	if h.secret == "" || c.GetHeader("X-Cron-Secret") != h.secret {
+	if h.secret == "" || subtle.ConstantTimeCompare([]byte(c.GetHeader("X-Cron-Secret")), []byte(h.secret)) != 1 {
 		response.Fail(c, http.StatusUnauthorized, "Akses ditolak", nil)
 		return
 	}

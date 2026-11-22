@@ -113,7 +113,7 @@ func TestSiakadLoginSetsCookie(t *testing.T) {
 
 func TestSiakadLoginRateLimit(t *testing.T) {
 	r, _, _ := newSiakadRouter(t)
-	ip := map[string]string{"X-Forwarded-For": "203.0.113.50"}
+	ip := map[string]string{"X-Vercel-Forwarded-For": "203.0.113.50"}
 	for i := range 5 {
 		if rec := send(r, http.MethodPost, "/api/siakad/auth/login", `{}`, ip); rec.Code != http.StatusBadRequest {
 			t.Fatalf("request ke-%d = %d, ingin 400", i+1, rec.Code)
@@ -131,7 +131,7 @@ func TestSiakadLoginRateLimit(t *testing.T) {
 func TestSiakadLoginBadBodyIsEmpty(t *testing.T) {
 	r, _, _ := newSiakadRouter(t)
 	for _, body := range []string{"", "bukan json", `{"username":5,"password":"x"}`, `[]`} {
-		rec := send(r, http.MethodPost, "/api/siakad/auth/login", body, map[string]string{"X-Forwarded-For": "203.0.113.60"})
+		rec := send(r, http.MethodPost, "/api/siakad/auth/login", body, map[string]string{"X-Vercel-Forwarded-For": "203.0.113.60"})
 		if rec.Code != http.StatusBadRequest || rec.Body.String() != `{"error":"Username dan password wajib diisi."}` {
 			t.Errorf("body %q: %d %s", body, rec.Code, rec.Body)
 		}
@@ -257,7 +257,7 @@ func TestSiakadRPC(t *testing.T) {
 
 func TestSiakadRPCRateLimit(t *testing.T) {
 	r, _, _ := newSiakadRouter(t)
-	ip := map[string]string{"X-Forwarded-For": "203.0.113.70"}
+	ip := map[string]string{"X-Vercel-Forwarded-For": "203.0.113.70"}
 	for range 7 {
 		if rec := send(r, http.MethodPost, "/api/siakad/rpc?fn=get_public_settings", "", ip); rec.Code != http.StatusOK {
 			t.Fatalf("RPC selain login_user/register_user tidak dibatasi, dapat %d", rec.Code)
