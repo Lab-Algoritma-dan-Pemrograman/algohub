@@ -71,9 +71,9 @@ Platform pembelajaran mandiri interaktif dengan pendekatan gamifikasi:
 ### 4. Praktikum (`praktikum.algohub.web.id`)
 Sistem inti pelaksanaan sesi praktikum resmi di ruang laboratorium:
 - Manajemen alur ujian berbatas waktu: Pretest, Posttest, Keterampilan, dan Ujian Utama.
-- Fitur autosave draft jawaban dan kode ke backend dan penyimpanan lokal IndexedDB.
+- Autosave jawaban dan kode ke PostgreSQL, dengan draft lokal `localStorage` yang tahan refresh.
 - Lingkungan eksekusi kode C di sisi peramban menggunakan Web Worker dan SharedArrayBuffer tanpa membebani server.
-- Pengunggahan dan pengelolaan Laporan Besar terintegrasi Supabase Storage.
+- Pengunggahan dan pengelolaan Laporan Besar via Vercel Blob, dengan Supabase Storage sebagai cadangan.
 - Penilaian terstruktur manual oleh asisten dosen dan bantuan evaluasi rubrik AI (AI-assisted grading).
 
 ### 5. Backend Go API (`api.algohub.web.id`)

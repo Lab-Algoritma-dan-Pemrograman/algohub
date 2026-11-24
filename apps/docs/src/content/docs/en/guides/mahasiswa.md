@@ -41,13 +41,14 @@ Inside the room, you will encounter structured prompts (Pretests, Posttests, Ski
 - **Monaco Code Editor**: Author your code directly in the integrated editor. Font sizing and editor themes can be toggled via preferences.
 - **Run & Test**: Click **Run Code**. Your C or Python source code compiles and executes immediately inside your browser.
 - **Interactive Terminal**: When programs prompt for standard input (`scanf` in C or `input()` in Python), enter responses directly into the dark terminal prompt and press `Enter`.
-- **Autosave Verification**: Keystrokes are buffered to browser memory and periodically synced to the server. Confirm that the status icon reads **"Tersimpan otomatis" (Saved automatically)**.
+- **Autosave Verification**: Every keystroke is saved as a browser draft, then synced to the server at most every 15 seconds. Drafts survive a page refresh. Confirm that the status reads **"Tersimpan otomatis" (Saved automatically)**.
 
 ### Submitting Your Work
 1. Review all answers before time expires.
 2. Click **Submit Answers** at the bottom of the interface.
 3. Confirm final submission. Once locked, submissions cannot be amended.
-4. **Timer Expiration**: If the countdown hits `00:00:00`, the workspace automatically locks and submits your latest cached drafts directly to the server.
+4. **Timer Expiration**: If the countdown hits `00:00:00`, the workspace locks and the last drafts are saved to the server. The backend finalizes the submission. If the final save fails, the screen shows a warning and the drafts remain on the device - do not close the browser or log out.
+5. **If Submit is rejected**: While any answer has not reached the server, Submit is blocked with a warning. Wait for the connection to recover and click Submit again; your answers are not lost.
 
 ---
 

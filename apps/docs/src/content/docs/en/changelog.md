@@ -20,6 +20,18 @@ Following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 
 ## Recent entry examples
 
+### Update 3: storage failover & answer protection during Supabase 402 (2026-11-24)
+
+- **Cause**: Supabase Auth/REST/Storage returned HTTP 402 because the billing quota was exhausted. The PostgreSQL database stayed healthy and is used directly by the backend, so exam answers were unaffected.
+- **Registration**: when Auth returns 402, the account is still created with local bcrypt and the roster is claimed; OTP is resynced once the quota is restored.
+- **Storage**: praktikum uploads, E-Learning lesson images, and final reports now use a failover object store - Vercel Blob (public/private) first, Supabase Storage as fallback. New env vars: `PUBLIC_BLOB_READ_WRITE_TOKEN`, `REPORT_BLOB_READ_WRITE_TOKEN`.
+- **Answer safety**: `localStorage` drafts per user+session+course (7 days), autosave every 15 seconds, submit is blocked while any answer has not reached the server, and a 401 no longer deletes drafts.
+- **UI**: avatars fall back to `ui-avatars` when the Supabase photo fails; praktikum/siakad CSP now allows Vercel Blob hosts.
+- **Verification**: `/api/health` 200, production upload 201 with the file readable from Blob, 4,792 answer rows in the DB (877 updated in the last 7 days), all Go/Vitest suites green.
+- **Remaining**: old photos/PDFs in Supabase Storage and OTP only recover after Supabase billing is resolved.
+
+See `CHANGELOG.md` at the monorepo root for full details.
+
 ### Update 2: structure, auth, UI, and hardening (2026-11-23)
 
 - **Structure**: `algohub-docs` moved into the monorepo as `apps/docs`; the Vercel git connection now uses Root Directory `apps/docs` (auto-deploy active). The old folder was removed.

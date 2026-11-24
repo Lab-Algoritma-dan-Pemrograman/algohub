@@ -48,6 +48,33 @@ GORM and `pgx` driver parameters are tuned specifically:
 
 ---
 
+### Two Supabase Planes: HTTP API vs PostgreSQL
+
+Supabase exposes two distinct planes, and an outage affects them differently:
+
+| Plane | Used for | Impact when 402 |
+|---|---|---|
+| HTTP API (Auth, REST, Storage) | OTP, password reset, legacy files | Fails, but does not block exams |
+| PostgreSQL pooler port 6543 | Core data: answers, grades, attendance, users, configuration | Stays healthy |
+
+Since the 2026-11-24 incident, the backend no longer depends on Supabase REST/Storage for core data:
+
+- Answers, grades, and attendance are written directly to PostgreSQL via GORM (`DATABASE_URL_*`).
+- File uploads use `pkg/objectstore`: Vercel Blob (public/private) as primary, Supabase Storage as fallback.
+- Registration keeps working when Auth returns 402 by using local bcrypt; the Supabase account/OTP is resynced once the quota is restored.
+- Legacy photos pointing at Supabase Storage are not deleted; the UI uses `ui-avatars` until the files are reachable again.
+
+Operators can verify the write path without changing table contents:
+
+```sql
+BEGIN;
+UPDATE jawaban_mahasiswa SET updated_at = updated_at
+WHERE id = (SELECT id FROM jawaban_mahasiswa ORDER BY id DESC LIMIT 1);
+ROLLBACK;
+```
+
+---
+
 ## 2. Multi-Token JWT Authentication System
 
 Each AlgoHub frontend utilizes session credentials optimized for its specific operational profile:

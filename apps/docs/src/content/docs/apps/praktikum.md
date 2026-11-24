@@ -41,13 +41,14 @@ Setiap pertemuan praktikum di laboratorium terbagi ke dalam empat jenis sesi ter
 
 Untuk mencegah hilangnya jawaban mahasiswa akibat gangguan listrik atau peramban tertutup:
 
-### Dual-Layer Storage
-- **Local Storage / IndexedDB (`algohub-praktikum-<id>`)**: Setiap ketikan kode atau perubahan jawaban disimpan secara instan ke database peramban lokal.
-- **Remote Autosave (`POST /api/praktikum/autosave`)**: Perubahan disinkronkan ke server secara berkala menggunakan teknik *debounce* (hanya mengirim saat ada jeda ketikan atau perubahan nilai nyata) guna mencegah pembengkakan pemanggilan API.
+### Tiga Lapis Penyimpanan
+- **Draft lokal (`localStorage`)**: kunci `algohub-praktikum-answer-draft:<user>:<sesi>:<course>`. Setiap ketikan langsung disimpan di peramban, bertahan 7 hari, dan dipulihkan saat halaman dibuka kembali. Draft **tidak** dihapus ketika sesi login kedaluwarsa (401).
+- **Autosave server (`POST /api/praktikum/autosave`)**: jawaban dikirim ke backend setiap 15 detik, saat pindah soal, dan saat editor kehilangan fokus. Backend menulis langsung ke PostgreSQL (`jawaban_mahasiswa`), bukan melalui REST Supabase.
+- **Submit terverifikasi**: tombol submit menunggu semua jawaban yang masih *dirty* tersimpan. Bila masih gagal, submit diblokir dan draft tetap ada - tidak ada lagi status "ter-submit" palsu.
 
 ### Graceful Auto-Submit
-- Ketika timer di sisi klien mencapai `00:00:00`, sistem mengunci editor dan mengirimkan draf terakhir ke `/api/praktikum/submit`.
-- Scheduler background di backend (`/api/cron/praktikum/auto-submit`) secara berkala memeriksa sesi yang telah melewati batas waktu toleransi dan secara otomatis membekukan jawaban mahasiswa yang belum tersubmit manual.
+- Ketika timer mencapai `00:00:00`, editor dikunci dan sistem menyimpan draf terakhir (flush autosave). Bila penyimpanan gagal, UI menampilkan peringatan dan draft tetap tersimpan di perangkat.
+- Scheduler backend (`/api/cron/praktikum/auto-submit`) memfinalisasi sesi yang melewati batas waktu. Draft lokal baru dihapus setelah server mengonfirmasi submit berhasil.
 
 ---
 
@@ -87,7 +88,7 @@ Berbeda dengan sistem judge konvensional yang mengeksekusi kode di server sandbo
 ## 4. Pengumpulan & Pengelolaan Laporan Besar
 
 Pada akhir semester, mahasiswa wajib mengumpulkan berkas Laporan Besar tugas proyek:
-- **Unggah Berkas**: Mahasiswa meminta presigned upload URL melalui `POST /api/praktikum/laporan-besar/upload-url` dan mengunggah berkas PDF/arsip proyek langsung ke Supabase Storage bucket terenkripsi.
+- **Unggah Berkas**: Mahasiswa meminta signed upload URL melalui `POST /api/praktikum/laporan-besar/upload-url`, lalu mengunggah PDF/arsip langsung ke object store privat. Vercel Blob dipakai lebih dulu; Supabase Storage menjadi cadangan otomatis. Berkas lama yang masih berada di Supabase Storage tidak dihapus, tetapi baru bisa diunduh setelah kuota Supabase pulih.
 - **Review Asisten**: Asisten meninjau berkas di `/admin/laporan-besar`, memberikan catatan revisi, dan menetapkan status *marked*.
 - **Unduh Massal (*Batch Download*)**: Koordinator asisten dapat mengunduh seluruh berkas laporan satu angkatan dalam satu arsip ZIP terstruktur menggunakan `POST /api/praktikum/admin/laporan-besar/:id/download-batch`.
 

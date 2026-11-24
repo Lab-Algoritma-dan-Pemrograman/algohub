@@ -4,6 +4,38 @@ Semua perubahan penting dicatat di file ini. Format mengikuti [Keep a Changelog]
 
 ## [Belum dirilis]
 
+### Update 3: failover storage & proteksi jawaban saat Supabase 402 (2026-11-24)
+
+#### Latar belakang
+- Supabase Auth, REST, dan Storage membalas HTTP 402 (kuota/billing habis). Ini bukan RLS dan bukan gangguan database.
+- Data inti (jawaban, nilai, absensi, user) memakai koneksi PostgreSQL langsung (`DATABASE_URL_PRAKTIKUM`, `DATABASE_URL_SIAKAD`, `DATABASE_URL_ELEARNING`), sehingga baca/tulis tetap normal. Diuji dengan transaksi `BEGIN/UPDATE/ROLLBACK`.
+
+#### Ditambahkan
+- `backend/pkg/objectstore`: antarmuka `Client` + `Failover` (primary lalu fallback) untuk penyimpanan berkas.
+- `backend/pkg/vercelblob`: klien HTTP Vercel Blob (upload, signed upload/download, delete, public/private).
+- Store Vercel Blob: `algohub-public-assets` (publik, gambar/PDF) dan `algohub-private-reports` (privat, laporan besar). Env baru: `PUBLIC_BLOB_READ_WRITE_TOKEN`, `REPORT_BLOB_READ_WRITE_TOKEN`.
+- Draft jawaban praktikum di `localStorage` per user+sesi+course (`apps/praktikum/src/lib/answer-drafts.ts`), TTL 7 hari.
+- Fallback avatar `ui-avatars` saat foto Supabase gagal dimuat.
+
+#### Diubah
+- Upload praktikum, gambar materi E-Learning, dan laporan besar memakai objectstore failover: Vercel Blob didahulukan, Supabase Storage menjadi cadangan.
+- CSP `apps/praktikum` dan `apps/siakad` mengizinkan host `*.public.blob.vercel-storage.com` dan API Blob.
+- Register praktikum: bila Supabase Auth 402, akun tetap dibuat dengan bcrypt lokal dan roster diklaim; OTP disinkronkan setelah kuota pulih.
+
+#### Diperbaiki
+- Autosave jawaban: draft lokal disimpan setiap ketikan, dipulihkan saat halaman dibuka, dan submit diblokir bila masih ada jawaban yang belum sampai ke server.
+- Timer habis tidak lagi menampilkan "otomatis ter-submit" bila penyimpanan terakhir gagal.
+- 401 di tengah ujian tidak menghapus draft lokal; draft dipulihkan setelah login ulang.
+- Race condition autosave vs ketikan baru diselesaikan dengan revision counter.
+
+#### Verifikasi
+- `go build ./...`, `go vet ./...`, `go test ./...` EXIT 0.
+- Vitest praktikum 76/76; SIAKAD 69/69; E-Learning 243/243; `svelte-check` 0 error.
+- Production: `/api/health` 200; upload 1x1 PNG via API 201 dan file terbaca 200 dari Blob publik; upload tanpa token 401; CSP praktikum/siakad memuat host Blob; halaman 4 app 200.
+- DB: 4.792 baris `jawaban_mahasiswa`, 877 diperbarui dalam 7 hari, uji tulis `BEGIN/UPDATE/ROLLBACK` berhasil.
+- Backup: `algohub-backup-2026-11-24T07-57-27-615Z` (dump lokal + private Blob `database-backups/...`).
+- Catatan: foto/PDF lama di Supabase Storage dan OTP tetap tidak tersedia sampai kuota Supabase dipulihkan; berkas lama tidak dihapus.
+
 ### Update 2: struktur, auth, UI, dan hardening (2026-11-23)
 
 #### Ditambahkan

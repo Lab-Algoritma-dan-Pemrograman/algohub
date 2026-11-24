@@ -21,6 +21,18 @@ di dalamnya dipakai sub-judul seperti:
 
 ## Contoh entri terbaru
 
+### Update 3: failover storage & proteksi jawaban saat Supabase 402 (2026-11-24)
+
+- **Penyebab**: Supabase Auth/REST/Storage membalas HTTP 402 karena kuota billing. Database PostgreSQL tetap sehat dan dipakai langsung oleh backend, sehingga jawaban ujian tidak terpengaruh.
+- **Register**: bila Auth membalas 402, akun tetap dibuat dengan bcrypt lokal dan roster diklaim; OTP disinkronkan setelah kuota pulih.
+- **Storage**: upload praktikum, gambar materi E-Learning, dan laporan besar memakai objectstore failover - Vercel Blob (publik/privat) didahulukan, Supabase Storage menjadi cadangan. Env baru: `PUBLIC_BLOB_READ_WRITE_TOKEN`, `REPORT_BLOB_READ_WRITE_TOKEN`.
+- **Proteksi jawaban**: draft `localStorage` per user+sesi+course (7 hari), autosave tiap 15 detik, submit diblokir bila masih ada jawaban belum terkirim, dan 401 tidak menghapus draft.
+- **UI**: avatar jatuh ke `ui-avatars` bila foto Supabase gagal dimuat; CSP praktikum/siakad mengizinkan host Vercel Blob.
+- **Verifikasi**: `/api/health` 200, upload produksi 201 dan file terbaca dari Blob, 4.792 jawaban di DB (877 diperbarui dalam 7 hari), seluruh test Go/Vitest lulus.
+- **Sisa**: foto/PDF lama di Supabase Storage dan OTP baru pulih setelah billing Supabase diselesaikan.
+
+Detail lengkap ada di `CHANGELOG.md` root monorepo.
+
 ### Update 2: struktur, auth, UI, dan hardening (2026-11-23)
 
 - **Struktur**: `algohub-docs` menjadi workspace member `apps/docs`; git Vercel terhubung ke repo dengan Root Directory `apps/docs` (auto-deploy aktif). Folder lama dihapus.

@@ -71,9 +71,9 @@ Gamified programming education platform:
 ### 4. Praktikum (`praktikum.algohub.web.id`)
 The core exam and laboratory session execution platform:
 - Timed assessment workflows: Pretest, Posttest, Skill Test, and Semester Exams.
-- Real-time autosave syncing student code drafts to backend endpoints and local IndexedDB.
+- Autosave of answers and code to PostgreSQL, with resilient `localStorage` drafts that survive refreshes.
 - Zero-server-overhead C code compilation directly in web browser workers using WebAssembly.
-- Final Comprehensive Report submission integrated with Supabase Storage.
+- Final Comprehensive Report submission via Vercel Blob, with Supabase Storage as fallback.
 - Dual grading system: assistant manual scoring alongside AI-assisted rubric evaluation.
 
 ### 5. Backend Go API (`api.algohub.web.id`)

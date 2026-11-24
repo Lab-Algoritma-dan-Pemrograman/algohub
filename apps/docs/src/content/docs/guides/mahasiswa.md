@@ -41,13 +41,14 @@ Di dalam ruang praktikum, Anda akan disajikan daftar soal (Pretest, Posttest, Ke
 - **Monaco Code Editor**: Tuliskan kode solusi Anda pada editor. Anda dapat mengatur tema editor dan ukuran font melalui panel setelan.
 - **Uji Kode (Compile & Run)**: Klik tombol **Jalankan Kode**. Program C atau Python Anda akan dikompilasi secara instan di peramban.
 - **Terminal Interaktif**: Jika program membutuhkan masukan (`scanf` pada C atau `input()` pada Python), ketikkan masukan langsung ke dalam terminal hitam di bawah editor dan tekan `Enter`.
-- **Indikator Autosave**: Setiap karakter yang Anda ketik disimpan secara otomatis ke memori lokal peramban dan disinkronkan ke server. Pastikan indikator menunjukkan status **"Tersimpan otomatis"**.
+- **Indikator Autosave**: Setiap karakter yang Anda ketik disimpan otomatis sebagai draft di peramban, lalu disinkronkan ke server maksimal setiap 15 detik. Draft tetap ada meski halaman di-refresh. Pastikan indikator menunjukkan status **"Tersimpan otomatis"**.
 
 ### Pengumpulan Jawaban (Submit)
 1. Periksa kembali seluruh jawaban sebelum waktu habis.
 2. Klik tombol **Submit Jawaban** di bagian bawah halaman.
 3. Konfirmasi pengumpulan akhir. Begitu konfirmasi dilakukan, jawaban Anda terkunci dan tidak dapat diubah kembali.
-4. **Batas Waktu**: Jika waktu pada *countdown timer* habis (`00:00:00`), sistem secara otomatis mengunci lembar kerja dan men-submit seluruh draf jawaban terakhir Anda ke server.
+4. **Batas Waktu**: Jika waktu pada *countdown timer* habis (`00:00:00`), sistem mengunci lembar kerja dan menyimpan draf terakhir ke server. Backend memfinalisasi pengumpulan. Bila penyimpanan terakhir gagal, layar menampilkan peringatan dan draft tetap tersimpan di perangkat - jangan tutup peramban atau logout.
+5. **Jika Submit ditolak**: Saat masih ada jawaban yang belum sampai ke server, Submit akan diblokir dengan pesan peringatan. Tunggu koneksi pulih lalu klik Submit lagi; jawaban Anda tidak hilang.
 
 ---
 

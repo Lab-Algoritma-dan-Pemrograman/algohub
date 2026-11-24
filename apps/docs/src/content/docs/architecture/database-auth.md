@@ -48,6 +48,33 @@ Parameter koneksi GORM diatur secara spesifik:
 
 ---
 
+### Dua Bidang Supabase: HTTP API vs PostgreSQL
+
+Supabase mengekspos dua bidang yang berbeda, dan dampak gangguannya juga berbeda:
+
+| Bidang | Dipakai untuk | Dampak bila 402 |
+|---|---|---|
+| HTTP API (Auth, REST, Storage) | OTP, reset password, berkas lama | Gagal, tetapi tidak memblokir ujian |
+| PostgreSQL pooler port 6543 | Data inti: jawaban, nilai, absensi, user, konfigurasi | Tetap normal |
+
+Sejak insiden 2026-11-24, backend tidak bergantung pada REST/Storage Supabase untuk data inti:
+
+- Jawaban, nilai, dan absensi ditulis langsung ke PostgreSQL via GORM (`DATABASE_URL_*`).
+- Upload berkas memakai `pkg/objectstore`: Vercel Blob (publik/privat) sebagai primary, Supabase Storage sebagai fallback.
+- Register tetap berjalan saat Auth membalas 402 dengan bcrypt lokal; akun Supabase/OTP disinkronkan setelah kuota pulih.
+- Foto lama yang masih menunjuk ke Supabase Storage tidak dihapus; UI memakai `ui-avatars` sampai berkas bisa diakses lagi.
+
+Operator dapat memverifikasi jalur tulis tanpa mengubah isi tabel:
+
+```sql
+BEGIN;
+UPDATE jawaban_mahasiswa SET updated_at = updated_at
+WHERE id = (SELECT id FROM jawaban_mahasiswa ORDER BY id DESC LIMIT 1);
+ROLLBACK;
+```
+
+---
+
 ## 2. Sistem Autentikasi Multi-Token JWT
 
 Masing-masing subsistem AlgoHub memiliki karakteristik sesi yang disesuaikan dengan kebutuhan arsitekturnya:

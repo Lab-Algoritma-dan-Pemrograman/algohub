@@ -41,13 +41,14 @@ Each formal lab meeting is partitioned into standardized assessment stages:
 
 To safeguard student progress against hardware faults or accidental tab closures:
 
-### Dual-Layer Storage Strategy
-- **Client Storage / IndexedDB (`algohub-praktikum-<id>`)**: Keystrokes and form updates are instantly saved locally in the browser's IndexedDB engine.
-- **Debounced Remote Autosave (`POST /api/praktikum/autosave`)**: Edits are periodically synced to the Go backend using debounce intervals, preventing serverless invocation floods while guaranteeing persistence.
+### Three Storage Layers
+- **Local draft (`localStorage`)**: key `algohub-praktikum-answer-draft:<user>:<session>:<course>`. Every keystroke is saved in the browser immediately, kept for 7 days, and restored when the page is reopened. Drafts are **not** deleted when the login session expires (401).
+- **Server autosave (`POST /api/praktikum/autosave`)**: answers are sent to the backend every 15 seconds, when switching questions, and when the editor loses focus. The backend writes directly to PostgreSQL (`jawaban_mahasiswa`), not through Supabase REST.
+- **Verified submit**: the submit button waits for every dirty answer to be stored. If saving still fails, submit is blocked and the draft remains - no more false "submitted" status.
 
 ### Graceful Auto-Submit Mechanics
-- When the client-side countdown reaches `00:00:00`, the editor locks down immediately and transmits final drafts to `/api/praktikum/submit`.
-- An automated backend background worker (`/api/cron/praktikum/auto-submit`) periodically audits overdue sessions and freezes unsubmitted attempts past the grace threshold.
+- When the countdown reaches `00:00:00`, the editor locks and the system flushes the last drafts. If saving fails, the UI shows a warning and the drafts remain on the device.
+- A backend scheduler (`/api/cron/praktikum/auto-submit`) finalizes sessions past their deadline. Local drafts are removed only after the server confirms a successful submit.
 
 ---
 
@@ -87,7 +88,7 @@ Unlike conventional online judges that execute submissions in heavy server sandb
 ## 4. Final Comprehensive Report Submissions
 
 At semester conclusion, students submit their final group project documentation:
-- **Direct Cloud Upload**: Students obtain presigned S3/Supabase upload URLs via `POST /api/praktikum/laporan-besar/upload-url` and transmit archives directly into encrypted storage buckets.
+- **Direct Cloud Upload**: Students obtain a signed upload URL via `POST /api/praktikum/laporan-besar/upload-url`, then upload the PDF/archive directly to a private object store. Vercel Blob is used first; Supabase Storage is the automatic fallback. Legacy files still stored in Supabase Storage are not deleted, but can only be downloaded after the Supabase quota is restored.
 - **Assistant Verification**: Assistants inspect submissions on `/admin/laporan-besar`, provide revision remarks, and assign official completion status.
 - **Batch Export**: Course coordinators can generate and download comprehensive ZIP archives containing all submissions for an entire academic cohort via `POST /api/praktikum/admin/laporan-besar/:id/download-batch`.
 
