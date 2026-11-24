@@ -16,12 +16,20 @@ export function homeFor(role: string): string {
   return role === 'asisten' || role === 'koordinator' ? '/praktikum/admin' : '/praktikum/dashboard';
 }
 
-export function signOut(): Promise<void> {
-  clearAllAnswerDrafts();
+function clearSession(): Promise<void> {
   return logout({ queryClient, persister: takePersister(), session });
 }
 
+export function signOut(): Promise<void> {
+  clearAllAnswerDrafts();
+  return clearSession();
+}
+
 export async function expireSession(): Promise<void> {
-  await signOut();
+  // Jangan hapus draft jawaban di sini. 401 bisa terjadi di tengah ujian
+  // (token kedaluwarsa), dan draft per user+sesi harus dipulihkan setelah
+  // login ulang. Menghapusnya di sini justru menghilangkan jawaban terakhir
+  // yang belum sempat tersimpan ke server.
+  await clearSession();
   if (location.pathname !== LOGIN_PATH) location.href = LOGIN_PATH;
 }
