@@ -2,6 +2,7 @@
   import { createQuery } from '@tanstack/svelte-query';
   import { UserPlus, Plus, X, Trash2, Edit, Search } from '@lucide/svelte';
   import type { User } from '@algohub/api-client/praktikum';
+  import { useAvatarFallback } from '#lib/avatar.ts';
   import ScrollTopButton from '#lib/components/ScrollTopButton.svelte';
   import {
     ampuanQuery,
@@ -215,6 +216,7 @@
                     src={a.foto_url}
                     alt=""
                     class="h-10 w-10 rounded-full object-cover border border-slate-200 shadow-sm"
+                    onerror={(event) => useAvatarFallback(event, a.nama)}
                   />
                 {:else}
                   <div
@@ -387,6 +389,7 @@
               src={form.foto_url}
               alt="foto"
               class="mb-2 h-16 w-16 rounded-full object-cover border"
+              onerror={(event) => useAvatarFallback(event, form.nama || '?')}
             />
           {/if}
           <input

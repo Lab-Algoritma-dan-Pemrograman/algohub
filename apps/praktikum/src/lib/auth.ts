@@ -1,4 +1,5 @@
 import { logout } from '@algohub/auth';
+import { clearAllAnswerDrafts } from './answer-drafts.ts';
 import { queryClient, takePersister } from './query.ts';
 import { session } from './session.ts';
 
@@ -16,6 +17,7 @@ export function homeFor(role: string): string {
 }
 
 export function signOut(): Promise<void> {
+  clearAllAnswerDrafts();
   return logout({ queryClient, persister: takePersister(), session });
 }
 

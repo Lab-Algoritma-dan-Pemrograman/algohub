@@ -26,6 +26,7 @@
   } from '@lucide/svelte';
   import { createQuery } from '@tanstack/svelte-query';
   import { emptyAnnouncements } from '#lib/announcements.ts';
+  import { avatarUrl, useAvatarFallback } from '#lib/avatar.ts';
   import { INFO_PAGE_STALE_TIME, infoQueries } from '#lib/queries/info.ts';
 
   // import.meta.glob tidak memahami subpath import #lib, jadi path relatif.
@@ -809,12 +810,11 @@
                       src={a.foto_url}
                       alt={a.nama}
                       class="w-12 h-12 rounded-full border-2 border-slate-900 shadow-lg object-cover"
+                      onerror={(event) => useAvatarFallback(event, a.nama)}
                     />
                   {:else}
                     <img
-                      src="https://ui-avatars.com/api/?name={encodeURIComponent(
-                        a.nama,
-                      )}&background=0D8ABC&color=fff&bold=true"
+                      src={avatarUrl(a.nama)}
                       alt={a.nama}
                       class="w-12 h-12 rounded-full border-2 border-slate-900 shadow-lg"
                     />

@@ -4,6 +4,7 @@
   import { goto } from '$app/navigation';
   import { ChevronLeft, ChevronRight, Lock, Sparkles } from '@lucide/svelte';
   import type { RuangCourse } from '@algohub/api-client/praktikum';
+  import { clearAnswerDraft, loadAnswerDraft, saveAnswerDraft } from '#lib/answer-drafts.ts';
   import Countdown from '#lib/components/Countdown.svelte';
   import RunnableEditor from '#lib/components/RunnableEditor.svelte';
   import { queryClient } from '#lib/query.ts';
@@ -31,6 +32,7 @@
   let loading = $state(true);
   let submitting = $state(false);
   const dirty = new SvelteSet<number>();
+  const revisions: Record<number, number> = {};
   let saveTimer: ReturnType<typeof setInterval>;
 
   let inputToken = $state('');
@@ -60,6 +62,23 @@
       ruang = data;
       const map: Record<number, string> = {};
       for (const s of data.soal) map[s.soal_terpilih_id] = s.jawaban_teks ?? '';
+
+      const userId = session.user?.id;
+      if (userId !== undefined) {
+        const draft = loadAnswerDraft(userId, aktivasiSesiId, courseId);
+        let restored = 0;
+        for (const [rawID, value] of Object.entries(draft)) {
+          const id = Number(rawID);
+          if (!(id in map)) continue;
+          map[id] = value;
+          dirty.add(id);
+          revisions[id] = (revisions[id] ?? 0) + 1;
+          restored++;
+        }
+        if (restored > 0) {
+          info = `${restored} draft jawaban yang belum terkirim dipulihkan dari perangkat ini.`;
+        }
+      }
       answers = map;
     } catch (e) {
       err = (e as Error).message;
@@ -68,26 +87,45 @@
     }
   }
 
-  async function saveOne(soalTerpilihId: number) {
-    if (locked) return;
+  function persistDirtyDraft() {
+    const userId = session.user?.id;
+    if (userId === undefined) return;
+    const pending: Record<number, string> = {};
+    for (const id of dirty) pending[id] = answers[id] ?? '';
+    saveAnswerDraft(userId, aktivasiSesiId, courseId, pending);
+  }
+
+  async function saveOne(soalTerpilihId: number): Promise<boolean> {
+    if (locked) return !dirty.has(soalTerpilihId);
+    const revision = revisions[soalTerpilihId] ?? 0;
+    const value = answers[soalTerpilihId] ?? '';
     try {
       await autosaveMutation.mutateAsync({
         soal_terpilih_id: soalTerpilihId,
-        jawaban_teks: answers[soalTerpilihId] ?? '',
+        jawaban_teks: value,
       });
-      dirty.delete(soalTerpilihId);
+      // Bila mahasiswa mengetik lagi saat request berlangsung, perubahan baru
+      // tetap dirty dan tidak boleh dianggap ikut tersimpan oleh response lama.
+      if ((revisions[soalTerpilihId] ?? 0) === revision) dirty.delete(soalTerpilihId);
+      persistDirtyDraft();
       info = 'Tersimpan otomatis ' + new Date().toLocaleTimeString();
+      return !dirty.has(soalTerpilihId);
     } catch (e) {
+      persistDirtyDraft();
       err = (e as Error).message;
+      return false;
     }
   }
 
   function markDirty(id: number) {
+    revisions[id] = (revisions[id] ?? 0) + 1;
     dirty.add(id);
+    persistDirtyDraft();
   }
 
-  async function flush() {
+  async function flush(): Promise<boolean> {
     for (const id of Array.from(dirty)) await saveOne(id);
+    return dirty.size === 0;
   }
 
   async function submit() {
@@ -101,11 +139,17 @@
       return;
     submitting = true;
     try {
-      await flush();
+      if (!(await flush())) {
+        err =
+          'Masih ada jawaban yang belum sampai ke server. Draft aman di perangkat ini; jangan tutup atau logout, lalu coba Submit lagi.';
+        return;
+      }
       await submitMutation.mutateAsync({
         aktivasi_sesi_id: aktivasiSesiId,
         course_id: courseId,
       });
+      const userId = session.user?.id;
+      if (userId !== undefined) clearAnswerDraft(userId, aktivasiSesiId, courseId);
       info = 'Jawaban berhasil di-submit.';
       await load();
       setTimeout(() => goto('/praktikum/dashboard'), 1000);
@@ -117,9 +161,14 @@
   }
 
   async function onExpire() {
-    info = 'Waktu habis. Jawaban otomatis ter-submit.';
-    await flush().catch(() => {});
+    const allSaved = await flush();
     await load();
+    if (!allSaved) {
+      err =
+        'Waktu habis dan sebagian jawaban belum terkirim. Draft tetap aman di perangkat ini. Jangan logout; tunjukkan pesan ini kepada asisten.';
+      return;
+    }
+    info = 'Waktu habis. Jawaban otomatis ter-submit.';
     setTimeout(() => goto('/praktikum/dashboard'), 1500);
   }
 
@@ -133,7 +182,10 @@
     saveTimer = setInterval(flush, 15000);
   });
 
-  onDestroy(() => clearInterval(saveTimer));
+  onDestroy(() => {
+    persistDirtyDraft();
+    clearInterval(saveTimer);
+  });
 </script>
 
 {#if loading}

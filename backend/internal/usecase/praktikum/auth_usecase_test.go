@@ -439,3 +439,36 @@ func TestRegister_Supabase_MenyimpanPasswordHashLokal(t *testing.T) {
 	assert.NotEmpty(t, resp.Token)
 	mockUserRepo.AssertExpectations(t)
 }
+
+// Saat kuota Supabase Auth habis, pendaftaran tidak boleh ikut mati. Backend
+// memang mengautentikasi login dengan bcrypt lokal; Supabase hanya kanal OTP.
+func TestRegister_Supabase402_FallbackKeAuthLokal(t *testing.T) {
+	mockUserRepo := mocks.NewUserRepository(t)
+	mockKelasRepo := mocks.NewKelasRepository(t)
+	jwtManager := jwt.NewManager("secret", 24)
+
+	supa := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusPaymentRequired)
+		_, _ = w.Write([]byte(`{"message":"quota exceeded"}`))
+	}))
+	defer supa.Close()
+
+	cfg := &config.Config{SupabaseURL: supa.URL, SupabaseServiceKey: "svc-key"}
+	uc := usecase.NewAuthUsecase(mockUserRepo, mockKelasRepo, jwtManager, cfg, hash.FbScryptConfig{})
+
+	mockUserRepo.On("FindByNIM", "123456").Return(rosterUser(), nil)
+	mockUserRepo.On("FindByEmail", "budi@gmail.com").Return(nil, gorm.ErrRecordNotFound)
+	mockUserRepo.On("Update", mock.MatchedBy(func(u *entity.User) bool {
+		return u.SupabaseUserID == nil && u.PasswordHash != nil && hash.Verify(*u.PasswordHash, "password123")
+	})).Return(nil)
+	mockUserRepo.On("FindByID", 1).Return(rosterUser(), nil)
+
+	resp, err := uc.Register(dto.RegisterRequest{NIM: "123456", Email: "budi@gmail.com", Password: "password123"})
+
+	assert.NoError(t, err)
+	assert.NotEmpty(t, resp.Token)
+	assert.Equal(t, "123456", resp.User.NIM)
+	mockUserRepo.AssertNotCalled(t, "ClaimRoster", mock.Anything, mock.Anything, mock.Anything, mock.Anything)
+	mockUserRepo.AssertExpectations(t)
+}

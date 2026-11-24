@@ -3,6 +3,7 @@ package supabase
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -15,6 +16,24 @@ type Admin struct {
 	URL        string
 	ServiceKey string
 	HTTP       *http.Client
+}
+
+// AdminAPIError mempertahankan status HTTP agar pemanggil dapat membedakan
+// kegagalan permanen (mis. kredensial salah) dari kondisi kuota upstream.
+// Error() sengaja mempertahankan teks lama karena dipakai di log produksi.
+type AdminAPIError struct {
+	StatusCode int
+}
+
+func (e *AdminAPIError) Error() string {
+	return fmt.Sprintf("Supabase Admin API %d", e.StatusCode)
+}
+
+// IsAdminAPIStatus melaporkan apakah err berasal dari Admin API dengan status
+// tertentu, termasuk ketika error tersebut dibungkus oleh lapisan lain.
+func IsAdminAPIStatus(err error, statusCode int) bool {
+	var apiErr *AdminAPIError
+	return errors.As(err, &apiErr) && apiErr.StatusCode == statusCode
 }
 
 func NewAdmin(url, serviceKey string) *Admin {
@@ -51,7 +70,7 @@ func (s *Admin) CreateAuthUser(email, password string, emailConfirm bool) (strin
 		return "", fmt.Errorf("email sudah terdaftar di Supabase Auth")
 	}
 	if resp.StatusCode >= 300 {
-		return "", fmt.Errorf("Supabase Admin API %d", resp.StatusCode) //nolint:staticcheck // ST1005: pesan tampil ke pengguna, teks sama dengan prod
+		return "", &AdminAPIError{StatusCode: resp.StatusCode}
 	}
 	return out.ID, nil
 }

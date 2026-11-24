@@ -86,7 +86,12 @@ describe('vercel.json', () => {
       'cdnjs.cloudflare.com',
       'data:',
     ]);
-    expect(csp.get('img-src')).toEqual(["'self'", 'data:', 'blob:']);
+    expect(csp.get('img-src')).toEqual([
+      "'self'",
+      'data:',
+      'blob:',
+      'https://*.public.blob.vercel-storage.com',
+    ]);
     expect(csp.get('media-src')).toEqual(["'self'", 'blob:']);
     expect(csp.get('worker-src')).toEqual(["'self'", 'blob:']);
     expect(csp.get('frame-ancestors')).toEqual(["'none'"]);

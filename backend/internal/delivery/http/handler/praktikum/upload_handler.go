@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/pkg/objectstore"
 	"github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/pkg/response"
-	"github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/pkg/supabase"
 
 	"github.com/gin-gonic/gin"
 )
@@ -35,13 +35,13 @@ var (
 )
 
 type UploadHandler struct {
-	sb *supabase.Client
+	sb objectstore.Client
 }
 
-func NewUploadHandler(sb *supabase.Client) *UploadHandler { return &UploadHandler{sb: sb} }
+func NewUploadHandler(sb objectstore.Client) *UploadHandler { return &UploadHandler{sb: sb} }
 
 // @Summary		Upload File
-// @Description	Mengunggah file ke Supabase Storage (gambar soal, dll)
+// @Description	Mengunggah file ke object storage (gambar soal, dll)
 // @Tags			Admin - Upload
 // @Security		bearerAuth
 // @Accept			multipart/form-data
@@ -52,7 +52,7 @@ func NewUploadHandler(sb *supabase.Client) *UploadHandler { return &UploadHandle
 // @Router			/praktikum/admin/upload [post]
 func (h *UploadHandler) Upload(c *gin.Context) {
 	if !h.sb.Enabled() {
-		response.Fail(c, http.StatusServiceUnavailable, "Supabase Storage belum dikonfigurasi", nil)
+		response.Fail(c, http.StatusServiceUnavailable, "Penyimpanan berkas belum dikonfigurasi", nil)
 		return
 	}
 	fileHeader, err := c.FormFile("file")
@@ -111,7 +111,7 @@ func (h *UploadHandler) Upload(c *gin.Context) {
 	// upsert=false: jangan pernah menimpa berkas yang sudah ada di bucket.
 	url, err := h.sb.Upload(name, content, sniffed, false)
 	if err != nil {
-		response.Fail(c, http.StatusBadGateway, "Upload ke Supabase gagal", err.Error())
+		response.Fail(c, http.StatusBadGateway, "Upload ke penyimpanan gagal", err.Error())
 		return
 	}
 	response.Created(c, "File diunggah", gin.H{"url": url, "path": name})

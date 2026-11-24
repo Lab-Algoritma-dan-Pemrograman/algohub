@@ -9,7 +9,7 @@ import (
 	dto "github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/dto/praktikum"
 	entity "github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/entity/praktikum"
 	repository "github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/internal/repository/praktikum"
-	"github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/pkg/supabase"
+	"github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/pkg/objectstore"
 )
 
 // Fase window pengumpulan laporan besar (server-authoritative, waktu dari server).
@@ -29,7 +29,7 @@ const (
 type LaporanBesarUsecase struct {
 	repo    repository.LaporanBesarRepository
 	users   repository.UserRepository
-	sb      *supabase.Client // bucket privat laporan besar
+	sb      objectstore.Client // bucket privat laporan besar
 	ttlRead time.Duration
 	ttlUp   time.Duration
 }
@@ -37,7 +37,7 @@ type LaporanBesarUsecase struct {
 func NewLaporanBesarUsecase(
 	r repository.LaporanBesarRepository,
 	u repository.UserRepository,
-	sb *supabase.Client,
+	sb objectstore.Client,
 ) *LaporanBesarUsecase {
 	return &LaporanBesarUsecase{repo: r, users: u, sb: sb, ttlRead: ttlBacaLaporan, ttlUp: ttlUploadLaporan}
 }

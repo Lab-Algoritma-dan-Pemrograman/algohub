@@ -101,6 +101,7 @@ describe('vercel.json', () => {
       'data:',
       'blob:',
       'https://*.supabase.co',
+      'https://*.public.blob.vercel-storage.com',
       'https://ui-avatars.com',
     ]);
     expect(csp.get('media-src')).toEqual(["'self'", 'blob:']);
@@ -124,6 +125,8 @@ describe('vercel.json', () => {
       'https://algohub-api.vercel.app',
       'https://*.supabase.co',
       'wss://*.supabase.co',
+      'https://vercel.com',
+      'https://*.blob.vercel-storage.com',
       'https://cdn.jsdelivr.net',
       'https://esm.sh',
       'https://algohub.web.id',

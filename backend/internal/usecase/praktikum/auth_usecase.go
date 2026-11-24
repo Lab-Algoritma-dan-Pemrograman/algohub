@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log"
+	"net/http"
 	"strings"
 	"time"
 
@@ -170,9 +171,18 @@ func (uc *AuthUsecase) Register(req dto.RegisterRequest) (*dto.AuthResponse, err
 			if strings.Contains(err.Error(), "sudah terdaftar") {
 				return nil, ErrConflict
 			}
-			return nil, err
+			// Supabase memakai 402 saat kuota/billing Auth habis. Login aplikasi ini
+			// tetap memakai bcrypt lokal, jadi jangan mengunci seluruh mahasiswa:
+			// klaim roster secara lokal dan biarkan kanal OTP disinkronkan kembali
+			// setelah kapasitas Supabase tersedia.
+			if supabase.IsAdminAPIStatus(err, http.StatusPaymentRequired) {
+				log.Printf("WARN kuota Supabase Auth habis; register NIM %s memakai auth lokal", req.NIM)
+			} else {
+				return nil, err
+			}
+		} else {
+			supaUID = uid
 		}
-		supaUID = uid
 	}
 
 	if supaUID != "" {

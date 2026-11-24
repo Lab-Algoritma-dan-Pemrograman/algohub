@@ -1,5 +1,6 @@
 <script lang="ts">
   import { createQuery } from '@tanstack/svelte-query';
+  import { useAvatarFallback } from '#lib/avatar.ts';
   import { infoQueries } from '#lib/queries/info.ts';
 
   const asistenQuery = createQuery(infoQueries.asisten);
@@ -76,7 +77,13 @@
         {@const last = cut > 0 ? nm.slice(cut + 1) : nm}
         <div class="asisten-card">
           {#if a.foto_url}
-            <img src={a.foto_url} alt={a.nama} class="photo" loading="lazy" />
+            <img
+              src={a.foto_url}
+              alt={a.nama}
+              class="photo"
+              loading="lazy"
+              onerror={(event) => useAvatarFallback(event, a.nama ?? '?')}
+            />
           {:else}
             <div class="photo photo-fallback" aria-hidden="true">
               {getInitials(a.nama ?? '?')}

@@ -11,8 +11,10 @@ import (
 	"github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/pkg/glot"
 	"github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/pkg/hash"
 	"github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/pkg/jwt"
+	"github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/pkg/objectstore"
 	"github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/pkg/ollama"
 	"github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/pkg/supabase"
+	"github.com/Lab-Algoritma-dan-Pemrograman/algohub/backend/pkg/vercelblob"
 )
 
 func fbScryptConfig(cfg *config.Config) hash.FbScryptConfig {
@@ -26,9 +28,17 @@ func fbScryptConfig(cfg *config.Config) hash.FbScryptConfig {
 
 func newPraktikum(cfg *config.Config, db *gorm.DB) *deliveryhttp.Praktikum {
 	jm := jwt.NewManager(cfg.JWTSecret, cfg.JWTExpireHours)
-	sb := supabase.New(cfg.SupabaseURL, cfg.SupabaseServiceKey, cfg.SupabaseBucket)
+	// Vercel Blob didahulukan selama seluruh gateway HTTP Supabase membalas 402.
+	// Supabase tetap menjadi fallback agar konfigurasi lama bisa dipakai lagi.
+	sb := objectstore.NewFailover(
+		vercelblob.New(cfg.PublicBlobReadWriteToken, vercelblob.Public),
+		supabase.New(cfg.SupabaseURL, cfg.SupabaseServiceKey, cfg.SupabaseBucket),
+	)
 	// Bucket privat khusus berkas laporan besar (baca via signed URL).
-	sbLaporan := supabase.New(cfg.SupabaseURL, cfg.SupabaseServiceKey, cfg.SupabaseBucketLaporan)
+	sbLaporan := objectstore.NewFailover(
+		vercelblob.New(cfg.ReportBlobReadWriteToken, vercelblob.Private),
+		supabase.New(cfg.SupabaseURL, cfg.SupabaseServiceKey, cfg.SupabaseBucketLaporan),
+	)
 	oc := ollama.NewClient(ollama.Config{URL: cfg.OllamaURL, Model: cfg.OllamaModel, APIKey: cfg.OllamaAPIKey})
 	glotClient := glot.New(cfg.GlotURL, cfg.GlotToken)
 
