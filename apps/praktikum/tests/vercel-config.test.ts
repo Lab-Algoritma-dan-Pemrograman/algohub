@@ -101,6 +101,7 @@ describe('vercel.json', () => {
       'data:',
       'blob:',
       'https://*.supabase.co',
+      'https://assets.algohub.web.id',
       'https://*.public.blob.vercel-storage.com',
       'https://ui-avatars.com',
     ]);

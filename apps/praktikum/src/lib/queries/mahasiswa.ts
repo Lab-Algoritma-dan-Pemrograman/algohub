@@ -11,7 +11,11 @@ import { api } from '#lib/api.ts';
 import { queryClient } from '#lib/query.ts';
 
 // Pengganti swrGet lama: isi cache tampil seketika, lalu selalu diambil ulang saat halaman dibuka.
+// staleTime 0 = data tetap dianggap basi tiap mount (revalidasi jalan), sedangkan IDB persist
+// (meta.persist) memberi first paint instan dari cache kunjungan sebelumnya sehingga skeleton
+// penuh tidak muncul lagi. Friskness data tidak berubah.
 const ALWAYS_REVALIDATE = 0;
+const persist = { persist: true };
 
 export const mahasiswaQueries = {
   dashboard: () =>
@@ -19,12 +23,14 @@ export const mahasiswaQueries = {
       queryKey: praktikumKeys.mahasiswa.dashboard,
       queryFn: () => api.get<DashboardResponse>('/dashboard'),
       staleTime: ALWAYS_REVALIDATE,
+      meta: persist,
     }),
   sesi: () =>
     queryOptions({
       queryKey: praktikumKeys.mahasiswa.sesi,
       queryFn: async () => (await api.get<SesiUserItem[] | null>('/sesi')) ?? [],
       staleTime: ALWAYS_REVALIDATE,
+      meta: persist,
     }),
   profile: () =>
     queryOptions({

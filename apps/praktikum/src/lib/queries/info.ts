@@ -26,6 +26,7 @@ export const infoQueries = {
     queryOptions({
       queryKey: praktikumKeys.info.asisten,
       queryFn: () => api.get<User[]>('/info/asisten'),
+      meta: persist,
     }),
   jadwal: () =>
     queryOptions({
@@ -43,6 +44,7 @@ export const infoQueries = {
     queryOptions({
       queryKey: praktikumKeys.info.kelasMahasiswa(kelasId),
       queryFn: () => api.get<KelasMahasiswaInfo>(`/info/kelas/${kelasId}/mahasiswa`),
+      meta: persist,
     }),
   laporan: () =>
     queryOptions({
