@@ -56,7 +56,7 @@ func TestProfileSyncUpdatesAndRoleChange(t *testing.T) {
 	old := &entity.User{NIM: nimSelf, Nama: "Nama " + nimSelf, Kelas: "TI-1", Jurusan: str("Sistem Informasi"), Role: "mahasiswa", Streak: 2, LastActive: wibTime(16, 8, 0), PrestigeMult: 1, XP: 10}
 	f.users.On("GetProfile", mock.Anything, nimSelf).Return(old, nil)
 	f.users.On("UpdateUser", mock.Anything, nimSelf, map[string]any{
-		"last_active": learnNow, "streak": 3, "kelas": "", "role": "asisten", "jurusan": "Informatika",
+		"last_active": learnNow, "streak": 3, "role": "asisten", "jurusan": "Informatika",
 	}, true).Return(int64(1), nil)
 	f.achievements.On("List", mock.Anything, "").Return([]entity.Achievement{{ID: "streak-3", RequirementType: str("streak"), RequirementValue: str("3")}}, nil)
 	f.achievements.On("UnlockedIDs", mock.Anything, nimSelf).Return([]string{}, nil)
@@ -79,6 +79,24 @@ func TestProfileSyncElearningRoleWins(t *testing.T) {
 	res, err := f.profileUC.Sync(bg, who(usecase.RoleAsisten))
 	require.NoError(t, err)
 	assert.Equal(t, "admin", res.Profile.Role)
+}
+
+// T-30: token tanpa kelas tidak boleh menulis "kelas" kosong, karena trigger lalu mengosongkan class_code dan kelas_id.
+func TestProfileSyncIgnoresEmptyKelas(t *testing.T) {
+	for _, tokenKelas := range []string{"", "   "} {
+		f := newLearn(t)
+		p := who(usecase.RolePraktikan)
+		p.Kelas = tokenKelas
+		f.users.On("GetProfile", mock.Anything, nimSelf).Return(&entity.User{NIM: nimSelf, Nama: "Nama " + nimSelf, Kelas: "TI-1", Role: "mahasiswa", Streak: 1, LastActive: wibTime(17, 8, 0), PrestigeMult: 1}, nil)
+		f.users.On("UpdateUser", mock.Anything, nimSelf, mock.MatchedBy(func(cols map[string]any) bool {
+			_, ada := cols["kelas"]
+			return !ada
+		}), true).Return(int64(1), nil)
+
+		_, err := f.profileUC.Sync(bg, p)
+		require.NoError(t, err)
+		f.users.AssertExpectations(t)
+	}
 }
 
 func TestProfileSyncRequiresPrincipal(t *testing.T) {

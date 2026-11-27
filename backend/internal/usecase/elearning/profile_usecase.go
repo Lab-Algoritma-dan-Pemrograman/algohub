@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"log"
+	"strings"
 	"time"
 
 	"gorm.io/datatypes"
@@ -104,8 +105,8 @@ func (uc *ProfileUsecase) refresh(ctx context.Context, p *dto.Principal, u *enti
 	if prof.Nama != p.Nama {
 		updates["nama"] = p.Nama
 	}
-	if prof.Kelas != p.Kelas {
-		updates["kelas"] = p.Kelas
+	if kelas := strings.TrimSpace(p.Kelas); kelas != "" && prof.Kelas != kelas {
+		updates["kelas"] = kelas // T-30: kelas kosong mengosongkan kelas_id/class_code lewat trigger.
 	}
 	if hasRoleChange {
 		updates["role"] = p.Role

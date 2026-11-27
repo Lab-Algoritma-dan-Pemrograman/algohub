@@ -51,9 +51,17 @@ func (r *userRepository) Delete(id int) error {
 }
 
 func (r *userRepository) BulkUpsert(users []entity.User) error {
+	// Saat import, kolom opsional yang kosong di file tidak boleh mengosongkan
+	// nilai yang sudah ada di DB. COALESCE menjaga data lama tetap utuh.
 	return r.db.Clauses(clause.OnConflict{
-		Columns:   []clause.Column{{Name: "nim"}},
-		DoUpdates: clause.AssignmentColumns([]string{"nama", "kelas_id", "shift", "gelombang", "kelompok"}),
+		Columns: []clause.Column{{Name: "nim"}},
+		DoUpdates: clause.Assignments(map[string]any{
+			"nama":      gorm.Expr("EXCLUDED.nama"),
+			"kelas_id":  gorm.Expr(`COALESCE(EXCLUDED.kelas_id, "users"."kelas_id")`),
+			"shift":     gorm.Expr(`COALESCE(EXCLUDED.shift, "users"."shift")`),
+			"gelombang": gorm.Expr(`COALESCE(EXCLUDED.gelombang, "users"."gelombang")`),
+			"kelompok":  gorm.Expr(`COALESCE(EXCLUDED.kelompok, "users"."kelompok")`),
+		}),
 	}).CreateInBatches(users, 100).Error
 }
 

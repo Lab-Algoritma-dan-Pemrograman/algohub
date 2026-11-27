@@ -105,13 +105,26 @@ func (uc *UserUsecase) UpdateMahasiswa(id int, req *dto.UserRequest) (*entity.Us
 	if err != nil {
 		return nil, ErrNotFound
 	}
-	u.NIM = req.NIM
-	u.Nama = req.Nama
-	u.KelasID = req.KelasID
-	u.Shift = req.Shift
-	u.Gelombang = req.Gelombang
-	u.Kelompok = req.Kelompok
-	if err := uc.users.Update(u); err != nil {
+
+	// Hanya kolom yang benar-benar dikirim yang ditimpa. Request parsial
+	// tidak boleh mengosongkan field opsional lewat Save() full-struct.
+	attrs := map[string]any{
+		"nim":  req.NIM,
+		"nama": req.Nama,
+	}
+	if req.KelasID != nil {
+		attrs["kelas_id"] = *req.KelasID
+	}
+	if req.Shift != nil {
+		attrs["shift"] = *req.Shift
+	}
+	if req.Gelombang != nil {
+		attrs["gelombang"] = *req.Gelombang
+	}
+	if req.Kelompok != nil {
+		attrs["kelompok"] = *req.Kelompok
+	}
+	if _, err := uc.users.BulkUpdateAttrs([]string{u.NIM}, attrs); err != nil {
 		return nil, err
 	}
 	return uc.users.FindByID(id)
