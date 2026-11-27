@@ -4,6 +4,51 @@ Semua perubahan penting dicatat di file ini. Format mengikuti [Keep a Changelog]
 
 ## [Belum dirilis]
 
+### Update 4: migrasi aset publik ke Cloudflare R2 + perbaikan data mahasiswa terhapus (2026-11-27)
+
+#### Latar belakang
+- Supabase Storage tetap membalas HTTP 402 (`exceed_cached_egress_quota`) untuk seluruh GET objek. Semua aset publik (gambar soal, PDF modul, pedoman `.docx`, foto asisten) jadi tidak bisa diambil.
+- Mahasiswa melapor web terasa lambat saat membuka halaman, dan sebagian data (kelas, shift, gelombang, kelompok, asisten) tiba-tiba hilang setelah admin mengisinya.
+
+#### Akar masalah data terhapus (3 jalur tulis destruktif)
+- `backend/internal/usecase/elearning/profile_usecase.go`: `refresh()` mengirim `updates["kelas"] = ""` setiap login saat token tidak membawa kelas. Trigger DB `users_sync_kelas_jurusan` lalu men-NULL-kan `kelas_id` + `class_code`, dan trigger `users_sync_group_members` menghapus baris `group_members` (asisten ikut lepas). Bukti: 27 dari 28 baris kelas-kosong memiliki selisih `|updated_at - last_login_at| < 10 ms`.
+- `backend/internal/usecase/praktikum/user_usecase.go` `UpdateMahasiswa`: PATCH diperlakukan PUT — `Save()` full-struct menimpa `KelasID/Shift/Gelombang/Kelompok` dengan zero-value ketika request parsial.
+- `backend/internal/repository/praktikum/user_repository.go` `BulkUpsert`: impor CSV dengan kolom kosong menimpa nilai lama menjadi NULL.
+- Kolom yang TIDAK terbukti korup: `kelompok` (398/399 NULL), `gelombang` (231 NULL), `nomor_hp` (240 NULL) — backup lama juga sudah NULL, jadi itu baseline yang memang tak pernah diisi, bukan data hilang.
+
+#### Ditambahkan
+- Bucket Cloudflare R2 `public-assets` (APAC) + domain publik `assets.algohub.web.id` (SSL aktif, DNS CNAME `public.r2.dev` otomatis). Bucket `laporan-besar` ikut dibuat.
+- Aset dimigrasi: 45 gambar soal keterampilan + ujian (3.6 MB), 3 PDF modul (8.4 MB), 8 pedoman (0.7 MB), 5 foto asisten (7 MB). Semua diverifikasi MD5 lokal = ETag R2.
+- `apps/praktikum/src/lib/queries/mahasiswa.ts`: `dashboard` dan `sesi` memakai `meta.persist` (IndexedDB). Skeleton full-page hilang, first paint instan dari cache kunjungan sebelumnya, revalidasi tetap jalan tiap mount.
+- `apps/praktikum/src/lib/queries/info.ts`: `asisten` dan `kelasMahasiswa` kini ikut persist.
+- `apps/praktikum/tests/vercel-config.test.ts`: assertion CSP `img-src` mencakup `assets.algohub.web.id`.
+- Backup DB: `_bak_users_20261126_kelasfix`, `_bak_users_20261126_kelasfix2/3`, `_bak_users_20261127_kelasfix4`, `_bak_konfigurasi_20261127`, `_bak_pedoman_laporan_20261127`, `_bak_users_foto_20261127`, `soal_gambar_url_backup_20261127`.
+
+#### Diubah
+- `backend/internal/usecase/elearning/profile_usecase.go`: guard `strings.TrimSpace(p.Kelas) != ""` — kelas kosong tidak pernah dikirim ke DB (mengacu temuan T-30).
+- `backend/internal/usecase/praktikum/user_usecase.go` `UpdateMahasiswa`: memakai `BulkUpdateAttrs` dengan map atribut; hanya kolom yang benar-benar dikirim yang ditimpa.
+- `backend/internal/repository/praktikum/user_repository.go` `BulkUpsert`: `DoUpdates` memakai `COALESCE(EXCLUDED.kolom, users.kolom)` agar kolom opsional kosong di file impor tidak mengosongkan nilai lama.
+- CSP `img-src` `apps/praktikum/vercel.json`: menambah `https://assets.algohub.web.id`.
+- `public.konfigurasi.modul_file_url`, `public.pedoman_laporan.file_url`, `public.soal.gambar_url` (74/74), `public.users.foto_url` (5 baris): prefix Supabase Storage diganti `https://assets.algohub.web.id/`. Tabel `konfigurasi` disalin dulu ke `_bak_konfigurasi_20261127`.
+
+#### Diperbaiki
+- Download modul `/info/modul` kembali normal: endpoint membalas URL R2, PDF 1.79 MB terunduh 200 `application/pdf`.
+- Pedoman laporan `.docx` dan foto asisten kembali bisa dimuat dari R2.
+- Data kelas mahasiswa dire-backfill dari `Penilaian Praktikum (2).xlsx` (303 baris valid). Setelah backend fix live, sisa `kelas_id` NULL hanya 9 baris: 7 mahasiswa TE AD/AE (di luar cakupan Excel) + 2 akun uji (`202711001`, `202711003`). Nol mahasiswa Excel yang kosong.
+
+#### Diverifikasi
+- Backend: `gofmt` bersih, `go build ./...` exit 0, `go test ./internal/usecase/... ./internal/repository/praktikum/...` exit 0. Negative check: patch dibalik sementara → test baru `TestUpdateMahasiswa_PartialRequest_DoesNotClearOptionalFields` FAIL dengan `Update(*entity.User)` menerima `KelasID/Shift/Gelombang/Kelompok = nil` (membuktikan mekanisme).
+- Frontend: `svelte-check` 0 error (36 warning a11y pre-existing); vitest praktikum 76/76.
+- DB akhir: 377 mahasiswa; `display_mismatch` 0; `dangling kelas_id` 0; `soal.gambar_url` ke R2 74/74 dan Supabase tersisa 0; referensi `supabase.co` pada `konfigurasi`/`pedoman_laporan`/`soal`/`users.foto_url` = 0.
+- R2: 45/45 gambar soal cocok ukuran; modul PDF 200 `application/pdf`; pedoman `.docx` 200 valid; foto asisten MD5 = ETag.
+- Deploy: backend `algohub-api` → alias `api.algohub.web.id` (`/api/health` 200); frontend `algohub-praktikum` → alias `praktikum.algohub.web.id` (200, CSP header memuat domain R2).
+
+#### Diketahui (belum dikerjakan)
+- Backend masih menulis aset baru ke Supabase Storage (pkg/supabase + `konfigurasi_handler` upload). Upload admin berikutnya akan menyimpan URL Supabase lagi — cutover writer ke R2 belum dilakukan.
+- Cold start backend 3.4s tetap ada (Vercel serverless). Ping keep-warm cron TIDAK diterapkan: pada plan Hobby ping tiap menit memakan ~720% kuota function invocations. Pertimbangan migrasi backend (Rust/CF Workers, Fly.io, Railway) tertunda.
+- Kasus C: NIM `202515015` (Excel TE E vs DB TE A) sengaja tidak diubah, menunggu keputusan.
+- `users.kelompok` praktis kosong (376/377 NULL) dan tidak ada sumbernya di production — perlu input manual.
+
 ### Update 3: failover storage & proteksi jawaban saat Supabase 402 (2026-11-24)
 
 #### Latar belakang
